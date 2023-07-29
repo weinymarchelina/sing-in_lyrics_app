@@ -1,6 +1,10 @@
 import os
 import time
+import json
 import spotipy
+import requests
+import pinyin_jyutping_sentence
+from dragonmapper import transcriptions
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect
 from dotenv import load_dotenv
@@ -15,18 +19,18 @@ TOKEN_INFO = "token_info"
 
 @app.route("/api")
 def login():
-    print("please login")
     auth_url = create_spotify_oauth().get_authorize_url()
     return redirect(auth_url)
 
 @app.route("/api/redirect")
 def redirect_page():
-    print("redirecting...")
     session.clear()
+
     code = request.args.get("code")
     token_info = create_spotify_oauth().get_access_token(code)
     session[TOKEN_INFO] = token_info
-    return redirect(url_for('get_current_track', _external=True))
+
+    return redirect("http://localhost:3000/library")
 
 @app.route("/api/getCurrentTrack")
 def get_current_track():
@@ -39,10 +43,9 @@ def get_current_track():
     current_playing_track =  sp.current_user_playing_track()['item']
 
     if current_playing_track is None:
-        return("nothing is played")
+        return json.dumps({})
 
     current_playing_album = current_playing_track['album']
-
     current_playing_artists_list = []
 
     for artists_item in current_playing_track['artists']:
@@ -53,7 +56,6 @@ def get_current_track():
 
         current_playing_artists_list.append(artist_data)
 
-
     current_playing_track_data = {
         'id': current_playing_track['id'],
         'name': current_playing_track['name'],
@@ -63,9 +65,7 @@ def get_current_track():
         'artists': current_playing_artists_list
     }
 
-    print(current_playing_track_data)
-
-    return (f"User's current track is returned successfully: {current_playing_track_data}")
+    return json.dumps(current_playing_track_data)
 
 @app.route("/api/playTrack")
 def play_track():
@@ -77,7 +77,7 @@ def play_track():
 
     sp.start_playback()
 
-    return("Track is played!")
+    return json.dumps({ 'message': "Action done."})
 
 @app.route("/api/pauseTrack")
 def pause_track():
@@ -89,7 +89,7 @@ def pause_track():
 
     sp.pause_playback()
 
-    return("Track is paused!")
+    return json.dumps({ 'message': "Action done."})
 
 @app.route("/api/nextTrack")
 def next_track():
@@ -101,7 +101,7 @@ def next_track():
 
     sp.next_track()
 
-    return("Playing next track!")
+    return json.dumps({ 'message': "Action done."})
 
 @app.route("/api/previousTrack")
 def previous_track():
@@ -113,9 +113,7 @@ def previous_track():
 
     sp.previous_track()
 
-    return("Playing previous track!")
-
-@app.route("/api/getCurrentLyric")
+    return json.dumps({ 'message': "Action done."})
 
 @app.route("/api/getSavedTrack")
 def get_saved_track():
@@ -130,6 +128,9 @@ def get_saved_track():
     offset = limit * (current_page - 1)
 
     user_tracks = sp.current_user_saved_tracks(limit=limit, offset=offset)['items']
+
+    if not user_tracks:
+        return json.dumps({'message': "The page you are looking for is not found."})
 
     tracks_list = []
 
@@ -159,9 +160,7 @@ def get_saved_track():
 
         tracks_list.append(track_data)
 
-    print(tracks_list)
-
-    return f"User's saved tracks of page is {current_page} returned successfully: {tracks_list}"
+    return json.dumps(tracks_list)
 
 @app.route("/api/getPlaylist")
 def get_playlist():
@@ -179,6 +178,9 @@ def get_playlist():
 
     user_playlists = sp.current_user_playlists(limit=limit, offset=offset)['items']
 
+    if not user_playlists:
+        return json.dumps({'message': "The page you are looking for is not found."})
+
     playlist_list = []
 
     for playlist in user_playlists:
@@ -191,9 +193,7 @@ def get_playlist():
 
         playlist_list.append(playlist_data)
 
-    print(playlist_list)
-
-    return f"User's playlist of page {current_page} is returned successfully: {playlist_list}"
+    return json.dumps(playlist_list)
 
 @app.route("/api/getSavedAlbum")
 def get_saved_album():
@@ -208,6 +208,9 @@ def get_saved_album():
     offset = limit * (current_page - 1)
 
     user_albums = sp.current_user_saved_albums(limit=limit, offset=offset)['items']
+
+    if not user_albums:
+        return json.dumps({'message': "The page you are looking for is not found."})
 
     album_data = []
 
@@ -231,9 +234,7 @@ def get_saved_album():
 
         album_data.append(selected_album)
 
-    print(album_data)
-
-    return f"User's saved album of page {current_page} is returned successfully: {album_data}"
+    return json.dumps(album_data)
 
 @app.route("/api/lyric/<track_id>")
 def get_track_info(track_id):
@@ -243,7 +244,10 @@ def get_track_info(track_id):
     
     sp = spotipy.Spotify(auth=token_info['access_token'])
 
-    track_info = sp.track(track_id)
+    try:
+        track_info = sp.track(track_id)
+    except Exception:
+        return json.dumps({'message': "The page you are looking for is not found."})
 
     track_album = track_info['album']
 
@@ -266,9 +270,30 @@ def get_track_info(track_id):
         'artists': track_artist_list,
     }
 
-    print(track_info_data)
+    lyric_url = f"https://spotify-lyric-api.herokuapp.com/?trackid={track_id}"
 
-    return(f"Track data and lyric successfully being returned: {track_info_data}")
+    lyric_response = requests.get(lyric_url)
+
+    lyric_data = {}
+    is_lyric_available = True
+
+    if lyric_response.status_code != 200:
+        is_lyric_available = False
+    else:
+        lines_list = []
+
+        for line in lyric_response.json()['lines']:
+            lines_list.append(line['words'])
+
+        lyric_data = get_phonetics(lines_list)
+
+    full_data = {
+        'track': track_info_data,
+        'is_lyric_available': is_lyric_available,
+        'lyric': lyric_data
+    }
+
+    return json.dumps(full_data)
 
 @app.route("/api/playlist/<playlist_id>")
 def get_playlist_tracks(playlist_id):
@@ -278,7 +303,10 @@ def get_playlist_tracks(playlist_id):
     
     sp = spotipy.Spotify(auth=token_info['access_token'])
 
-    playlist_info = sp.playlist(playlist_id, additional_types=["track"])
+    try:
+        playlist_info = sp.playlist(playlist_id, additional_types=["track"])
+    except Exception:
+        return json.dumps({'message': "The page you are looking for is not found."})
 
     playlist_name = playlist_info['name']
     playlist_img = playlist_info['images']
@@ -313,9 +341,14 @@ def get_playlist_tracks(playlist_id):
 
         tracks_list.append(track_data)
 
-    print(tracks_list)
+    playlist_data = {
+        'tracks': tracks_list,
+        'name': playlist_name,
+        'img': playlist_img,
+        'total_tracks': playlist_total_tracks
+    }
 
-    return f"User's playlist {playlist_name}'s tracks returned successfully: {tracks_list}"
+    return json.dumps(playlist_data)
 
 @app.route("/api/album/<album_id>")
 def get_album_tracks(album_id):
@@ -325,8 +358,11 @@ def get_album_tracks(album_id):
     
     sp = spotipy.Spotify(auth=token_info['access_token'])
 
-    album_info = sp.album(album_id)
-
+    try:
+        album_info = sp.album(album_id)
+    except Exception:
+        return json.dumps({'message': "The page you are looking for is not found."})
+    
     album_name = album_info['name']
     album_img = album_info['images']
     album_total_tracks = album_info['tracks']['total']
@@ -354,9 +390,14 @@ def get_album_tracks(album_id):
 
         tracks_list.append(track_data)
 
-    print(tracks_list)
+    album_data = {
+        'tracks': tracks_list,
+        'name': album_name,
+        'img': album_img,
+        'total_tracks': album_total_tracks
+    }
 
-    return(f"Track data of album {album_name} successfully being returned: {tracks_list}")
+    return json.dumps(album_data)
 
 @app.route("/api/profile")
 def get_profile():
@@ -411,11 +452,7 @@ def get_profile():
         'top_tracks': tracks_list
     }
     
-    return f"{user_data}"
-
-@app.route("/api/python")
-def hello_world():
-    return "<p>Hello, World!</p>"
+    return json.dumps(user_data)
 
 def handle_token_info():
     try: 
@@ -448,4 +485,60 @@ def create_spotify_oauth():
         scope="user-library-read user-read-currently-playing user-modify-playback-state playlist-read-private playlist-read-collaborative user-top-read"
     )
 
-# app.run()
+def hanzi_converter(line):
+    words = line.split(" ")
+    zhuyin_list = []
+    pinyin_list = []
+    jyutping_list = []
+    original_list = []
+
+    for word in words:
+        if ('\u4e00' <= word <= '\u9fff'):
+            pinyin = pinyin_jyutping_sentence.pinyin(word, spaces=True)
+            jyutping = pinyin_jyutping_sentence.jyutping(word, spaces=True).replace("妳", "něi")
+
+            try: 
+                zhuyin = transcriptions.pinyin_to_zhuyin(pinyin)
+            except:
+                print(f"{word} is unreadable as zhuyin")
+
+                if '哦' in word:
+                    zhuyin = word.replace('哦', 'ㄜˊ')
+                else:
+                    zhuyin = word
+            
+            zhuyin_list.append(zhuyin)
+            pinyin_list.append(pinyin)
+            jyutping_list.append(jyutping)
+            original_list.append(word)
+        else:
+            print(f"Not hanzi: {word}")
+
+            zhuyin_list.append(word)
+            pinyin_list.append(word)
+            jyutping_list.append(word)
+            original_list.append(word)
+           
+    return zhuyin_list, pinyin_list, jyutping_list, original_list
+
+def get_phonetics(lines_list):
+    zhuyin_list = []
+    pinyin_list = []
+    jyutping_list = []
+    original_list = []
+
+    for line in lines_list:
+        zhuyin, pinyin, jyutping, original = hanzi_converter(line)
+        zhuyin_list.append(zhuyin)
+        pinyin_list.append(pinyin)
+        jyutping_list.append(jyutping)
+        original_list.append(original)
+
+    phonetics_list = {
+        'zhuyin': zhuyin_list,
+        'pinyin': pinyin_list,
+        'jyutping': jyutping_list,
+        'original': original_list
+    }
+
+    return phonetics_list
