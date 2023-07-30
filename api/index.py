@@ -18,7 +18,6 @@ CORS(app)
 app.config['SESSION_COOKIE_NAME'] = "Spotify Cookie"
 app.secret_key = os.getenv("SECRET_KEY")
 TOKEN_INFO = "token_info"
-main_token = "empty"
 
 error_not_found = "The page you are looking for is not found."
 success_action_done = "Action done."
@@ -72,10 +71,7 @@ def get_current_track():
         'artists': current_playing_artists_list
     }
 
-    print(current_playing_track_data)
-    print(jsonify(current_playing_track_data))
-
-    return jsonify(current_playing_track_data)
+    return current_playing_track_data
 
 @app.route("/api/playTrack", methods=["GET"])
 def play_track():
@@ -137,12 +133,14 @@ def get_saved_track():
     limit = 20
     offset = limit * (current_page - 1)
 
-    user_tracks = sp.current_user_saved_tracks(limit=limit, offset=offset)['items']
+    response_data = sp.current_user_saved_tracks(limit=limit, offset=offset)
+    
+    user_tracks = response_data['items']
 
     if not user_tracks:
         return error_not_found
 
-    tracks_list = []
+    track_list = []
 
     for track_item in user_tracks:
         track_album = track_item['track']['album']
@@ -168,9 +166,18 @@ def get_saved_track():
             'popularity': track_item['track']['popularity']
         }
 
-        tracks_list.append(track_data)
+        track_list.append(track_data)
 
-    return tracks_list
+    is_next_page = True
+    if not response_data['next']:
+        is_next_page = False
+
+    response_data = {
+        'is_next_page': is_next_page,
+        'track_list': track_list
+    }
+
+    return response_data
 
 @app.route("/api/getPlaylist", methods=["GET"])
 def get_playlist():
@@ -184,7 +191,9 @@ def get_playlist():
     limit = 20
     offset = limit * (current_page - 1)
 
-    user_playlists = sp.current_user_playlists(limit=limit, offset=offset)['items']
+    user_playlists_data = sp.current_user_playlists(limit=limit, offset=offset)
+    
+    user_playlists = user_playlists_data['items']
 
     if not user_playlists:
         return error_not_found
@@ -192,16 +201,23 @@ def get_playlist():
     playlist_list = []
 
     for playlist in user_playlists:
-        playlist_data = {
+        playlist_list.append({
             'id': playlist['id'],
             'images': playlist['images'],
             'name': playlist['name'],
             'total_tracks': playlist['tracks']['total']
-        }
+        })
 
-        playlist_list.append(playlist_data)
+    is_next_page = True
+    if not user_playlists_data['next']:
+        is_next_page = False
 
-    return playlist_list
+    response_data = {
+        'is_next_page': is_next_page,
+        'playlist_list': playlist_list,
+    }
+
+    return response_data
 
 @app.route("/api/getSavedAlbum", methods=["GET"])
 def get_saved_album():
@@ -215,7 +231,9 @@ def get_saved_album():
     limit = 20
     offset = limit * (current_page - 1)
 
-    user_albums = sp.current_user_saved_albums(limit=limit, offset=offset)['items']
+    saved_albums_data = sp.current_user_saved_albums(limit=limit, offset=offset)
+    
+    user_albums = saved_albums_data['items']
 
     if not user_albums:
         return error_not_found
@@ -233,16 +251,23 @@ def get_saved_album():
 
             artists_list.append(artist_data)
 
-        selected_album = {
+        album_data.append({
             'id': album_item['album']['id'],
             'images': album_item['album']['images'],
             'name': album_item['album']['name'],
             'artists': artists_list,
-        }
+        })
 
-        album_data.append(selected_album)
+    is_next_page = True
+    if not saved_albums_data['next']:
+        is_next_page = False
 
-    return album_data
+    response_data = {
+        'is_next_page': is_next_page,
+        'album_data': album_data,
+    }
+
+    return response_data
 
 @app.route("/api/lyric/<track_id>", methods=["GET"])
 def get_track_info(track_id):
@@ -321,7 +346,7 @@ def get_playlist_tracks(playlist_id):
     playlist_total_tracks = playlist_info['tracks']['total']
     playlist_tracks = playlist_info['tracks']['items']
 
-    tracks_list = []
+    track_list = []
 
     for track_item in playlist_tracks:
         track_album = track_item['track']['album']
@@ -347,10 +372,10 @@ def get_playlist_tracks(playlist_id):
             'popularity': track_item['track']['popularity']
         }
 
-        tracks_list.append(track_data)
+        track_list.append(track_data)
 
     playlist_data = {
-        'tracks': tracks_list,
+        'tracks': track_list,
         'name': playlist_name,
         'img': playlist_img,
         'total_tracks': playlist_total_tracks
@@ -376,7 +401,7 @@ def get_album_tracks(album_id):
     album_total_tracks = album_info['tracks']['total']
     album_tracks = album_info['tracks']['items']
 
-    tracks_list = []
+    track_list = []
 
     for track_item in album_tracks:
         track_artists_list = []
@@ -396,10 +421,10 @@ def get_album_tracks(album_id):
             'duration': track_item['duration_ms'],
         }
 
-        tracks_list.append(track_data)
+        track_list.append(track_data)
 
     album_data = {
-        'tracks': tracks_list,
+        'tracks': track_list,
         'name': album_name,
         'img': album_img,
         'total_tracks': album_total_tracks
@@ -420,7 +445,7 @@ def get_profile():
     user_top_tracks = sp.current_user_top_tracks(limit=10, time_range='short_term')['items']
 
     artists_list = []
-    tracks_list = []
+    track_list = []
 
     for artist_item in user_top_artists:
         artist_info = {
@@ -451,13 +476,13 @@ def get_profile():
             'artist': tracks_artists
         }
 
-        tracks_list.append(tracks_info)
+        track_list.append(tracks_info)
 
     user_data = {
         'name': user_info['display_name'],
         'img': user_info['images'],
         'top_artists': artists_list,
-        'top_tracks': tracks_list
+        'top_tracks': track_list
     }
     
     return json.dumps(user_data)

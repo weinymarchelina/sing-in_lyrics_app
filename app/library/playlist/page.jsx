@@ -1,26 +1,62 @@
+"use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const getPlaylist = async () => {
+async function getPlaylist(page = 0) {
   try {
-    const res = await fetch("http://localhost:3000/api/getSavedTrack");
-    const data = await res.json();
-    return data;
+    const url = `http://localhost:3000/api/getPlaylist${
+      page ? `?page=${page}` : ""
+    }`;
+    const res = await fetch(url, {
+      next: {
+        revalidate: 5,
+      },
+    });
+
+    return await res.json();
   } catch (error) {
-    console.error("Error fetching current track:", error);
-    return "BLANK";
+    console.log(error);
   }
-};
+}
 
-export default async function Playlist() {
-  const data = await getPlaylist();
+export default function Playlist() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [playlists, setPlaylists] = useState([]);
+  const [isNextPage, setIsNextPage] = useState(false);
 
-  console.log(data);
+  // Function to fetch data for the current page
+  const fetchData = async () => {
+    const newData = await getPlaylist(currentPage);
+    setPlaylists(newData?.playlist_list || []);
+    setIsNextPage(newData?.is_next_page || false);
+  };
+
+  // Fetch data when the component mounts or when the currentPage changes
+  useEffect(() => {
+    fetchData();
+  }, [currentPage]);
+
+  // Function to handle the "Next Page" button click
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
 
   return (
     <main>
       <h1>Playlist</h1>
-      <Link href="/api/getPlaylist">Get Data</Link>
+      {isNextPage && <button onClick={handleNextPage}>NEXT PAGE</button>}
+      <br />
+      {!playlists.length && <Link href="/api/getPlaylist">Get Data</Link>}
+      {playlists.length > 0 && (
+        <div>
+          <h1>All playlists</h1>
+          <ul>
+            {playlists.map((playlist) => (
+              <li key={playlist.id}>{playlist.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }

@@ -15,6 +15,8 @@ const Navbar = () => {
         <li>
           <Link href="/">Logout</Link>
         </li>
+
+        {/*
         <li>
           <Link href="/currentTrackLyrics">Current Track Lyrics</Link>
         </li>
@@ -22,14 +24,15 @@ const Navbar = () => {
           <Link href="/previousTrack">Previous Track</Link>
         </li>
         <li>
-          <Link href="/api/playTrack">Play</Link>
+          <Link href="/api/pauseTrack">Pause</Link>
         </li>
         <li>
-          <Link href="/api/pauseTrack">Pause</Link>
+          <Link href="/api/playTrack">Play</Link>
         </li>
         <li>
           <Link href="/nextTrack">Next Track</Link>
         </li>
+        */}
       </ul>
     </nav>
   );

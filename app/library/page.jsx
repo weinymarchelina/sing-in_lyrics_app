@@ -1,69 +1,61 @@
 "use client";
-import { useRouter } from "next/router";
-import { getCookie } from "cookies-next";
-import { useCookies } from "react-cookie";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
-export default async function Library({ searchParams }) {
-  const [cookies, setCookie] = useCookies();
-
-  console.log(searchParams.code);
-
-  const code = searchParams.code;
-
-  if (code) {
-    console.log("Known code: " + code);
-  } else {
-    console.log(cookies);
-    console.log("Cookie value:", getCookie("access_token"));
+async function getCurrentTrack() {
+  try {
+    const res = await fetch("http://localhost:3000/api/getCurrentTrack");
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.log("Error getting track:", error);
+    return null;
   }
+}
 
-  if (getCookie("access_token")) {
-    console.log("cookie is found!");
-
-    try {
-      const res = await fetch("http://localhost:3000/api/getCurrentTrack");
-      const data = await res.json();
-      console.log(data);
-    } catch (error) {
-      console.log("Error getting track:", error);
-    }
-  } else if (code) {
-    console.log("redirecting...");
-
-    try {
-      const res = await fetch(
-        `http://localhost:3000/api/getCookie?code=${code}`
-      );
-      console.log("Set cookies!");
-      console.log(res);
-    } catch (error) {
-      console.log("Error! What: ", error);
-    }
+async function setCookieWithCode(code) {
+  try {
+    await fetch(`http://localhost:3000/api/getCookie?code=${code}`);
+    console.log("Cookie set successfully");
+  } catch (error) {
+    console.log("Error setting cookie: ", error);
   }
+}
+
+export default function Library({ searchParams }) {
+  const [track, setTrack] = useState(null);
+
+  useEffect(() => {
+    // Check if the code parameter is available in the searchParams
+    const code = searchParams?.code;
+    if (code) {
+      // Send a request to set the cookie with the provided code
+      setCookieWithCode(code);
+    }
+
+    // Fetch current track data and update the state
+    const fetchCurrentTrack = async () => {
+      const data = await getCurrentTrack();
+      if (data) {
+        setTrack(data);
+      }
+    };
+
+    fetchCurrentTrack();
+  }, [searchParams]);
 
   return (
     <main>
       <h1>Library</h1>
+      {track && <p>You are playing: {track.name}</p>}
       <br />
-      <Link href="/library/savedTrack">Saved Track</Link>
-      <br />
-      <Link href="/api/getCurrentTrack">Get Current Track</Link>
-
-      {/*
       <Link href="/library/playlist">Playlist</Link>
       <br />
       <Link href="/library/savedTrack">Saved Track</Link>
       <br />
       <Link href="/library/savedAlbum">Saved Album</Link>
       <br />
-      {token && <Link href={`/api/getCookie?code=${token}`}>Get Cookie</Link>}
-      <br />
-      <Link href="/api/playTrack">Play Track</Link>
-      <br />
-      <Link href="/api/pauseTrack">Pause Track</Link>
-      */}
     </main>
   );
 }
