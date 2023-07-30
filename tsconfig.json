@@ -23,6 +23,18 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/library/playlist/page.jsx",
+    "app/library/savedAlbum/page.jsx",
+    "app/library/savedTrack/page.jsx",
+    "app/library/page.jsx",
+    "app/404.jsx",
+    "app/layout.jsx",
+    "app/page.jsx"
+  ],
   "exclude": ["node_modules"]
 }
