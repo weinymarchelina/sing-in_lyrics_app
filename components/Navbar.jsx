@@ -1,20 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import PlayerBar from "./PlayerBar";
 
 const Navbar = () => {
   return (
     <nav>
       <ul>
+        <PlayerBar />
+        <br />
         <li>
           <Link href="/library">Library</Link>
         </li>
         <li>
           <Link href="/profile">Profile</Link>
         </li>
+        {/*
         <li>
-          <Link href="/">Logout</Link>
+          <Link href="/api/logout">Logout</Link>
         </li>
+       */}
 
         {/*
         <li>

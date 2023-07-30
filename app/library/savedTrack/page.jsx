@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import TrackList from "../../../components/TrackList";
 
 async function getSavedTrack(page = 0) {
   try {
@@ -41,20 +42,24 @@ export default function SavedTrack() {
     setCurrentPage((prevPage) => prevPage + 1);
   };
 
+  // Function to handle the "Previous Page" button click
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
   return (
     <main>
       <h1>SavedTrack</h1>
-      {isNextPage && <button onClick={handleNextPage}>NEXT PAGE</button>}
+      {currentPage > 1 && (
+        <button onClick={handlePreviousPage}>Previous Page</button>
+      )}
+      {isNextPage && <button onClick={handleNextPage}>Next Page</button>}
       <br />
       {!tracks.length && <Link href="/api/getSavedTrack">Get Data</Link>}
       {tracks.length > 0 && (
         <div>
           <h1>All saved tracks</h1>
-          <ul>
-            {tracks.map((item) => (
-              <li key={item.id}>{item.name}</li>
-            ))}
-          </ul>
+          <TrackList tracks={tracks} />
         </div>
       )}
     </main>

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import AlbumList from "../../../components/AlbumList";
 
 async function getSavedAlbum(page = 0) {
   try {
@@ -29,6 +30,7 @@ export default function SavedAlbum() {
     const newData = await getSavedAlbum(currentPage);
     setAlbums(newData?.album_data || []);
     setIsNextPage(newData?.is_next_page || false);
+    console.log(newData?.album_data);
   };
 
   // Fetch data when the component mounts or when the currentPage changes
@@ -41,20 +43,22 @@ export default function SavedAlbum() {
     setCurrentPage((prevPage) => prevPage + 1);
   };
 
+  // Function to handle the "Previous Page" button click
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
   return (
     <main>
-      <h1>SavedAlbum</h1>
-      {isNextPage && <button onClick={handleNextPage}>NEXT PAGE</button>}
+      {currentPage > 1 && (
+        <button onClick={handlePreviousPage}>Previous Page</button>
+      )}
+      {isNextPage && <button onClick={handleNextPage}>Next Page</button>}
       <br />
-      {!albums.length && <Link href="/api/getSavedAlbum">Get Data</Link>}
       {albums.length > 0 && (
         <div>
           <h1>All saved albums</h1>
-          <ul>
-            {albums.map((album) => (
-              <li key={album.id}>{album.name}</li>
-            ))}
-          </ul>
+          <AlbumList albums={albums} />
         </div>
       )}
     </main>

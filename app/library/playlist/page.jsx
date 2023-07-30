@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import PlaylistList from "../../../components/PlaylistList";
 
 async function getPlaylist(page = 0) {
   try {
@@ -27,6 +28,7 @@ export default function Playlist() {
   // Function to fetch data for the current page
   const fetchData = async () => {
     const newData = await getPlaylist(currentPage);
+    console.log(newData?.playlist_list);
     setPlaylists(newData?.playlist_list || []);
     setIsNextPage(newData?.is_next_page || false);
   };
@@ -41,20 +43,24 @@ export default function Playlist() {
     setCurrentPage((prevPage) => prevPage + 1);
   };
 
+  // Function to handle the "Previous Page" button click
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
   return (
     <main>
       <h1>Playlist</h1>
-      {isNextPage && <button onClick={handleNextPage}>NEXT PAGE</button>}
+      {currentPage > 1 && (
+        <button onClick={handlePreviousPage}>Previous Page</button>
+      )}
+      {isNextPage && <button onClick={handleNextPage}>Next Page</button>}
       <br />
       {!playlists.length && <Link href="/api/getPlaylist">Get Data</Link>}
       {playlists.length > 0 && (
         <div>
           <h1>All playlists</h1>
-          <ul>
-            {playlists.map((playlist) => (
-              <li key={playlist.id}>{playlist.name}</li>
-            ))}
-          </ul>
+          <PlaylistList playlists={playlists} />
         </div>
       )}
     </main>

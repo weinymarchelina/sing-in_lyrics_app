@@ -1,6 +1,5 @@
 import os
 import time
-import json
 import spotipy
 import requests
 import pinyin_jyutping_sentence
@@ -159,7 +158,7 @@ def get_saved_track():
             'album_img': track_album['images'],
             'album_id': track_album['id'],
             'album_name': track_album['name'],
-            'artist': track_artists_list,
+            'artists': track_artists_list,
             'name': track_item['track']['name'],
             'id': track_item['track']['id'],
             'duration': track_item['track']['duration_ms'],
@@ -203,7 +202,7 @@ def get_playlist():
     for playlist in user_playlists:
         playlist_list.append({
             'id': playlist['id'],
-            'images': playlist['images'],
+            'img': playlist['images'],
             'name': playlist['name'],
             'total_tracks': playlist['tracks']['total']
         })
@@ -253,7 +252,7 @@ def get_saved_album():
 
         album_data.append({
             'id': album_item['album']['id'],
-            'images': album_item['album']['images'],
+            'img': album_item['album']['images'],
             'name': album_item['album']['name'],
             'artists': artists_list,
         })
@@ -365,7 +364,7 @@ def get_playlist_tracks(playlist_id):
             'album_img': track_album['images'],
             'album_id': track_album['id'],
             'album_name': track_album['name'],
-            'artist': track_artists_list,
+            'artists': track_artists_list,
             'name': track_item['track']['name'],
             'id': track_item['track']['id'],
             'duration': track_item['track']['duration_ms'],
@@ -375,7 +374,7 @@ def get_playlist_tracks(playlist_id):
         track_list.append(track_data)
 
     playlist_data = {
-        'tracks': track_list,
+        'track_list': track_list,
         'name': playlist_name,
         'img': playlist_img,
         'total_tracks': playlist_total_tracks
@@ -415,7 +414,7 @@ def get_album_tracks(album_id):
             track_artists_list.append(artist_data)
 
         track_data = {
-            'artist': track_artists_list,
+            'artists': track_artists_list,
             'name': track_item['name'],
             'id': track_item['id'],
             'duration': track_item['duration_ms'],
@@ -424,7 +423,7 @@ def get_album_tracks(album_id):
         track_list.append(track_data)
 
     album_data = {
-        'tracks': track_list,
+        'track_list': track_list,
         'name': album_name,
         'img': album_img,
         'total_tracks': album_total_tracks
@@ -473,7 +472,7 @@ def get_profile():
             'id': tracks_info['id'],
             'name': tracks_info['name'],
             'popularity': tracks_info['popularity'],
-            'artist': tracks_artists
+            'artists': tracks_artists
         }
 
         track_list.append(tracks_info)
@@ -485,7 +484,7 @@ def get_profile():
         'top_tracks': track_list
     }
     
-    return json.dumps(user_data)
+    return user_data
 
 def handle_token_info():
     try: 
@@ -532,6 +531,14 @@ def set_cookie():
 
     return response
 
+@app.route('/api/logout', methods=["GET"])
+def logout():
+    response = make_response(redirect("http://localhost:3000/"))
+    response.set_cookie("access_token", "", httponly=True)
+
+    return response
+
+
 def hanzi_converter(line):
     words = line.split(" ")
     zhuyin_list = []
@@ -559,7 +566,7 @@ def hanzi_converter(line):
             jyutping_list.append(jyutping)
             original_list.append(word)
         else:
-            print(f"Not hanzi: {word}")
+            # print(f"Not hanzi: {word}")
 
             zhuyin_list.append(word)
             pinyin_list.append(word)
