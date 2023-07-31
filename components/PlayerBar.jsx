@@ -16,37 +16,76 @@ async function getCurrentTrack() {
   }
 }
 
+async function handlePlayback(action) {
+  try {
+    const url = `http://localhost:3000/api/${action}Track`;
+    const res = await fetch(url, {
+      cache: "no-store",
+    });
+    return await res.json();
+  } catch (error) {
+    console.log(`Error doing ${action} action:`, error);
+  }
+}
+
 export default function PlayerBar() {
   const [track, setTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  const fetchCurrentTrack = async () => {
+    const data = await getCurrentTrack();
+    if (data) {
+      setTrack(data);
+      setIsPlaying(data?.is_playing);
+    }
+    console.log(data);
+  };
 
   useEffect(() => {
-    // Fetch current track data and update the state
-    const fetchCurrentTrack = async () => {
-      const data = await getCurrentTrack();
-      if (data) {
-        console.log(data);
-        setTrack(data);
-      }
-    };
-
     fetchCurrentTrack();
   }, []);
+
+  const handlePlayPauseToggle = async () => {
+    setIsPlaying((prevIsPlaying) => !prevIsPlaying);
+    const data = await handlePlayback(isPlaying ? "pause" : "play");
+
+    if (data) {
+      setTrack(data);
+      console.log(data);
+    }
+  };
+
+  const handleSkipTrack = async (action) => {
+    const data = await handlePlayback(action);
+
+    if (data) {
+      setTrack(data);
+      console.log(data);
+    }
+  };
 
   return (
     <div>
       {track && (
         <div>
           <p>
-            {`You are playing: ${track.name} by
+            {`You are ${isPlaying ? "playing" : "paused"}: ${track.name} by
             ${track.artists.map((artist) => artist.name).join(", ")}`}
           </p>
           <Image
-            src={track.album_img[2].url} // Replace with the actual image URL
+            src={track.album_img[2].url}
             alt={`${track.album_name}_img`}
-            width={track.album_img[2].width} // Specify the width of the image
-            height={track.album_img[2].height} // Specify the height of the image
+            width={track.album_img[2].width}
+            height={track.album_img[2].height}
           />
           <Link href={`/lyric/${track.id}`}>Open Lyric</Link>
+          <button onClick={handlePlayPauseToggle}>
+            {isPlaying ? "Pause" : "Play"}
+          </button>
+          <button onClick={() => handleSkipTrack("previous")}>
+            Previous Track
+          </button>
+          <button onClick={() => handleSkipTrack("skip")}>Next Track</button>
         </div>
       )}
     </div>

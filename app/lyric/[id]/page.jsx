@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 
 export default function LyricInfo() {
   const [lyricData, setLyricData] = useState(null);
@@ -35,6 +36,12 @@ export default function LyricInfo() {
   return (
     <div>
       <h2>Track Information</h2>
+      <Image
+        src={track.album_img[1].url} // Replace with the actual image URL
+        alt={`${track.album_name}_img`}
+        width={track.album_img[1].width} // Specify the width of the image
+        height={track.album_img[1].height} // Specify the height of the image
+      />
       <p>Track Name: {track.name}</p>
       <p>Album Name: {track.album_name}</p>
       <p>Artists:</p>

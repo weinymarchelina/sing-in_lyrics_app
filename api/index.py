@@ -45,7 +45,10 @@ def get_current_track():
     
     sp = spotipy.Spotify(auth=token_info)
 
-    current_playing_track =  sp.current_user_playing_track()['item']
+    current_player =  sp.current_user_playing_track()
+
+    is_playing = current_player['is_playing']
+    current_playing_track = current_player['item']
 
     if current_playing_track is None:
         return "empty"
@@ -67,7 +70,8 @@ def get_current_track():
         'album_id': current_playing_album['id'],
         'album_img': current_playing_album['images'],
         'album_name': current_playing_album['name'],
-        'artists': current_playing_artists_list
+        'artists': current_playing_artists_list,
+        'is_playing': is_playing
     }
 
     return current_playing_track_data
@@ -82,7 +86,9 @@ def play_track():
 
     sp.start_playback()
 
-    return success_action_done
+    time.sleep(0.5)
+
+    return get_current_track()
 
 @app.route("/api/pauseTrack", methods=["GET"])
 def pause_track():
@@ -94,7 +100,9 @@ def pause_track():
 
     sp.pause_playback()
 
-    return success_action_done
+    time.sleep(0.5)
+
+    return get_current_track()
 
 @app.route("/api/nextTrack", methods=["GET"])
 def next_track():
@@ -106,7 +114,34 @@ def next_track():
 
     sp.next_track()
 
-    return success_action_done
+    next_tracks_list =  sp.queue()['queue']
+
+    next_playing_track = next_tracks_list[0]
+
+    if next_playing_track is None:
+        return "empty"
+
+    next_playing_album = next_playing_track['album']
+    next_playing_artists_list = []
+
+    for artists_item in next_playing_track['artists']:
+        artist_data = {
+            'name': artists_item['name'],
+            'id': artists_item['id'],
+        }
+
+        next_playing_artists_list.append(artist_data)
+
+    next_playing_track_data = {
+        'id': next_playing_track['id'],
+        'name': next_playing_track['name'],
+        'album_id': next_playing_album['id'],
+        'album_img': next_playing_album['images'],
+        'album_name': next_playing_album['name'],
+        'artists': next_playing_artists_list,
+    }
+
+    return next_playing_track_data
 
 @app.route("/api/previousTrack", methods=["GET"])
 def previous_track():
@@ -118,7 +153,9 @@ def previous_track():
 
     sp.previous_track()
 
-    return success_action_done
+    time.sleep(0.5)
+
+    return get_current_track()
 
 @app.route("/api/getSavedTrack", methods=["GET"])
 def get_saved_track():
@@ -490,7 +527,6 @@ def handle_token_info():
     try: 
         token_info = get_token()
     except:
-        print('User not logged in')
         return None
     
     return token_info
@@ -518,16 +554,14 @@ def create_spotify_oauth():
         client_id=os.getenv("CLIENT_ID"),
         client_secret=os.getenv("CLIENT_SECRET"),
         redirect_uri=url_for("redirect_page", _external=True),
-        scope="user-library-read user-read-currently-playing user-modify-playback-state playlist-read-private playlist-read-collaborative user-top-read"
+        scope="user-library-read user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-top-read"
     )
 
 @app.route('/api/getCookie', methods=["GET"])
 def set_cookie():
-    print("You are getting code!")
     response = make_response("Cookie set successfully")
     token = request.args.get('code', "empty!")
     response.set_cookie("access_token", token, httponly=True)
-    print("Token: ", token)
 
     return response
 
@@ -537,7 +571,6 @@ def logout():
     response.set_cookie("access_token", "", httponly=True)
 
     return response
-
 
 def hanzi_converter(line):
     words = line.split(" ")
