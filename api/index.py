@@ -328,6 +328,25 @@ def get_track_lyric(track_id):
         'artists': track_artist_list,
     }
 
+    #
+
+    """
+    name_data = {
+        'name': track_info['name'],
+        'album_name': track_album['name'],
+        'artists': track_artist_list,
+    }
+    """
+
+    name_list = [track_info['name'], track_album['name']]
+
+    for artists_item in track_info['artists']:
+        name_list.append(artists_item['name'])
+
+    track_phonetics_data = get_phonetics(name_list)
+
+    #
+
     lyric_url = f"https://spotify-lyric-api.herokuapp.com/?trackid={track_id}"
 
     lyric_response = requests.get(lyric_url)
@@ -345,10 +364,13 @@ def get_track_lyric(track_id):
 
         lyric_data = get_phonetics(lines_list)
 
+    #
+
     full_data = {
         'track': track_info_data,
         'is_lyric_available': is_lyric_available,
         'lyric': lyric_data,
+        'track_phonetics': track_phonetics_data
     }
 
     return full_data
@@ -583,13 +605,6 @@ def convert_to_pinyin_jyutping(word):
 
     return pinyin, jyutping
 
-"""
-word = "卡拉永遠OK真的 戀愛ing 愛不愛 IS IT WORTH 戀愛안녕하세요 ありyoがとう おはよう pengお疲れ様です heheㄅㄆㄇㄈ"
-result = split_words(word)
-a, b = convert_to_pinyin_jyutping(result)
-print(a, b)
-"""
-
 def hanzi_converter(line):
     words = line.split(" ")
     zhuyin_list = []
@@ -677,3 +692,4 @@ def get_phonetics(lines_list):
     }
 
     return phonetics_list
+
