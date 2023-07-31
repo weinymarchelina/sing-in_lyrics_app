@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 async function getCurrentTrack() {
   try {
@@ -30,27 +31,31 @@ async function handlePlayback(action) {
 
 export default function PlayerBar() {
   const [track, setTrack] = useState(null);
+  const [nextTrack, setNextTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(true);
+  const pathname = usePathname();
 
   const fetchCurrentTrack = async () => {
     const data = await getCurrentTrack();
     if (data) {
-      setTrack(data);
-      setIsPlaying(data?.is_playing);
+      setTrack(data.current_track);
+      setNextTrack(data.next_track);
+      setIsPlaying(data.current_track.is_playing);
     }
     console.log(data);
   };
 
   useEffect(() => {
     fetchCurrentTrack();
-  }, []);
+  }, [pathname]);
 
   const handlePlayPauseToggle = async () => {
     setIsPlaying((prevIsPlaying) => !prevIsPlaying);
     const data = await handlePlayback(isPlaying ? "pause" : "play");
 
     if (data) {
-      setTrack(data);
+      setTrack(data.current_track);
+      setNextTrack(data.next_track);
       console.log(data);
     }
   };
@@ -59,7 +64,8 @@ export default function PlayerBar() {
     const data = await handlePlayback(action);
 
     if (data) {
-      setTrack(data);
+      setTrack(data.current_track);
+      setNextTrack(data.next_track);
       console.log(data);
     }
   };
@@ -86,6 +92,17 @@ export default function PlayerBar() {
             Previous Track
           </button>
           <button onClick={() => handleSkipTrack("skip")}>Next Track</button>
+          <br />
+          <br />
+          {nextTrack && (
+            <>
+              <Link href={`/lyric/${nextTrack.id}`}>{`Next track: ${
+                nextTrack.name
+              } by ${nextTrack.artists
+                .map((artist) => artist.name)
+                .join(", ")}`}</Link>
+            </>
+          )}
         </div>
       )}
     </div>

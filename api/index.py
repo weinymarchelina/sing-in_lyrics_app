@@ -1,9 +1,10 @@
 import os
+import re
 import time
 import spotipy
 import requests
 import pinyin_jyutping_sentence
-from dragonmapper import transcriptions
+from dragonmapper import transcriptions, hanzi
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect, jsonify, make_response
 from flask_cors import CORS
@@ -39,9 +40,6 @@ def redirect_page():
 @app.route("/api/getCurrentTrack", methods=["GET"])
 def get_current_track():
     token_info = handle_token_info()
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
     
     sp = spotipy.Spotify(auth=token_info)
 
@@ -64,6 +62,32 @@ def get_current_track():
 
         current_playing_artists_list.append(artist_data)
 
+    #
+
+    next_tracks_list =  sp.queue()['queue']
+
+    if not next_tracks_list:
+        return "empty"
+    
+    next_track = next_tracks_list[0]
+
+    next_track_artist_list = []
+
+    for artists_item in next_track['artists']:
+        artist_data = {
+            'name': artists_item['name'],
+            'id': artists_item['id'],
+        }
+
+        next_track_artist_list.append(artist_data)
+
+    next_track_info_data = {
+        'id': next_track['id'],
+        'name': next_track['name'],
+        'album_img': next_track['album']['images'],
+        'artists': next_track_artist_list,
+    }
+
     current_playing_track_data = {
         'id': current_playing_track['id'],
         'name': current_playing_track['name'],
@@ -71,16 +95,20 @@ def get_current_track():
         'album_img': current_playing_album['images'],
         'album_name': current_playing_album['name'],
         'artists': current_playing_artists_list,
-        'is_playing': is_playing
+        'is_playing': is_playing,
+        
     }
 
-    return current_playing_track_data
+    response = {
+        'current_track': current_playing_track_data,
+        'next_track': next_track_info_data
+    }
+
+    return response
 
 @app.route("/api/playTrack", methods=["GET"])
 def play_track():
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
+    token_info = handle_token_info()
     
     sp = spotipy.Spotify(auth=token_info)
 
@@ -92,10 +120,8 @@ def play_track():
 
 @app.route("/api/pauseTrack", methods=["GET"])
 def pause_track():
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     sp.pause_playback()
@@ -106,49 +132,20 @@ def pause_track():
 
 @app.route("/api/nextTrack", methods=["GET"])
 def next_track():
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
+    token_info = handle_token_info()
     
     sp = spotipy.Spotify(auth=token_info)
 
     sp.next_track()
 
-    next_tracks_list =  sp.queue()['queue']
+    time.sleep(0.5)
 
-    next_playing_track = next_tracks_list[0]
-
-    if next_playing_track is None:
-        return "empty"
-
-    next_playing_album = next_playing_track['album']
-    next_playing_artists_list = []
-
-    for artists_item in next_playing_track['artists']:
-        artist_data = {
-            'name': artists_item['name'],
-            'id': artists_item['id'],
-        }
-
-        next_playing_artists_list.append(artist_data)
-
-    next_playing_track_data = {
-        'id': next_playing_track['id'],
-        'name': next_playing_track['name'],
-        'album_id': next_playing_album['id'],
-        'album_img': next_playing_album['images'],
-        'album_name': next_playing_album['name'],
-        'artists': next_playing_artists_list,
-    }
-
-    return next_playing_track_data
+    return get_current_track()
 
 @app.route("/api/previousTrack", methods=["GET"])
 def previous_track():
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     sp.previous_track()
@@ -159,10 +156,8 @@ def previous_track():
 
 @app.route("/api/getSavedTrack", methods=["GET"])
 def get_saved_track():
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     current_page = int(request.args.get('page', 1))
@@ -217,10 +212,8 @@ def get_saved_track():
 
 @app.route("/api/getPlaylist", methods=["GET"])
 def get_playlist():
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     current_page = int(request.args.get('page', 1))
@@ -257,10 +250,8 @@ def get_playlist():
 
 @app.route("/api/getSavedAlbum", methods=["GET"])
 def get_saved_album():
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     current_page = int(request.args.get('page', 1))
@@ -306,11 +297,9 @@ def get_saved_album():
     return response_data
 
 @app.route("/api/lyric/<track_id>", methods=["GET"])
-def get_track_info(track_id):
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+def get_track_lyric(track_id):
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     try:
@@ -359,17 +348,15 @@ def get_track_info(track_id):
     full_data = {
         'track': track_info_data,
         'is_lyric_available': is_lyric_available,
-        'lyric': lyric_data
+        'lyric': lyric_data,
     }
 
     return full_data
 
 @app.route("/api/playlist/<playlist_id>", methods=["GET"])
 def get_playlist_tracks(playlist_id):
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     try:
@@ -421,10 +408,8 @@ def get_playlist_tracks(playlist_id):
 
 @app.route("/api/album/<album_id>", methods=["GET"])
 def get_album_tracks(album_id):
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     try:
@@ -470,10 +455,8 @@ def get_album_tracks(album_id):
 
 @app.route("/api/profile", methods=["GET"])
 def get_profile():
-    token_info = request.cookies.get("access_token")
-    if not token_info:
-        return redirect("/")
-    
+    token_info = handle_token_info()
+
     sp = spotipy.Spotify(auth=token_info)
 
     user_info = sp.current_user()
@@ -524,25 +507,36 @@ def get_profile():
     return user_data
 
 def handle_token_info():
-    try: 
-        token_info = get_token()
-    except:
-        return None
+    user_token = request.cookies.get("access_token")
+
+    if not user_token:
+        return redirect("http://localhost:3000/")
+
+    """
+    token_info = session.get(TOKEN_INFO, None)
+
+    print(token_info)
+
+    current_time = int(time.time())
+
+    is_expired = token_info.get('expires_at', 0) - current_time < 60
     
-    return token_info
+    if is_expired:
+        spotify_oauth = create_spotify_oauth()
+        token_info = spotify_oauth.refresh_access_token(token_info.get('refresh_token'))
+    """
+    
+    return user_token
 
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
    
-    if not token_info:
-        return redirect(url_for('login', _external=False))
 
     current_time = int(time.time())
 
     if token_info:
         is_expired = token_info.get('expires_at', 0) - current_time < 60
         if is_expired:
-            # Access token has expired, refresh it using the refresh token
             spotify_oauth = create_spotify_oauth()
             token_info = spotify_oauth.refresh_access_token(token_info.get('refresh_token'))
 
@@ -572,35 +566,89 @@ def logout():
 
     return response
 
+def split_words(word):
+    pattern = r"([\u4e00-\u9fff]+|[\u3100-\u312F]+|[a-zA-Z]+|[\uac00-\ud7af]+|[ぁ-ゔ]+|[ァ-ヴー]+|[一-龠]+)"  
+    word_list = re.findall(pattern, word)
+
+    # return ' '.join(word_list)
+    return word_list
+
+def convert_to_pinyin_jyutping(word):
+    if ('\u4e00' <= word <= '\u9fff'):
+        pinyin = pinyin_jyutping_sentence.pinyin(word, spaces=True)
+        jyutping = pinyin_jyutping_sentence.jyutping(word, spaces=True).replace("妳", "něi")
+    else:
+        pinyin = word
+        jyutping = word
+
+    return pinyin, jyutping
+
+"""
+word = "卡拉永遠OK真的 戀愛ing 愛不愛 IS IT WORTH 戀愛안녕하세요 ありyoがとう おはよう pengお疲れ様です heheㄅㄆㄇㄈ"
+result = split_words(word)
+a, b = convert_to_pinyin_jyutping(result)
+print(a, b)
+"""
+
 def hanzi_converter(line):
     words = line.split(" ")
     zhuyin_list = []
     pinyin_list = []
     jyutping_list = []
     original_list = []
+    
 
     for word in words:
         if ('\u4e00' <= word <= '\u9fff'):
-            pinyin = pinyin_jyutping_sentence.pinyin(word, spaces=True)
-            jyutping = pinyin_jyutping_sentence.jyutping(word, spaces=True).replace("妳", "něi")
+            splitted_word_list = split_words(word)
+            cleaned_word = ' '.join(splitted_word_list)
+            # print(cleaned_word)
 
-            try: 
-                zhuyin = transcriptions.pinyin_to_zhuyin(pinyin)
-            except:
-                print(f"{word} is unreadable as zhuyin")
+            splitted_zhuyin = []
+            splitted_pinyin = []
+            splitted_jyutping = []
 
-                if '哦' in word:
-                    zhuyin = word.replace('哦', 'ㄜˊ')
-                else:
-                    zhuyin = word
-            
+            for splitted_word in splitted_word_list:
+                pinyin = splitted_word
+                jyutping = splitted_word
+                zhuyin = splitted_word
+
+                if ('\u4e00' <= splitted_word <= '\u9fff'):
+                    pinyin, jyutping = convert_to_pinyin_jyutping(splitted_word)
+                    
+                    try: 
+                        zhuyin = hanzi.to_zhuyin(splitted_word)
+                    except:
+                        char_list = []
+                        for char in splitted_word:
+                            try:
+                                zhuyin_char = hanzi.to_zhuyin(char)
+                            except:
+                                zhuyin_char = char
+
+                                oh_list = ['喔', '哦', '噢']
+                                for oh in oh_list:
+                                    if oh == char:
+                                        zhuyin_char = 'ㄛˊ'
+                                
+                            char_list.append(zhuyin_char)
+                    
+                        zhuyin = ' '.join(char_list)
+
+                splitted_pinyin.append(pinyin)
+                splitted_jyutping.append(jyutping)
+                splitted_zhuyin.append(zhuyin)
+                
+            pinyin = ' '.join(splitted_pinyin)
+            jyutping = ' '.join(splitted_jyutping)
+            zhuyin = ' '.join(splitted_zhuyin)
+
             zhuyin_list.append(zhuyin)
             pinyin_list.append(pinyin)
             jyutping_list.append(jyutping)
-            original_list.append(word)
+            original_list.append(cleaned_word)
+            
         else:
-            # print(f"Not hanzi: {word}")
-
             zhuyin_list.append(word)
             pinyin_list.append(word)
             jyutping_list.append(word)

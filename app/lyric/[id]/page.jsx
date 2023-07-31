@@ -37,10 +37,10 @@ export default function LyricInfo() {
     <div>
       <h2>Track Information</h2>
       <Image
-        src={track.album_img[1].url} // Replace with the actual image URL
+        src={track.album_img[1].url}
         alt={`${track.album_name}_img`}
-        width={track.album_img[1].width} // Specify the width of the image
-        height={track.album_img[1].height} // Specify the height of the image
+        width={track.album_img[1].width}
+        height={track.album_img[1].height}
       />
       <p>Track Name: {track.name}</p>
       <p>Album Name: {track.album_name}</p>
@@ -53,41 +53,16 @@ export default function LyricInfo() {
       <h2>Lyric Information</h2>
       {is_lyric_available ? (
         <div>
-          <div>
-            <h3>Original</h3>
-            <ul>
-              {lyric["original"].map((version, index) => (
-                <li key={index}>{version.join(" ")}</li>
-              ))}
-            </ul>
-          </div>
-          <br />
-          <div>
-            <h3>Pinyin</h3>
-            <ul>
-              {lyric["pinyin"].map((version, index) => (
-                <li key={index}>{version.join(" ")}</li>
-              ))}
-            </ul>
-          </div>
-          <br />
-          <div>
-            <h3>Zhuyin</h3>
-            <ul>
-              {lyric["zhuyin"].map((version, index) => (
-                <li key={index}>{version.join(" ")}</li>
-              ))}
-            </ul>
-          </div>
-          <br />
-          <div>
-            <h3>Jyutping</h3>
-            <ul>
-              {lyric["jyutping"].map((version, index) => (
-                <li key={index}>{version.join(" ")}</li>
-              ))}
-            </ul>
-          </div>
+          {Object.keys(lyric).map((language) => (
+            <div key={language}>
+              <h3>{language}</h3>
+              <ul>
+                {lyric[language].map((version, index) => (
+                  <li key={index}>{version.join(" ")}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       ) : (
         <p>Lyric not available</p>

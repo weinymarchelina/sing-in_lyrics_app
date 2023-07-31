@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 async function setCookieWithCode(code) {
@@ -12,12 +13,15 @@ async function setCookieWithCode(code) {
 }
 
 export default function Library({ searchParams }) {
+  const router = useRouter();
+
   useEffect(() => {
     // Check if the code parameter is available in the searchParams
     const code = searchParams?.code;
     if (code) {
       // Send a request to set the cookie with the provided code
       setCookieWithCode(code);
+      router.push("/library");
     }
   }, [searchParams]);
 

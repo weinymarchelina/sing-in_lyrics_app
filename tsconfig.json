@@ -32,7 +32,7 @@
     "app/library/savedAlbum/page.jsx",
     "app/library/savedTrack/page.jsx",
     "app/library/page.jsx",
-    "app/404.jsx",
+    "app/not-found.jsx",
     "app/layout.jsx",
     "app/page.jsx"
   ],

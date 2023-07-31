@@ -2,7 +2,8 @@
 
 import Navbar from "../components/Navbar";
 import { Inter } from "next/font/google";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,12 +14,16 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const router = useRouter();
-  const isHomePage = router.pathname === "/";
+  const pathname = usePathname();
+  const [isHomePage, setIsHomePage] = useState(false);
 
-  if (isHomePage) {
-    console.log("you are in the home page");
-  }
+  useEffect(() => {
+    if (pathname === "/") {
+      setIsHomePage(true);
+    } else {
+      setIsHomePage(false);
+    }
+  }, [pathname]);
 
   return (
     <html lang="en">
