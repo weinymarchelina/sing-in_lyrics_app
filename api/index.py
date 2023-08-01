@@ -1,15 +1,17 @@
+import io
 import os
 import re
 import time
 import spotipy
 import requests
 import pinyin_jyutping_sentence
+from PIL import Image
 from dragonmapper import hanzi
-from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
-from flask import Flask, request, url_for, session, redirect, jsonify, make_response
+from spotipy.oauth2 import SpotifyOAuth
+from flask import Flask, request, url_for, session, redirect, make_response
 from flask_cors import CORS
 from dotenv import load_dotenv
-
+import colorgram
 load_dotenv()
 
 app = Flask(__name__)
@@ -397,11 +399,32 @@ def get_track_lyric(track_id):
 
     #
 
+    album_img_url = track_album['images'][0]['url']
+    bg_color, text_color = get_album_color(album_img_url)
+
+    #
+
+    preference = request.cookies.get("preference")
+    valid_preference_list = ['pinyin', 'jyutping', 'zhuyin', 'original']
+    valid_preference = False
+
+    for phonetics in valid_preference_list:
+        if phonetics == preference:
+            valid_preference = True
+    
+    if not preference or not valid_preference:
+        preference = "pinyin"
+
+    #
+
     full_data = {
         'track': track_info_data,
         'is_lyric_available': is_lyric_available,
         'lyric': lyric_data,
-        'track_phonetics': track_phonetics_data
+        'track_phonetics': track_phonetics_data,
+        'bg_color': bg_color,
+        'text_color': text_color,
+        'preference': preference
     }
 
     return full_data
@@ -621,6 +644,13 @@ def check_token():
 
     return redirect_response 
 
+@app.route('/api/setPreference', methods=["GET"])
+def set_preference():
+    preference = request.args.get('preference', None)
+    response = make_response("Preference set successfully")
+    response.set_cookie('preference', preference, httponly=True)
+    return response
+
 def add_spaces_to_parentheses_and_brackets(text):
     characters_to_add_spaces = "()<>《》[]『』「」（）.～？！"
     
@@ -637,7 +667,7 @@ def split_words(word):
 def convert_to_pinyin_jyutping(word):
     if ('\u4e00' <= word <= '\u9fff'):
         pinyin = pinyin_jyutping_sentence.pinyin(word, spaces=True)
-        jyutping = pinyin_jyutping_sentence.jyutping(word, spaces=True).replace("妳", "něi")
+        jyutping = pinyin_jyutping_sentence.jyutping(word, spaces=True).replace("妳", "něi").replace("喔", "āk").replace("涙", "leoi").replace("綑", "kwán")
     else:
         pinyin = word
         jyutping = word
@@ -731,3 +761,75 @@ def get_phonetics(lines_list):
 
     return phonetics_list
 
+def rgb_to_hex(rgb_tuple):
+    r, g, b = rgb_tuple
+    return "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+def text_color_based_on_background_hex(background_hex):
+    # Convert hex color to RGB
+    hex_color = background_hex.lstrip("#")
+    rgb = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
+
+    # Calculate brightness from RGB values
+    r, g, b = rgb
+    brightness = (0.299 * r) + (0.587 * g) + (0.114 * b)
+
+    # Define the brightness threshold for choosing text color
+    brightness_threshold = 130
+
+    # Choose text color based on background brightness
+    if brightness < brightness_threshold:
+        return "#EEEEEE"
+    else:
+        return "#202020"
+
+def get_album_color(image_link):
+    response = requests.get(image_link)
+    image = Image.open(io.BytesIO(response.content))
+
+    palette = colorgram.extract(image, 5)
+
+    palette.sort(key=lambda c: c.hsl.h)
+
+    # print(palette)
+
+    for color in palette:
+        print(color.hsl)
+
+    matched_hex_color_list = [rgb_to_hex(color.rgb) for color in palette]
+
+    # print(matched_hex_color_list)
+
+    filtered_hex = []
+
+    for color in  matched_hex_color_list:
+        dark_shades = (not color[1].isalpha()) and (
+            int(color[1]) < 3 
+        )
+
+        light_shades = (color[1].isalpha()) 
+
+        if not dark_shades and not light_shades:
+            filtered_hex.append(color)
+
+    # print(filtered_hex)
+
+    bg_color = matched_hex_color_list[2]
+
+    if filtered_hex:
+        bg_color = filtered_hex[-1]
+
+    text_color = text_color_based_on_background_hex(bg_color)
+
+    # print(bg_color)
+    # print(text_color)
+
+    return bg_color, text_color
+
+# get_album_color("https://i.scdn.co/image/ab67616d0000b2730a020a0296b97e6c8f4def97")
+
+
+    
+
+
+    
