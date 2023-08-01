@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 async function getCurrentTrack() {
   try {
@@ -34,13 +34,19 @@ export default function PlayerBar() {
   const [nextTrack, setNextTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
 
   const fetchCurrentTrack = async () => {
     const data = await getCurrentTrack();
+
+    if (data?.redirect_user) {
+      router.push("/");
+    }
+
     if (data) {
       setTrack(data.current_track);
       setNextTrack(data.next_track);
-      setIsPlaying(data.current_track.is_playing);
+      setIsPlaying(data.current_track?.is_playing);
     }
     console.log(data);
   };

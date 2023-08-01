@@ -35,15 +35,35 @@ def redirect_page():
     token_info = create_spotify_oauth().get_access_token(code)
     session[TOKEN_INFO] = token_info
 
-    return redirect("http://localhost:3000/library?code=" + token_info["access_token"])
+    print(token_info)
+
+    return redirect("http://localhost:3000/library?token=" + token_info["access_token"] + "&refresh_token=" + token_info["refresh_token"])
 
 @app.route("/api/getCurrentTrack", methods=["GET"])
 def get_current_track():
-    token_info = handle_token_info()
-    
-    sp = spotipy.Spotify(auth=token_info)
+    token = request.cookies.get("access_token")
 
-    current_player =  sp.current_user_playing_track()
+    redirect_response = {
+        'redirect_user': True,
+    }
+
+    if not token:
+        return redirect_response 
+    
+    sp = None
+    current_player = None
+    next_tracks_list = None
+
+    try:
+        sp = spotipy.Spotify(auth=token)
+        current_player =  sp.current_user_playing_track()
+        next_tracks_list =  sp.queue()['queue']
+    except Exception as err:
+        print(err)
+       
+        return redirect_response
+
+    #
 
     is_playing = current_player['is_playing']
     current_playing_track = current_player['item']
@@ -63,8 +83,6 @@ def get_current_track():
         current_playing_artists_list.append(artist_data)
 
     #
-
-    next_tracks_list =  sp.queue()['queue']
 
     if not next_tracks_list:
         return "empty"
@@ -96,7 +114,6 @@ def get_current_track():
         'album_name': current_playing_album['name'],
         'artists': current_playing_artists_list,
         'is_playing': is_playing,
-        
     }
 
     response = {
@@ -108,9 +125,12 @@ def get_current_track():
 
 @app.route("/api/playTrack", methods=["GET"])
 def play_track():
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
+
+    if not token:
+        return None 
     
-    sp = spotipy.Spotify(auth=token_info)
+    sp = spotipy.Spotify(auth=token)
 
     sp.start_playback()
 
@@ -120,9 +140,12 @@ def play_track():
 
 @app.route("/api/pauseTrack", methods=["GET"])
 def pause_track():
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     sp.pause_playback()
 
@@ -132,9 +155,12 @@ def pause_track():
 
 @app.route("/api/nextTrack", methods=["GET"])
 def next_track():
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
+
+    if not token:
+        return None 
     
-    sp = spotipy.Spotify(auth=token_info)
+    sp = spotipy.Spotify(auth=token)
 
     sp.next_track()
 
@@ -144,9 +170,12 @@ def next_track():
 
 @app.route("/api/previousTrack", methods=["GET"])
 def previous_track():
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     sp.previous_track()
 
@@ -156,9 +185,12 @@ def previous_track():
 
 @app.route("/api/getSavedTrack", methods=["GET"])
 def get_saved_track():
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     current_page = int(request.args.get('page', 1))
     limit = 20
@@ -212,9 +244,12 @@ def get_saved_track():
 
 @app.route("/api/getPlaylist", methods=["GET"])
 def get_playlist():
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     current_page = int(request.args.get('page', 1))
     limit = 20
@@ -250,9 +285,12 @@ def get_playlist():
 
 @app.route("/api/getSavedAlbum", methods=["GET"])
 def get_saved_album():
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     current_page = int(request.args.get('page', 1))
     limit = 20
@@ -298,9 +336,12 @@ def get_saved_album():
 
 @app.route("/api/lyric/<track_id>", methods=["GET"])
 def get_track_lyric(track_id):
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     try:
         track_info = sp.track(track_id)
@@ -329,14 +370,6 @@ def get_track_lyric(track_id):
     }
 
     #
-
-    """
-    name_data = {
-        'name': track_info['name'],
-        'album_name': track_album['name'],
-        'artists': track_artist_list,
-    }
-    """
 
     name_list = [track_info['name'], track_album['name']]
 
@@ -377,9 +410,12 @@ def get_track_lyric(track_id):
 
 @app.route("/api/playlist/<playlist_id>", methods=["GET"])
 def get_playlist_tracks(playlist_id):
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     try:
         playlist_info = sp.playlist(playlist_id, additional_types=["track"])
@@ -430,9 +466,12 @@ def get_playlist_tracks(playlist_id):
 
 @app.route("/api/album/<album_id>", methods=["GET"])
 def get_album_tracks(album_id):
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     try:
         album_info = sp.album(album_id)
@@ -477,9 +516,12 @@ def get_album_tracks(album_id):
 
 @app.route("/api/profile", methods=["GET"])
 def get_profile():
-    token_info = handle_token_info()
+    token = request.cookies.get("access_token")
 
-    sp = spotipy.Spotify(auth=token_info)
+    if not token:
+        return None 
+
+    sp = spotipy.Spotify(auth=token)
 
     user_info = sp.current_user()
     user_top_artists = sp.current_user_top_artists(limit=10, time_range='short_term')['items']
@@ -531,39 +573,7 @@ def get_profile():
 def handle_token_info():
     user_token = request.cookies.get("access_token")
 
-    if not user_token:
-        return redirect("http://localhost:3000/")
-
-    """
-    token_info = session.get(TOKEN_INFO, None)
-
-    print(token_info)
-
-    current_time = int(time.time())
-
-    is_expired = token_info.get('expires_at', 0) - current_time < 60
-    
-    if is_expired:
-        spotify_oauth = create_spotify_oauth()
-        token_info = spotify_oauth.refresh_access_token(token_info.get('refresh_token'))
-    """
-    
     return user_token
-
-def get_token():
-    token_info = session.get(TOKEN_INFO, None)
-   
-
-    current_time = int(time.time())
-
-    if token_info:
-        is_expired = token_info.get('expires_at', 0) - current_time < 60
-        if is_expired:
-            spotify_oauth = create_spotify_oauth()
-            token_info = spotify_oauth.refresh_access_token(token_info.get('refresh_token'))
-
-    # return the one that is not empty
-    return token_info
 
 def create_spotify_oauth():
     return SpotifyOAuth(
@@ -575,9 +585,17 @@ def create_spotify_oauth():
 
 @app.route('/api/getCookie', methods=["GET"])
 def set_cookie():
+    """
     response = make_response("Cookie set successfully")
     token = request.args.get('code', "empty!")
     response.set_cookie("access_token", token, httponly=True)
+    """
+    token = request.args.get('token', None)
+    refresh_token = request.args.get('refreshToken', None)
+
+    response = make_response("Cookie set successfully")
+    response.set_cookie("access_token", token, httponly=True)
+    response.set_cookie("refresh_token", refresh_token, httponly=True)
 
     return response
 
@@ -587,6 +605,30 @@ def logout():
     response.set_cookie("access_token", "", httponly=True)
 
     return response
+
+@app.route('/api/checkToken', methods=["GET"])
+def check_token():
+    token = request.cookies.get("access_token")
+
+    redirect_response = {
+        'is_auth': False,
+        'is_checked': False
+    }
+
+    if token:
+        try:
+            sp = spotipy.Spotify(auth=token)
+            user = sp.current_user()
+
+            redirect_response['is_checked'] = True
+            
+            if user:
+                redirect_response['is_auth'] = True
+                
+        except Exception as err:
+            print(err)
+
+    return redirect_response 
 
 def split_words(word):
     pattern = r"([\u4e00-\u9fff]+|[\u3100-\u312F]+|[a-zA-Z]+|[\uac00-\ud7af]+|[ぁ-ゔ]+|[ァ-ヴー]+|[一-龠]+)"  
