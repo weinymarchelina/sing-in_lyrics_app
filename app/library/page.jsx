@@ -3,11 +3,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-async function setCookieWithCode(token, refresh_token) {
+async function setCookieWithCode(token) {
   try {
-    await fetch(
-      `http://localhost:3000/api/getCookie?token=${token}&refreshToken=${refresh_token}`
-    );
+    await fetch(`http://localhost:3000/api/getCookie?token=${token}`);
   } catch (error) {
     console.log("Error setting cookie: ", error);
   }
@@ -19,10 +17,9 @@ export default function Library() {
 
   useEffect(() => {
     const token = searchParams.get("token");
-    const refresh_token = searchParams.get("refresh_token");
 
     if (token) {
-      setCookieWithCode(token, refresh_token);
+      setCookieWithCode(token);
       router.push("/library");
     }
   }, [searchParams]);

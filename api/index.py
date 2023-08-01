@@ -4,8 +4,8 @@ import time
 import spotipy
 import requests
 import pinyin_jyutping_sentence
-from dragonmapper import transcriptions, hanzi
-from spotipy.oauth2 import SpotifyOAuth
+from dragonmapper import hanzi
+from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from flask import Flask, request, url_for, session, redirect, jsonify, make_response
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -35,9 +35,7 @@ def redirect_page():
     token_info = create_spotify_oauth().get_access_token(code)
     session[TOKEN_INFO] = token_info
 
-    print(token_info)
-
-    return redirect("http://localhost:3000/library?token=" + token_info["access_token"] + "&refresh_token=" + token_info["refresh_token"])
+    return redirect("http://localhost:3000/library?token=" + token_info["access_token"])
 
 @app.route("/api/getCurrentTrack", methods=["GET"])
 def get_current_track():
@@ -570,11 +568,6 @@ def get_profile():
     
     return user_data
 
-def handle_token_info():
-    user_token = request.cookies.get("access_token")
-
-    return user_token
-
 def create_spotify_oauth():
     return SpotifyOAuth(
         client_id=os.getenv("CLIENT_ID"),
@@ -591,18 +584,16 @@ def set_cookie():
     response.set_cookie("access_token", token, httponly=True)
     """
     token = request.args.get('token', None)
-    refresh_token = request.args.get('refreshToken', None)
-
     response = make_response("Cookie set successfully")
     response.set_cookie("access_token", token, httponly=True)
-    response.set_cookie("refresh_token", refresh_token, httponly=True)
 
     return response
 
 @app.route('/api/logout', methods=["GET"])
 def logout():
     response = make_response(redirect("http://localhost:3000/"))
-    response.set_cookie("access_token", "", httponly=True)
+    # response.set_cookie("access_token", "", httponly=True)
+    response.delete_cookie("access_token")
 
     return response
 
@@ -630,11 +621,17 @@ def check_token():
 
     return redirect_response 
 
+def add_spaces_to_parentheses_and_brackets(text):
+    characters_to_add_spaces = "()<>《》[]『』「」（）.～？！"
+    
+    for char in characters_to_add_spaces:
+        text = text.replace(char, f" {char} ")
+    
+    return text
+
 def split_words(word):
     pattern = r"([\u4e00-\u9fff]+|[\u3100-\u312F]+|[a-zA-Z]+|[\uac00-\ud7af]+|[ぁ-ゔ]+|[ァ-ヴー]+|[一-龠]+)"  
     word_list = re.findall(pattern, word)
-
-    # return ' '.join(word_list)
     return word_list
 
 def convert_to_pinyin_jyutping(word):
@@ -654,12 +651,10 @@ def hanzi_converter(line):
     jyutping_list = []
     original_list = []
     
-
     for word in words:
         if ('\u4e00' <= word <= '\u9fff'):
             splitted_word_list = split_words(word)
             cleaned_word = ' '.join(splitted_word_list)
-            # print(cleaned_word)
 
             splitted_zhuyin = []
             splitted_pinyin = []
@@ -720,7 +715,8 @@ def get_phonetics(lines_list):
     original_list = []
 
     for line in lines_list:
-        zhuyin, pinyin, jyutping, original = hanzi_converter(line)
+        cleaned_line = add_spaces_to_parentheses_and_brackets(line)
+        zhuyin, pinyin, jyutping, original = hanzi_converter(cleaned_line)
         zhuyin_list.append(zhuyin)
         pinyin_list.append(pinyin)
         jyutping_list.append(jyutping)
