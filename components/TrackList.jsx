@@ -10,15 +10,17 @@ const TrackList = ({ tracks }) => {
       {tracks.map((track) => (
         <li key={track.id}>
           <h3>{track.name}</h3>
-          <h4>{track.album_name}</h4>
+          <h4>
+            <Link href={`/album/${track.album_id}`}>{track.album_name}</Link>
+          </h4>
           <p>{track.artists.map((artist) => artist.name).join(", ")}</p>
           <Link href={`/lyric/${track.id}`}>Open Lyric</Link>
           <br />
           <Image
-            src={track.album_img[1].url} // Replace with the actual image URL
+            src={track.album_img[1].url}
             alt={`${track.album_name}_img`}
-            width={track.album_img[1].width} // Specify the width of the image
-            height={track.album_img[1].height} // Specify the height of the image
+            width={track.album_img[1].width}
+            height={track.album_img[1].height}
           />
         </li>
       ))}

@@ -2,6 +2,7 @@ import io
 import os
 import re
 import time
+import random
 import spotipy
 import requests
 import pinyin_jyutping_sentence
@@ -343,22 +344,24 @@ def get_track_lyric(track_id):
 
     sp = spotipy.Spotify(auth=token)
 
+    track_artist_list = []
+
     try:
         track_info = sp.track(track_id)
+        
+        for artists_item in track_info['artists']:
+            artist_img = sp.artist(artists_item['id'])['images']
+            artist_data = {
+                'name': artists_item['name'],
+                'id': artists_item['id'],
+                'img': artist_img
+            }
+
+            track_artist_list.append(artist_data)
     except Exception:
         return error_not_found
 
     track_album = track_info['album']
-
-    track_artist_list = []
-
-    for artists_item in track_info['artists']:
-        artist_data = {
-            'name': artists_item['name'],
-            'id': artists_item['id'],
-        }
-
-        track_artist_list.append(artist_data)
 
     track_info_data = {
         'id': track_info['id'],
@@ -437,16 +440,21 @@ def get_playlist_tracks(playlist_id):
         return None 
 
     sp = spotipy.Spotify(auth=token)
+    
+    current_page = int(request.args.get('page', 1))
+    limit = 20
+    offset = limit * (current_page - 1)
 
     try:
         playlist_info = sp.playlist(playlist_id, additional_types=["track"])
+        response_data = sp.playlist_tracks(playlist_id, limit=limit, offset=offset, additional_types=["track"])
     except Exception:
         return error_not_found
 
+    playlist_tracks = response_data['items']
     playlist_name = playlist_info['name']
     playlist_img = playlist_info['images']
     playlist_total_tracks = playlist_info['tracks']['total']
-    playlist_tracks = playlist_info['tracks']['items']
 
     track_list = []
 
@@ -476,11 +484,21 @@ def get_playlist_tracks(playlist_id):
 
         track_list.append(track_data)
 
+    is_next_page = True
+    if not response_data['next']:
+        is_next_page = False
+
+    album_img_url = playlist_img[0]['url']
+    bg_color, text_color = get_album_color(album_img_url)
+
     playlist_data = {
         'track_list': track_list,
         'name': playlist_name,
         'img': playlist_img,
-        'total_tracks': playlist_total_tracks
+        'total_tracks': playlist_total_tracks,
+        'is_next_page': is_next_page,
+        'bg_color': bg_color,
+        'text_color': text_color
     }
 
     return playlist_data
@@ -494,11 +512,25 @@ def get_album_tracks(album_id):
 
     sp = spotipy.Spotify(auth=token)
 
+    album_artists_list = []
+
     try:
         album_info = sp.album(album_id)
+
+        for album_artists_item in album_info['artists']:
+            artist_img = sp.artist(album_artists_item['id'])['images']
+            artist_data = {
+                'name': album_artists_item['name'],
+                'id': album_artists_item['id'],
+                'img': artist_img
+            }
+
+            album_artists_list.append(artist_data)
+
+            
     except Exception:
         return error_not_found
-    
+
     album_name = album_info['name']
     album_img = album_info['images']
     album_total_tracks = album_info['tracks']['total']
@@ -526,11 +558,19 @@ def get_album_tracks(album_id):
 
         track_list.append(track_data)
 
+    album_img_url = album_img[0]['url']
+    bg_color, text_color = get_album_color(album_img_url)
+
     album_data = {
         'track_list': track_list,
-        'name': album_name,
-        'img': album_img,
-        'total_tracks': album_total_tracks
+        'base_album_info': {
+            'name': album_name,
+            'img': album_img,
+            'artists': album_artists_list,
+            'total_tracks': album_total_tracks
+        },
+        'bg_color': bg_color,
+        'text_color': text_color
     }
 
     return album_data
@@ -787,7 +827,7 @@ def get_album_color(image_link):
     response = requests.get(image_link)
     image = Image.open(io.BytesIO(response.content))
 
-    palette = colorgram.extract(image, 5)
+    palette = colorgram.extract(image, 7)
 
     palette.sort(key=lambda c: c.hsl.h)
 
@@ -807,17 +847,17 @@ def get_album_color(image_link):
             int(color[1]) < 3 
         )
 
-        light_shades = (color[1].isalpha()) 
+        light_shades = (color[1].isalpha()) and (color[5].isalpha())
 
         if not dark_shades and not light_shades:
             filtered_hex.append(color)
 
     # print(filtered_hex)
 
-    bg_color = matched_hex_color_list[2]
+    bg_color = random.choice(matched_hex_color_list)
 
     if filtered_hex:
-        bg_color = filtered_hex[-1]
+        bg_color = random.choice(filtered_hex)
 
     text_color = text_color_based_on_background_hex(bg_color)
 

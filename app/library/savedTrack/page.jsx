@@ -2,8 +2,9 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import TrackList from "../../../components/TrackList";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-async function getSavedTrack(page = 0) {
+async function getSavedTrack(page = 1) {
   try {
     const url = `http://localhost:3000/api/getSavedTrack${
       page ? `?page=${page}` : ""
@@ -21,9 +22,13 @@ async function getSavedTrack(page = 0) {
 }
 
 export default function SavedTrack() {
-  const [currentPage, setCurrentPage] = useState(1);
   const [tracks, setTracks] = useState([]);
   const [isNextPage, setIsNextPage] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const page = useSearchParams().get("page");
+  const currentPage = page ? parseInt(page) : 1;
 
   // Function to fetch data for the current page
   const fetchData = async () => {
@@ -39,12 +44,14 @@ export default function SavedTrack() {
 
   // Function to handle the "Next Page" button click
   const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
+    const nextPage = currentPage + 1;
+    router.push(`${pathname}?page=${nextPage}`);
   };
 
   // Function to handle the "Previous Page" button click
   const handlePreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    const prevPage = Math.max(currentPage - 1, 1);
+    router.push(`${pathname}?page=${prevPage}`);
   };
 
   return (

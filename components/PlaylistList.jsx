@@ -19,6 +19,14 @@ const PlaylistItem = ({ playlists }) => {
         <li key={playlist.id}>
           <h3>{playlist.name}</h3>
           <p>{playlist.total_tracks} tracks</p>
+          {playlist?.img && playlist?.img[0]?.url && (
+            <Image
+              src={playlist.img[0].url}
+              alt={`${playlist.name}_img`}
+              width={300}
+              height={300}
+            />
+          )}
           <Link href={`/playlist/${playlist.id}`}>See Tracks</Link>
         </li>
       ))}

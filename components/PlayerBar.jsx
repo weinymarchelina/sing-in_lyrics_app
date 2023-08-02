@@ -97,7 +97,7 @@ export default function PlayerBar() {
           <button onClick={() => handleSkipTrack("previous")}>
             Previous Track
           </button>
-          <button onClick={() => handleSkipTrack("skip")}>Next Track</button>
+          <button onClick={() => handleSkipTrack("next")}>Next Track</button>
           <br />
           <br />
           {nextTrack && (

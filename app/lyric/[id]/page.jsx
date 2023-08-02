@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 async function setPreference(preference) {
   try {
@@ -15,8 +16,8 @@ async function setPreference(preference) {
 
 export default function LyricInfo() {
   const [lyricData, setLyricData] = useState(null);
-  const [selectedPhonetic, setSelectedPhonetic] = useState(null); // State to track user's preference
-  const [phoneticsOn, setPhoneticsOn] = useState(true); // State to track whether phonetics are turned on or off
+  const [selectedPhonetic, setSelectedPhonetic] = useState(null);
+  const [phoneticsOn, setPhoneticsOn] = useState(true);
   const trackId = useParams().id;
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function LyricInfo() {
         const data = await response.json();
         console.log(data);
         setLyricData(data);
-        setSelectedPhonetic(data?.preference || null); // Initialize the selectedPhonetic state with the saved preference
+        setSelectedPhonetic(data?.preference || null);
       } catch (error) {
         console.error("Error fetching lyric data:", error);
       }
@@ -52,11 +53,11 @@ export default function LyricInfo() {
 
   const handlePreference = async (phonetic) => {
     await setPreference(phonetic);
-    setSelectedPhonetic(phonetic); // Update the selectedPhonetic state when a button is clicked
+    setSelectedPhonetic(phonetic);
   };
 
   const handlePhoneticsToggle = () => {
-    setPhoneticsOn((prev) => !prev); // Toggle the phonetics state (on/off)
+    setPhoneticsOn((prev) => !prev);
   };
 
   const selectedBtn = {
@@ -98,11 +99,22 @@ export default function LyricInfo() {
         </div>
 
         <p>Track Name: {track.name}</p>
-        <p>Album Name: {track.album_name}</p>
+        <p>
+          Album Name:{" "}
+          <Link href={`/album/${track.album_id}`}>{track.album_name}</Link>
+        </p>
         <p>Artists:</p>
         <ul>
           {track.artists.map((artist) => (
-            <li key={artist.id}>{artist.name}</li>
+            <li key={artist.id}>
+              <Image
+                src={artist.img[1].url}
+                alt={`${artist.name}_img`}
+                width={artist.img[1].width}
+                height={artist.img[1].height}
+              />
+              <p>{artist.name}</p>
+            </li>
           ))}
         </ul>
       </div>

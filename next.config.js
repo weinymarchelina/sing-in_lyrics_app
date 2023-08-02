@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["i.scdn.co", "mosaic.scdn.co"],
+    domains: ["i.scdn.co", "mosaic.scdn.co", "images-ak.spotifycdn.com"],
   },
   rewrites: async () => {
     return [
