@@ -3,16 +3,19 @@ import os
 import re
 import time
 import random
+import string
 import spotipy
 import requests
+import colorgram
 import pinyin_jyutping_sentence
 from PIL import Image
+from gtts import gTTS
 from dragonmapper import hanzi
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect, make_response
 from flask_cors import CORS
 from dotenv import load_dotenv
-import colorgram
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -641,11 +644,6 @@ def create_spotify_oauth():
 
 @app.route('/api/getCookie', methods=["GET"])
 def set_cookie():
-    """
-    response = make_response("Cookie set successfully")
-    token = request.args.get('code', "empty!")
-    response.set_cookie("access_token", token, httponly=True)
-    """
     token = request.args.get('token', None)
     response = make_response("Cookie set successfully")
     response.set_cookie("access_token", token, httponly=True)
@@ -689,6 +687,16 @@ def set_preference():
     preference = request.args.get('preference', None)
     response = make_response("Preference set successfully")
     response.set_cookie('preference', preference, httponly=True)
+    return response
+
+@app.route('/api/getAudio', methods=["POST"])
+def get_audio():
+    data = request.get_json()
+    audio_data_list = data.get('audio_data', [])
+    audio_blob_list = generate_audio_files(audio_data_list)
+    audio_response = b''.join(audio_blob_list)
+    response = make_response(audio_response)
+    response.headers['Content-Type'] = 'audio/mpeg'
     return response
 
 def add_spaces_to_parentheses_and_brackets(text):
@@ -833,8 +841,8 @@ def get_album_color(image_link):
 
     # print(palette)
 
-    for color in palette:
-        print(color.hsl)
+    #   for color in palette:
+    #       print(color.hsl)
 
     matched_hex_color_list = [rgb_to_hex(color.rgb) for color in palette]
 
@@ -866,10 +874,22 @@ def get_album_color(image_link):
 
     return bg_color, text_color
 
-# get_album_color("https://i.scdn.co/image/ab67616d0000b2730a020a0296b97e6c8f4def97")
+def generate_audio_files(elements):
+    audio_files = []
 
+    for element in elements:
+        filtered_words = [word for word in element if word.strip() and not all(char in string.punctuation for char in word)]
+        # print(filtered_words)
+        for word in filtered_words:
+            if '\u4e00' <= word <= '\u9fff':
+                tts = gTTS(text=word, lang='zh-cn')
+            else:
+                tts = gTTS(text=word, lang='zh-tw')
 
-    
+            audio_file = io.BytesIO()
+            tts.write_to_fp(audio_file)
+            audio_file.seek(0)
+            audio_files.append(audio_file.getvalue())
 
+    return audio_files
 
-    

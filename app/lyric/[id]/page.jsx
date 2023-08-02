@@ -14,10 +14,65 @@ async function setPreference(preference) {
   }
 }
 
+function splitBlob(mainBlob) {
+  // Helper function to split a Blob into separate Blob objects
+  const byteArrays = [];
+  const blobParts = [];
+  const chunkSize = 1024 * 1024; // 1 MB (adjust as needed)
+  const totalChunks = Math.ceil(mainBlob.size / chunkSize);
+
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * chunkSize;
+    const end = Math.min(start + chunkSize, mainBlob.size);
+    const blobPart = mainBlob.slice(start, end);
+    blobParts.push(blobPart);
+
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(blobPart);
+
+    reader.onloadend = function () {
+      byteArrays.push(reader.result);
+    };
+  }
+
+  return byteArrays.map(
+    (byteArray) => new Blob([byteArray], { type: "audio/mpeg" })
+  );
+}
+
+async function getAudio(textList) {
+  // console.log(textList);
+
+  try {
+    const response = await fetch("http://localhost:3000/api/getAudio", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ audio_data: textList }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Request failed");
+    }
+
+    // console.log(response);
+
+    const audioBlob = await response.blob();
+
+    const audioUrl = URL.createObjectURL(audioBlob);
+    // console.log(audioUrl);
+    return audioUrl;
+  } catch (error) {
+    console.log("Error getting audio: ", error);
+  }
+}
+
 export default function LyricInfo() {
   const [lyricData, setLyricData] = useState(null);
   const [selectedPhonetic, setSelectedPhonetic] = useState(null);
   const [phoneticsOn, setPhoneticsOn] = useState(true);
+  const [audioUrl, setAudioUrl] = useState(null);
   const trackId = useParams().id;
 
   useEffect(() => {
@@ -30,6 +85,9 @@ export default function LyricInfo() {
         console.log(data);
         setLyricData(data);
         setSelectedPhonetic(data?.preference || null);
+
+        const audioUrl = await getAudio(data?.track_phonetics.original);
+        setAudioUrl(audioUrl);
       } catch (error) {
         console.error("Error fetching lyric data:", error);
       }
@@ -117,6 +175,8 @@ export default function LyricInfo() {
             </li>
           ))}
         </ul>
+        <button>Play audio</button>
+        {audioUrl && <audio controls src={audioUrl} />}
       </div>
       <h2>Lyric Information</h2>
       {is_lyric_available ? (
