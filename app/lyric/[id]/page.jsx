@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
-async function setPreference(preference) {
+async function savePreference(preference) {
   try {
     await fetch(
       `http://localhost:3000/api/setPreference?preference=${preference}`
@@ -77,7 +77,7 @@ export default function LyricInfo() {
           `http://localhost:3000/api/lyric/${trackId}`
         );
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         setMainData(data);
         setSelectedPhonetic(data?.preference || null);
 
@@ -86,11 +86,13 @@ export default function LyricInfo() {
           album_name: data?.track.album_name,
           artists: data?.track.artists.map((artist) => artist.name).join(", "),
         };
-        console.log(script);
+
         const audioUrl = await getAudio(script);
         setAudioUrl(audioUrl);
 
-        setLyric(data.lyric.original);
+        setLyric(data?.lyric);
+
+        console.log(data?.lyric);
       } catch (error) {
         console.error("Error fetching lyric data:", error);
       }
@@ -106,7 +108,7 @@ export default function LyricInfo() {
   const { track, is_lyric_available, bg_color, text_color } = mainData;
 
   const handlePreference = async (phonetic) => {
-    await setPreference(phonetic);
+    await savePreference(phonetic);
     setSelectedPhonetic(phonetic);
   };
 
@@ -176,7 +178,56 @@ export default function LyricInfo() {
       <h2>Lyric Information</h2>
       {is_lyric_available ? (
         <div>
-          <div></div>
+          <div>
+            {lyric.length > 0 &&
+              lyric.map((line) => {
+                return (
+                  <p
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                    }}
+                  >
+                    {line.map((phrase) => {
+                      return (
+                        <div style={{ display: "flex" }}>
+                          {phrase.map((word_list) => {
+                            return (
+                              <span
+                                style={{
+                                  padding: ".2rem",
+                                  display: "flex",
+                                  flexDirection: "row",
+                                }}
+                              >
+                                {word_list.map((word) => {
+                                  return (
+                                    <span
+                                      style={{
+                                        padding: ".2rem",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "flex-end",
+                                      }}
+                                    >
+                                      <div style={{ minHeight: "1rem" }}>
+                                        {word[1]}
+                                      </div>
+                                      <div>{word[0]}</div>
+                                    </span>
+                                  );
+                                })}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </p>
+                );
+              })}
+          </div>
         </div>
       ) : (
         <p>Lyric not available</p>
