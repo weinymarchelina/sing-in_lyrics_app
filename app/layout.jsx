@@ -1,6 +1,10 @@
 "use client";
 
-import Navbar from "../components/Navbar";
+import "../styles/global.css";
+import theme from "../styles/theme";
+import { ThemeProvider } from "@emotion/react";
+import { Container, Box } from "@mui/material";
+import PlayerBar from "../components/PlayerBar";
 import { Inter } from "next/font/google";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -27,11 +31,12 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className={`${inter.className}`}>
-        {!isHomePage && <Navbar />}
-        <br />
-        {children}
-      </body>
+      <ThemeProvider theme={theme}>
+        <body className={`${inter.className}`}>
+          <Box sx={{ pb: 2 }}>{children}</Box>
+          {!isHomePage && <PlayerBar />}
+        </body>
+      </ThemeProvider>
     </html>
   );
 }

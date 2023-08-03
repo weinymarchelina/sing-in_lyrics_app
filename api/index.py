@@ -653,7 +653,6 @@ def set_cookie():
 @app.route('/api/logout', methods=["GET"])
 def logout():
     response = make_response(redirect("http://localhost:3000/"))
-    # response.set_cookie("access_token", "", httponly=True)
     response.delete_cookie("access_token")
 
     return response
@@ -734,9 +733,7 @@ def hanzi_converter(line):
     for word in words:
         if ('\u4e00' <= word <= '\u9fff'):
             splitted_word_list = split_chinese_english_words(word) 
-            # print(splitted_word_list) #['抱住你我找回我自己'] or ['自己', 'ing']
-            cleaned_word = ' '.join(splitted_word_list) #抱住你我找回我自己 ing
-            # print(cleaned_word)
+            cleaned_word = ' '.join(splitted_word_list) #
 
             splitted_zhuyin = []
             splitted_pinyin = []
@@ -781,11 +778,6 @@ def hanzi_converter(line):
             pinyin_list.append([pinyin])
             jyutping_list.append([jyutping])
             original_list.append([cleaned_word])
-            
-            # spaced_original = " ".join(cleaned_word)
-            # print(spaced_original) #抱 住 你 我 找 回 我 自 己
-            # original_list.append(cleaned_word)
-
             
         else:
             zhuyin_list.append([word])
@@ -858,8 +850,6 @@ def add_spacing_to_chinese_phrase(phrase_list):
 
     result_list = []
 
-    # print(phrase_list)
-
     fixed_phrase_list = []
 
     for string_phrase in phrase_list:
@@ -883,7 +873,6 @@ def add_spacing_to_chinese_phrase(phrase_list):
 
             word_string = spaced_word
 
-            # print(word_string)
             new_fixed_phrase.append(word_string)
 
         result_list.append(' '.join(new_fixed_phrase))
@@ -921,8 +910,6 @@ def create_word_mapping(hanzi_list, pinyin_list, zhuyin_list, jyutping_list):
 def word_map_experiment(hanzi_list, jyutping_list):
     result = []
     for (hanzi_line, jyutping_line) in zip(hanzi_list, jyutping_list):
-        # print(hanzi_line)
-        # print(jyutping_line)
         new_line = []
 
         for (hanzi_phrase, jyutping_phrase) in zip(hanzi_line, jyutping_line):
@@ -931,16 +918,12 @@ def word_map_experiment(hanzi_list, jyutping_list):
             tokenized_h_p = tokenize_phrase(hanzi_phrase)
             tokenized_j_p = tokenize_phrase(jyutping_phrase)
 
-            # print(tokenized_h_p)
-            # print(tokenized_j_p)
-
             for (hanzi_word, jyutping_word) in zip(tokenized_h_p, tokenized_j_p):
                 word_pair = [hanzi_word]
 
                 if (hanzi_word != jyutping_word):
                     word_pair = [hanzi_word, jyutping_word]
                 
-                # print(word_pair)
                 phrase_pair.append(word_pair)
             
             new_line.append(phrase_pair)
@@ -949,23 +932,6 @@ def word_map_experiment(hanzi_list, jyutping_list):
 
     return result  
 
-"""
-input_chinese_list = [
-    [['陪 你 熬 夜'], ['讓 我 重 生']],
-    [['超 感 謝 你']],
-    [['戀 愛 ing'], ['happy'], ['ing']]
-]
-
-input_jyutping_list = [
-    [['pùi něi ngòu je'], ['joeng ngǒ cùng sāng']],
-    [['cīu gám ze něi']],
-    [['lyún ôi ing'], ['happy'], ['ing']]
-]
-
-output_list = word_map_experiment(input_chinese_list, input_jyutping_list)
-print(output_list)
-"""
-
 #
 
 def rgb_to_hex(rgb_tuple):
@@ -973,18 +939,14 @@ def rgb_to_hex(rgb_tuple):
     return "#{:02x}{:02x}{:02x}".format(r, g, b)
 
 def text_color_based_on_background_hex(background_hex):
-    # Convert hex color to RGB
     hex_color = background_hex.lstrip("#")
     rgb = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
 
-    # Calculate brightness from RGB values
     r, g, b = rgb
     brightness = (0.299 * r) + (0.587 * g) + (0.114 * b)
 
-    # Define the brightness threshold for choosing text color
     brightness_threshold = 130
 
-    # Choose text color based on background brightness
     if brightness < brightness_threshold:
         return "#EEEEEE"
     else:
@@ -998,14 +960,7 @@ def get_album_color(image_link):
 
     palette.sort(key=lambda c: c.hsl.h)
 
-    # print(palette)
-
-    #   for color in palette:
-    #       print(color.hsl)
-
     matched_hex_color_list = [rgb_to_hex(color.rgb) for color in palette]
-
-    # print(matched_hex_color_list)
 
     filtered_hex = []
 
@@ -1019,17 +974,12 @@ def get_album_color(image_link):
         if not dark_shades and not light_shades:
             filtered_hex.append(color)
 
-    # print(filtered_hex)
-
     bg_color = random.choice(matched_hex_color_list)
 
     if filtered_hex:
         bg_color = random.choice(filtered_hex)
 
     text_color = text_color_based_on_background_hex(bg_color)
-
-    # print(bg_color)
-    # print(text_color)
 
     return bg_color, text_color
 
@@ -1048,7 +998,6 @@ def generate_audio_files(track_info_list):
         phrase = ' '.join(split_chinese_english_words(value))
         track_info_list[key] = f"{translation[key]} {phrase}"
 
-    # print(track_info_list)
 
     for info_string in track_info_list.values():
         tts = gTTS(text=info_string, lang='zh-tw')
@@ -1058,44 +1007,3 @@ def generate_audio_files(track_info_list):
         audio_files.append(audio_file.getvalue())
 
     return audio_files
-
-"""
-
-input
-[
-    [['陪 你 熬 夜'], ['讓 我 重 生']], 
-    [['超 感 謝 你']]
-    [['戀 愛 ing'], ['happy'], ['ing']]
-]
-[
-    [['pùi něi ngòu je'], ['joeng ngǒ cùng sāng']], 
-    [['cīu gám ze něi']]
-    [['lyún ôi ing'], ['happy'], ['ing']]
-]
-
-output
-[
-    [
-        [['陪', 'pùi'], ['你', 'něi'], ['熬', 'ngòu'], ['夜', 'je']]
-        [['讓', 'joeng'], ['我', 'ngǒ'], ['重', 'cùng'], ['生', 'sāng']] 
-    ],
-    [...],
-    [...]
-]
-
-current output
-[
-    [
-        [['陪', 'pùi'], ['你', 'něi'], ['熬', 'ngòu'], ['夜', 'je']], 
-        [['讓', 'joeng'], ['我', 'ngǒ'], ['重', 'cùng'], ['生', 'sāng']]
-    ], 
-    [
-        [['超', 'cīu'], ['感', 'gám'], ['謝', 'ze'], ['你', 'něi']]
-    ], 
-    [
-        [['戀', 'lyún'], ['愛', 'ôi'], ['ing']], 
-        [['happy']], 
-        [['ing']]
-    ]
-]
-"""

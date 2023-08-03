@@ -1,8 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  IconButton,
+  ButtonGroup,
+  Typography,
+  Button,
+  Box,
+  Icon,
+  Container,
+  BottomNavigation,
+  Card,
+  AppBar,
+  Paper,
+  CardContent,
+} from "@mui/material";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import PauseCircleIcon from "@mui/icons-material/PauseCircle";
+import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
 
 async function getCurrentTrack() {
   try {
@@ -77,42 +96,72 @@ export default function PlayerBar() {
   };
 
   return (
-    <div>
+    <Container sx={{ position: "fixed", bottom: 0, left: 0, right: 0, px: 0 }}>
       {track && (
-        <div>
-          <p>
-            {`You are ${isPlaying ? "playing" : "paused"}: ${track.name} by
-            ${track.artists.map((artist) => artist.name).join(", ")}`}
-          </p>
-          <Image
-            src={track.album_img[2].url}
-            alt={`${track.album_name}_img`}
-            width={track.album_img[2].width}
-            height={track.album_img[2].height}
-          />
-          <Link href={`/lyric/${track.id}`}>Open Lyric</Link>
-          <button onClick={handlePlayPauseToggle}>
-            {isPlaying ? "Pause" : "Play"}
-          </button>
-          <button onClick={() => handleSkipTrack("previous")}>
-            Previous Track
-          </button>
-          <button onClick={() => handleSkipTrack("next")}>Next Track</button>
-          <br />
-          <br />
-          {nextTrack && (
-            <>
-              <Link
-                href={`/lyric/${nextTrack.id}`}
-              >{`Next track on your playlist: ${
-                nextTrack.name
-              } by ${nextTrack.artists
-                .map((artist) => artist.name)
-                .join(", ")}`}</Link>
-            </>
-          )}
-        </div>
+        <>
+          <Card elevation={3}>
+            <Container
+              sx={{
+                p: 1,
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+              }}
+            >
+              <Box sx={{ minWidth: "4rem" }}>
+                <Image
+                  src={track.album_img[2].url}
+                  alt={`${track.album_name}_img`}
+                  width={track.album_img[2].width}
+                  height={track.album_img[2].height}
+                />
+              </Box>
+              <Box sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                <Typography noWrap>{track.name}</Typography>
+                <Typography noWrap>
+                  {track.artists.map((artist) => artist.name).join(", ")}
+                </Typography>
+              </Box>
+            </Container>
+
+            <Container className="f-row" sx={{ gap: 2 }}>
+              <IconButton onClick={() => handleSkipTrack("previous")}>
+                <SkipPreviousIcon fontSize="large" />
+              </IconButton>
+              <IconButton size="large" onClick={handlePlayPauseToggle}>
+                {isPlaying ? (
+                  <PauseCircleIcon fontSize="large" />
+                ) : (
+                  <PlayCircleIcon fontSize="large" />
+                )}
+              </IconButton>
+              <IconButton onClick={() => handleSkipTrack("next")}>
+                <SkipNextIcon fontSize="large" />
+              </IconButton>
+            </Container>
+
+            {nextTrack && (
+              <Container
+                sx={{
+                  p: 2,
+                  borderTop: "1px solid #eee",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                <Typography noWrap>
+                  <Link href={`/lyric/${nextTrack.id}`}>{`Next : ${
+                    nextTrack.name
+                  } • ${nextTrack.artists
+                    .map((artist) => artist.name)
+                    .join(", ")}`}</Link>
+                </Typography>
+              </Container>
+            )}
+          </Card>
+          <Navbar trackId={track.id} />
+        </>
       )}
-    </div>
+    </Container>
   );
 }

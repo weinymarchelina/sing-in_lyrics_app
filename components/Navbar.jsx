@@ -1,45 +1,78 @@
 "use client";
 
 import Link from "next/link";
-import PlayerBar from "./PlayerBar";
+import {
+  AppBar,
+  BottomNavigation,
+  BottomNavigationAction,
+  Button,
+  ButtonGroup,
+  Card,
+  Container,
+  IconButton,
+} from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
+import PersonIcon from "@mui/icons-material/Person";
+import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
-const Navbar = () => {
+const Navbar = ({ trackId }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [value, setValue] = useState("/library");
+  const matches = useMediaQuery("(max-width:720px)");
+
+  useEffect(() => {
+    console.log(pathname);
+    setValue(pathname);
+  }, [pathname, value]);
+
   return (
-    <nav>
-      <ul>
-        <PlayerBar />
-        <br />
-        <li>
-          <Link href="/library">Library</Link>
-        </li>
-        <li>
-          <Link href="/profile">Profile</Link>
-        </li>
-        {/*
+    <BottomNavigation
+      showLabels
+      value={value}
+      className="f-row"
+      onChange={(event, newValue) => {
+        setValue(newValue);
+      }}
+    >
+      <BottomNavigationAction
+        label="Library"
+        value="/library"
+        icon={<HomeIcon />}
+        onClick={() => router.push("/library")}
+      />
+      {matches && (
+        <BottomNavigationAction
+          label="Lyric"
+          value="/lyric"
+          icon={<LibraryMusicIcon />}
+          onClick={() => router.push(`/lyric/${trackId}`)}
+        />
+      )}
+      <BottomNavigationAction
+        label="Profile"
+        value="/profile"
+        icon={<PersonIcon />}
+        onClick={() => router.push("/profile")}
+      />
+
+      {/*
+        <ButtonGroup>
+          <Button>
+            <Link href="/library">Library</Link>
+          </Button>
+          <Button>
+            <Link href="/profile">Profile</Link>
+          </Button>
+        </ButtonGroup>
         <li>
           <Link href="/api/logout">Logout</Link>
         </li>
        */}
-
-        {/*
-        <li>
-          <Link href="/currentTrackLyrics">Current Track Lyrics</Link>
-        </li>
-        <li>
-          <Link href="/previousTrack">Previous Track</Link>
-        </li>
-        <li>
-          <Link href="/api/pauseTrack">Pause</Link>
-        </li>
-        <li>
-          <Link href="/api/playTrack">Play</Link>
-        </li>
-        <li>
-          <Link href="/nextTrack">Next Track</Link>
-        </li>
-        */}
-      </ul>
-    </nav>
+    </BottomNavigation>
   );
 };
 
