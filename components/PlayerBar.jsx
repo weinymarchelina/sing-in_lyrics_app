@@ -102,7 +102,9 @@ export default function PlayerBar() {
           <br />
           {nextTrack && (
             <>
-              <Link href={`/lyric/${nextTrack.id}`}>{`Next track: ${
+              <Link
+                href={`/lyric/${nextTrack.id}`}
+              >{`Next track on your playlist: ${
                 nextTrack.name
               } by ${nextTrack.artists
                 .map((artist) => artist.name)

@@ -430,7 +430,7 @@ def get_track_lyric(track_id):
         'track_phonetics': track_phonetics_data,
         'bg_color': bg_color,
         'text_color': text_color,
-        'preference': preference
+        'preference': preference,
     }
 
     return full_data
@@ -699,6 +699,8 @@ def get_audio():
     response.headers['Content-Type'] = 'audio/mpeg'
     return response
 
+#
+
 def add_spaces_to_parentheses_and_brackets(text):
     characters_to_add_spaces = "()<>《》[]『』「」（）.～？！"
     
@@ -707,7 +709,7 @@ def add_spaces_to_parentheses_and_brackets(text):
     
     return text
 
-def split_words(word):
+def split_chinese_english_words(word):
     pattern = r"([\u4e00-\u9fff]+|[\u3100-\u312F]+|[a-zA-Z]+|[\uac00-\ud7af]+|[ぁ-ゔ]+|[ァ-ヴー]+|[一-龠]+)"  
     word_list = re.findall(pattern, word)
     return word_list
@@ -731,8 +733,10 @@ def hanzi_converter(line):
     
     for word in words:
         if ('\u4e00' <= word <= '\u9fff'):
-            splitted_word_list = split_words(word)
-            cleaned_word = ' '.join(splitted_word_list)
+            splitted_word_list = split_chinese_english_words(word) 
+            # print(splitted_word_list) #['抱住你我找回我自己'] or ['自己', 'ing']
+            cleaned_word = ' '.join(splitted_word_list) #抱住你我找回我自己 ing
+            # print(cleaned_word)
 
             splitted_zhuyin = []
             splitted_pinyin = []
@@ -773,16 +777,21 @@ def hanzi_converter(line):
             jyutping = ' '.join(splitted_jyutping)
             zhuyin = ' '.join(splitted_zhuyin)
 
-            zhuyin_list.append(zhuyin)
-            pinyin_list.append(pinyin)
-            jyutping_list.append(jyutping)
-            original_list.append(cleaned_word)
+            zhuyin_list.append([zhuyin])
+            pinyin_list.append([pinyin])
+            jyutping_list.append([jyutping])
+            original_list.append([cleaned_word])
+            
+            # spaced_original = " ".join(cleaned_word)
+            # print(spaced_original) #抱 住 你 我 找 回 我 自 己
+            # original_list.append(cleaned_word)
+
             
         else:
-            zhuyin_list.append(word)
-            pinyin_list.append(word)
-            jyutping_list.append(word)
-            original_list.append(word)
+            zhuyin_list.append([word])
+            pinyin_list.append([word])
+            jyutping_list.append([word])
+            original_list.append([word])
            
     return zhuyin_list, pinyin_list, jyutping_list, original_list
 
@@ -791,23 +800,173 @@ def get_phonetics(lines_list):
     pinyin_list = []
     jyutping_list = []
     original_list = []
+    lyric_data = []
 
     for line in lines_list:
         cleaned_line = add_spaces_to_parentheses_and_brackets(line)
         zhuyin, pinyin, jyutping, original = hanzi_converter(cleaned_line)
+
+        spaced_original = []
+        for phrase_list in original:
+            spaced_phrase_list = add_spacing_to_chinese_phrase(phrase_list)
+            spaced_original.append(spaced_phrase_list)
+
         zhuyin_list.append(zhuyin)
         pinyin_list.append(pinyin)
         jyutping_list.append(jyutping)
-        original_list.append(original)
+        original_list.append(spaced_original)
+        map_lyric = create_word_mapping(spaced_original, pinyin, zhuyin, jyutping)
+        lyric_data.append(map_lyric)
 
-    phonetics_list = {
-        'zhuyin': zhuyin_list,
-        'pinyin': pinyin_list,
-        'jyutping': jyutping_list,
-        'original': original_list
-    }
+    return lyric_data
 
-    return phonetics_list
+#
+
+def is_chinese(word):
+    for char in word:
+        if '\u4e00' <= char <= '\u9fff':
+            return True
+    return False
+
+def create_word_pairs(hanzi_list, jyutping_list, pinyin_list, zhuyin_list):
+    word_pairs = []
+
+    for hanzi_word, jyutping_word, pinyin_word, zhuyin_word in zip(hanzi_list, jyutping_list, pinyin_list, zhuyin_list):
+        if is_chinese(hanzi_word):
+            hanzi_chars = hanzi_word.split()
+            jyutping_chars = jyutping_word.split()
+            pinyin_chars = pinyin_word.split()
+            zhuyin_chars = zhuyin_word.split()
+            word_pairs.extend(zip(hanzi_chars, jyutping_chars, pinyin_chars, zhuyin_chars))
+        else:
+            word_pairs.append([hanzi_word])
+
+    return word_pairs
+
+def tokenize_phrase(phrase_string):
+    return phrase_string.split(' ')
+
+def group_phrase(phrase_list):
+    return [[word] for word in phrase_list]
+
+def spacing_word(word):
+    return ' '.join(word)
+
+def add_spacing_to_chinese_phrase(phrase_list):
+    def has_space(lst):
+        return any(' ' in element for element in lst)
+
+    result_list = []
+
+    # print(phrase_list)
+
+    fixed_phrase_list = []
+
+    for string_phrase in phrase_list:
+        new_phrase = [string_phrase]
+
+        if (has_space(string_phrase)):
+            splitted_words = string_phrase.split(' ')
+            new_phrase = splitted_words
+        
+        fixed_phrase_list.append(new_phrase)
+        
+
+    for fixed_phrase in fixed_phrase_list:
+        new_fixed_phrase = []
+
+        for word_string in fixed_phrase:
+            spaced_word = word_string
+
+            if is_chinese(word_string):
+                spaced_word = spacing_word(word_string)
+
+            word_string = spaced_word
+
+            # print(word_string)
+            new_fixed_phrase.append(word_string)
+
+        result_list.append(' '.join(new_fixed_phrase))
+
+    return result_list
+
+def create_word_mapping(hanzi_list, pinyin_list, zhuyin_list, jyutping_list):
+    result = []
+    for (hanzi_line, pinyin_line, zhuyin_line, jyutping_line) in zip(hanzi_list, pinyin_list, zhuyin_list, jyutping_list):
+
+        new_line = []
+
+        for (hanzi_phrase, pinyin_phrase, zhuyin_phrase, jyutping_phrase) in zip(hanzi_line, pinyin_line, zhuyin_line, jyutping_line):
+            phrase_pair = []
+
+            tokenized_h_p = tokenize_phrase(hanzi_phrase)
+            tokenized_p_p = tokenize_phrase(pinyin_phrase)
+            tokenized_z_p = tokenize_phrase(zhuyin_phrase)
+            tokenized_j_p = tokenize_phrase(jyutping_phrase)
+
+            for (hanzi_word, pinyin_word, zhuyin_word, jyutping_word) in zip(tokenized_h_p, tokenized_p_p, tokenized_z_p, tokenized_j_p):
+                word_pair = [hanzi_word]
+
+                if (hanzi_word != pinyin_word):
+                    word_pair = [hanzi_word, pinyin_word, zhuyin_word, jyutping_word]
+                
+                phrase_pair.append(word_pair)
+            
+            new_line.append(phrase_pair)
+
+        result.append(new_line)
+
+    return result
+
+def word_map_experiment(hanzi_list, jyutping_list):
+    result = []
+    for (hanzi_line, jyutping_line) in zip(hanzi_list, jyutping_list):
+        # print(hanzi_line)
+        # print(jyutping_line)
+        new_line = []
+
+        for (hanzi_phrase, jyutping_phrase) in zip(hanzi_line, jyutping_line):
+            phrase_pair = []
+
+            tokenized_h_p = tokenize_phrase(hanzi_phrase)
+            tokenized_j_p = tokenize_phrase(jyutping_phrase)
+
+            # print(tokenized_h_p)
+            # print(tokenized_j_p)
+
+            for (hanzi_word, jyutping_word) in zip(tokenized_h_p, tokenized_j_p):
+                word_pair = [hanzi_word]
+
+                if (hanzi_word != jyutping_word):
+                    word_pair = [hanzi_word, jyutping_word]
+                
+                # print(word_pair)
+                phrase_pair.append(word_pair)
+            
+            new_line.append(phrase_pair)
+
+        result.append(new_line)
+
+    return result  
+
+"""
+input_chinese_list = [
+    [['陪 你 熬 夜'], ['讓 我 重 生']],
+    [['超 感 謝 你']],
+    [['戀 愛 ing'], ['happy'], ['ing']]
+]
+
+input_jyutping_list = [
+    [['pùi něi ngòu je'], ['joeng ngǒ cùng sāng']],
+    [['cīu gám ze něi']],
+    [['lyún ôi ing'], ['happy'], ['ing']]
+]
+
+output_list = word_map_experiment(input_chinese_list, input_jyutping_list)
+print(output_list)
+"""
+
+#
 
 def rgb_to_hex(rgb_tuple):
     r, g, b = rgb_tuple
@@ -874,22 +1033,69 @@ def get_album_color(image_link):
 
     return bg_color, text_color
 
-def generate_audio_files(elements):
+#
+
+def generate_audio_files(track_info_list):
     audio_files = []
 
-    for element in elements:
-        filtered_words = [word for word in element if word.strip() and not all(char in string.punctuation for char in word)]
-        # print(filtered_words)
-        for word in filtered_words:
-            if '\u4e00' <= word <= '\u9fff':
-                tts = gTTS(text=word, lang='zh-cn')
-            else:
-                tts = gTTS(text=word, lang='zh-tw')
+    translation = {
+        'album_name': "專輯 ",
+        'artists': "歌手 ",
+        'name': "歌名 "
+    }
 
-            audio_file = io.BytesIO()
-            tts.write_to_fp(audio_file)
-            audio_file.seek(0)
-            audio_files.append(audio_file.getvalue())
+    for key, value in track_info_list.items():
+        phrase = ' '.join(split_chinese_english_words(value))
+        track_info_list[key] = f"{translation[key]} {phrase}"
+
+    # print(track_info_list)
+
+    for info_string in track_info_list.values():
+        tts = gTTS(text=info_string, lang='zh-tw')
+        audio_file = io.BytesIO()
+        tts.write_to_fp(audio_file)
+        audio_file.seek(0)
+        audio_files.append(audio_file.getvalue())
 
     return audio_files
 
+"""
+
+input
+[
+    [['陪 你 熬 夜'], ['讓 我 重 生']], 
+    [['超 感 謝 你']]
+    [['戀 愛 ing'], ['happy'], ['ing']]
+]
+[
+    [['pùi něi ngòu je'], ['joeng ngǒ cùng sāng']], 
+    [['cīu gám ze něi']]
+    [['lyún ôi ing'], ['happy'], ['ing']]
+]
+
+output
+[
+    [
+        [['陪', 'pùi'], ['你', 'něi'], ['熬', 'ngòu'], ['夜', 'je']]
+        [['讓', 'joeng'], ['我', 'ngǒ'], ['重', 'cùng'], ['生', 'sāng']] 
+    ],
+    [...],
+    [...]
+]
+
+current output
+[
+    [
+        [['陪', 'pùi'], ['你', 'něi'], ['熬', 'ngòu'], ['夜', 'je']], 
+        [['讓', 'joeng'], ['我', 'ngǒ'], ['重', 'cùng'], ['生', 'sāng']]
+    ], 
+    [
+        [['超', 'cīu'], ['感', 'gám'], ['謝', 'ze'], ['你', 'něi']]
+    ], 
+    [
+        [['戀', 'lyún'], ['愛', 'ôi'], ['ing']], 
+        [['happy']], 
+        [['ing']]
+    ]
+]
+"""

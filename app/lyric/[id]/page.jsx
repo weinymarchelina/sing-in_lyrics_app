@@ -14,35 +14,7 @@ async function setPreference(preference) {
   }
 }
 
-function splitBlob(mainBlob) {
-  // Helper function to split a Blob into separate Blob objects
-  const byteArrays = [];
-  const blobParts = [];
-  const chunkSize = 1024 * 1024; // 1 MB (adjust as needed)
-  const totalChunks = Math.ceil(mainBlob.size / chunkSize);
-
-  for (let i = 0; i < totalChunks; i++) {
-    const start = i * chunkSize;
-    const end = Math.min(start + chunkSize, mainBlob.size);
-    const blobPart = mainBlob.slice(start, end);
-    blobParts.push(blobPart);
-
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(blobPart);
-
-    reader.onloadend = function () {
-      byteArrays.push(reader.result);
-    };
-  }
-
-  return byteArrays.map(
-    (byteArray) => new Blob([byteArray], { type: "audio/mpeg" })
-  );
-}
-
 async function getAudio(textList) {
-  // console.log(textList);
-
   try {
     const response = await fetch("http://localhost:3000/api/getAudio", {
       method: "POST",
@@ -56,24 +28,47 @@ async function getAudio(textList) {
       throw new Error("Request failed");
     }
 
-    // console.log(response);
-
     const audioBlob = await response.blob();
-
     const audioUrl = URL.createObjectURL(audioBlob);
-    // console.log(audioUrl);
     return audioUrl;
   } catch (error) {
     console.log("Error getting audio: ", error);
   }
 }
 
+function isChineseWord(word) {
+  const regex = /^[\u4e00-\u9fff]+$/;
+  return regex.test(word);
+}
+
+function createWordPairs(hanziList, phoneticList) {
+  const wordPairs = [];
+
+  for (let i = 0; i < hanziList.length; i++) {
+    const hanziWord = hanziList[i];
+    const phoneticWord = phoneticList[i];
+
+    if (isChineseWord(hanziWord)) {
+      const hanziChars = hanziWord.split(" ");
+      const phoneticChars = phoneticWord.split(" ");
+      for (let j = 0; j < hanziChars.length; j++) {
+        wordPairs.push([hanziChars[j], phoneticChars[j]]);
+      }
+    } else {
+      wordPairs.push([hanziWord, null]);
+    }
+  }
+
+  return wordPairs;
+}
+
 export default function LyricInfo() {
-  const [lyricData, setLyricData] = useState(null);
-  const [selectedPhonetic, setSelectedPhonetic] = useState(null);
+  const [mainData, setMainData] = useState(null);
+  const [selectedPhonetic, setSelectedPhonetic] = useState("pinyin");
   const [phoneticsOn, setPhoneticsOn] = useState(true);
   const [audioUrl, setAudioUrl] = useState(null);
   const trackId = useParams().id;
+  const [lyric, setLyric] = useState([]);
 
   useEffect(() => {
     async function fetchLyricData() {
@@ -83,11 +78,19 @@ export default function LyricInfo() {
         );
         const data = await response.json();
         console.log(data);
-        setLyricData(data);
+        setMainData(data);
         setSelectedPhonetic(data?.preference || null);
 
-        const audioUrl = await getAudio(data?.track_phonetics.original);
+        const script = {
+          name: data?.track.name,
+          album_name: data?.track.album_name,
+          artists: data?.track.artists.map((artist) => artist.name).join(", "),
+        };
+        console.log(script);
+        const audioUrl = await getAudio(script);
         setAudioUrl(audioUrl);
+
+        setLyric(data.lyric.original);
       } catch (error) {
         console.error("Error fetching lyric data:", error);
       }
@@ -96,18 +99,11 @@ export default function LyricInfo() {
     fetchLyricData();
   }, [trackId]);
 
-  if (!lyricData) {
+  if (!mainData) {
     return <div>Loading...</div>;
   }
 
-  const { track, is_lyric_available, bg_color, text_color } = lyricData;
-
-  const originalLyric = lyricData.lyric.original;
-  const phoneticsLyric = {
-    jyutping: lyricData.lyric.jyutping,
-    pinyin: lyricData.lyric.pinyin,
-    zhuyin: lyricData.lyric.zhuyin,
-  };
+  const { track, is_lyric_available, bg_color, text_color } = mainData;
 
   const handlePreference = async (phonetic) => {
     await setPreference(phonetic);
@@ -166,81 +162,21 @@ export default function LyricInfo() {
           {track.artists.map((artist) => (
             <li key={artist.id}>
               <Image
-                src={artist.img[1].url}
+                src={artist.img[1]?.url}
                 alt={`${artist.name}_img`}
-                width={artist.img[1].width}
-                height={artist.img[1].height}
+                width={artist.img[1]?.width}
+                height={artist.img[1]?.height}
               />
               <p>{artist.name}</p>
             </li>
           ))}
         </ul>
-        <button>Play audio</button>
         {audioUrl && <audio controls src={audioUrl} />}
       </div>
       <h2>Lyric Information</h2>
       {is_lyric_available ? (
         <div>
-          <div>
-            {Object.keys(phoneticsLyric).map((phonetic) => (
-              <button
-                style={phonetic === selectedPhonetic ? selectedBtn : normalBtn}
-                key={phonetic}
-                onClick={() => handlePreference(phonetic)}
-              >
-                {phonetic}
-              </button>
-            ))}
-            <button
-              style={phoneticsOn ? normalBtn : selectedBtn}
-              onClick={handlePhoneticsToggle}
-            >
-              Off
-            </button>
-          </div>
-          <br />
-          <div>
-            {/* Display the selected phonetic section if phonetics are turned on */}
-            {phoneticsOn && (
-              <>
-                {phoneticsLyric[selectedPhonetic]?.map((version, index) => (
-                  <div key={index}>
-                    <li
-                      style={{
-                        listStyle: "none",
-                      }}
-                    >
-                      {version.join(" ")}
-                    </li>
-                    <li
-                      style={{
-                        fontSize: "1.75rem",
-                        listStyle: "none",
-                        letterSpacing: "0.25rem",
-                      }}
-                    >
-                      {originalLyric[index].join(" ")}
-                    </li>
-                    <br />
-                  </div>
-                ))}
-              </>
-            )}
-            {/* Always display the original Hanzi lyrics */}
-            {!phoneticsOn &&
-              originalLyric.map((version, index) => (
-                <li
-                  style={{
-                    fontSize: "1.75rem",
-                    listStyle: "none",
-                    letterSpacing: "0.25rem",
-                  }}
-                  key={index}
-                >
-                  {version.join(" ")}
-                </li>
-              ))}
-          </div>
+          <div></div>
         </div>
       ) : (
         <p>Lyric not available</p>
