@@ -169,9 +169,9 @@ export default function PlayerBar() {
               )}
             </AccordionDetails>
           </Accordion>
-          <Navbar trackId={track.id} />
         </>
       )}
+      <Navbar trackId={track?.id} />
     </Container>
   );
 }

@@ -70,9 +70,9 @@ export default function PlaylistTrack() {
           }}
         >
           {playlist && (
-            <Container>
+            <Container sx={{ p: 0 }}>
               {playlist?.img && playlist?.img[0]?.url && (
-                <Box>
+                <Box sx={{ minWidth: 250 }}>
                   <Image
                     src={playlist.img[0].url}
                     alt={`${playlist.name}_img`}
@@ -81,13 +81,18 @@ export default function PlaylistTrack() {
                   />
                 </Box>
               )}
-              <Container>
+              <Container sx={{ pt: 3, px: 0 }}>
                 <Typography variant="h3" component="h1">
                   {playlist.name}
                 </Typography>
-                <Typography>{playlist.total_tracks} tracks</Typography>
+                <Typography sx={{ py: 2 }}>
+                  {playlist.total_tracks} tracks
+                </Typography>
               </Container>
-              <Container className="f-space">
+              <Container
+                className="f-space"
+                sx={{ px: 0, alignItems: "center" }}
+              >
                 <Typography
                   variant="h6"
                   sx={{ textTransform: "uppercase" }}
@@ -108,7 +113,7 @@ export default function PlaylistTrack() {
             </Container>
           )}
           {playlist?.track_list?.length > 0 && (
-            <Container sx={{ my: 5 }}>
+            <Container sx={{ my: 5, px: 0 }}>
               <Typography variant="h5">All saved tracks</Typography>
               <TrackList tracks={playlist.track_list} />
             </Container>

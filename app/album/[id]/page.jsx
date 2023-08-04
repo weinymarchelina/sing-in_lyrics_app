@@ -3,6 +3,14 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import AlbumTrackList from "../../../components/AlbumTrackList";
+import {
+  ListItem,
+  Typography,
+  Container,
+  Box,
+  List,
+  Card,
+} from "@mui/material";
 
 async function getAlbumTrack(albumId) {
   try {
@@ -40,52 +48,91 @@ export default function AlbumTrack() {
   }, []);
 
   return (
-    <main>
+    <Container sx={{ p: 3, backgroundColor: bgColor, color: textColor }}>
       {albumInfo && (
-        <div
-          style={{
-            backgroundColor: bgColor,
-            color: textColor,
-            padding: "1rem",
-          }}
-        >
-          <div key={albumInfo.id}>
-            <h1>Album Track</h1>
-            <h2>{albumInfo.name}</h2>
-            {albumInfo?.img && albumInfo.img[1]?.url && (
-              <Image
-                src={albumInfo.img[1].url}
-                alt={`${albumInfo.name}_img`}
-                width={albumInfo.img[1].width}
-                height={albumInfo.img[1].height}
-              />
-            )}
-            <h3>Artist</h3>
-            {albumInfo?.artists &&
-              albumInfo.artists.map((artist) => (
-                <li key={artist.id}>
-                  <p>{artist.name}</p>
+        <Container sx={{ py: 2, px: 0 }}>
+          {albumInfo && (
+            <Container sx={{ p: 0 }}>
+              {albumInfo?.img && albumInfo?.img[0]?.url && (
+                <Box sx={{ minWidth: 250, minHeight: 250 }}>
                   <Image
-                    src={artist.img[1].url}
-                    alt={`${artist.name}_img`}
-                    width={artist.img[1].width}
-                    height={artist.img[1].height}
+                    src={albumInfo.img[0].url}
+                    alt={`${albumInfo.name}_img`}
+                    width={325}
+                    height={325}
                   />
-                </li>
-              ))}
+                </Box>
+              )}
+              <Container sx={{ pt: 3, px: 0 }}>
+                <Typography variant="h4" component="h1">
+                  {albumInfo.name}
+                </Typography>
+                <Typography
+                  sx={{ py: 2, textTransform: "uppercase" }}
+                  variant="h6"
+                  component="h2"
+                >
+                  {albumInfo.total_tracks} tracks
+                </Typography>
 
-            <p>{albumInfo.total_tracks} tracks</p>
-            <br />
-          </div>
-          <br />
-          {tracks.length > 0 && (
-            <div>
-              <h1>All tracks</h1>
-              <AlbumTrackList tracks={tracks} />
-            </div>
+                {albumInfo?.artists && (
+                  <Container sx={{ py: 3, px: 0 }}>
+                    <Typography
+                      sx={{ textTransform: "uppercase" }}
+                      variant="h5"
+                      component="h2"
+                    >
+                      Artist
+                    </Typography>
+                    <List>
+                      {albumInfo.artists.map((artist) => (
+                        <ListItem sx={{ px: 0 }} key={artist.id}>
+                          <Card
+                            className="f-space"
+                            sx={{ width: "100%", maxHeight: "100px" }}
+                          >
+                            <Box sx={{ minWidth: "100px" }}>
+                              <Image
+                                src={artist.img[1].url}
+                                alt={`${artist.name}_img`}
+                                width={100}
+                                height={100}
+                              />
+                            </Box>
+                            <Container
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-start",
+                              }}
+                            >
+                              <Typography variant="h5" component="p">
+                                {artist.name}
+                              </Typography>
+                            </Container>
+                          </Card>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Container>
+                )}
+              </Container>
+            </Container>
           )}
-        </div>
+          {tracks.length > 0 && (
+            <Container sx={{ mt: 2, mb: 15, px: 0 }}>
+              <Typography
+                sx={{ textTransform: "uppercase" }}
+                variant="h5"
+                component="h2"
+              >
+                All saved albums
+              </Typography>
+              <AlbumTrackList tracks={tracks} />
+            </Container>
+          )}
+        </Container>
       )}
-    </main>
+    </Container>
   );
 }

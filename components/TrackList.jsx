@@ -10,8 +10,10 @@ import {
   Card,
   Container,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const TrackList = ({ tracks }) => {
+  const router = useRouter();
   return (
     <List sx={{ mb: 15 }}>
       {tracks.map((track) => (

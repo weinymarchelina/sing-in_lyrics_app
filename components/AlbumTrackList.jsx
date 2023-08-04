@@ -2,18 +2,38 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { List, ListItem, Typography, Card } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const AlbumTrackList = ({ tracks }) => {
+  const router = useRouter();
   return (
-    <ul>
+    <List>
       {tracks.map((track) => (
-        <li key={track.id}>
-          <h3>{track.name}</h3>
-          <p>{track.artists.map((artist) => artist.name).join(", ")}</p>
-          <Link href={`/lyric/${track.id}`}>Open Lyric</Link>
-        </li>
+        <ListItem
+          className="f-col"
+          key={track.id}
+          sx={{ alignItems: "flex-start", px: 0 }}
+          onClick={() => router.push(`/lyric/${track.id}`)}
+        >
+          <Card
+            sx={{
+              width: "100%",
+              p: 2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            <Typography sx={{ pb: 1 }} noWrap>
+              {track.name}
+            </Typography>
+            <Typography variant="subtitle2" noWrap>
+              {track.artists.map((artist) => artist.name).join(", ")}
+            </Typography>
+          </Card>
+        </ListItem>
       ))}
-    </ul>
+    </List>
   );
 };
 

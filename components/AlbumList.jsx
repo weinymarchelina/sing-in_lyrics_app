@@ -2,27 +2,58 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  ListItem,
+  List,
+  Card,
+  Box,
+  Container,
+  Typography,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const AlbumList = ({ albums }) => {
+  const router = useRouter();
+
   return (
-    <ul>
+    <List sx={{ mb: 15 }}>
       {albums.map((album) => (
-        <li key={album.id}>
-          <h3>{album.name}</h3>
-          <p>{album.artists.map((artist) => artist.name).join(", ")}</p>
-          <Link href={`/album/${album.id}`}>See Tracks</Link>
-          <br />
-          {album.img[1].url && (
-            <Image
-              src={album.img[1]?.url} // Replace with the actual image URL
-              alt={`${album.name}_img`}
-              width={album.img[1]?.width} // Specify the width of the image
-              height={album.img[1]?.height} // Specify the height of the image
-            />
-          )}
-        </li>
+        <ListItem
+          sx={{ px: 0, cursor: "pointer" }}
+          key={album.id}
+          onClick={() => router.push(`/album/${album.id}`)}
+        >
+          <Card
+            className="f-space"
+            variant="outlined"
+            sx={{
+              alignItems: "center",
+              width: "100%",
+              maxHeight: "100px",
+            }}
+          >
+            {album?.img && album?.img[0]?.url && (
+              <Box sx={{ minWidth: "100px" }}>
+                <Image
+                  src={album.img[0].url}
+                  alt={`${album.name}_img`}
+                  width={100}
+                  height={100}
+                />
+              </Box>
+            )}
+            <Container
+              sx={{ p: 2, overflow: "hidden", textOverflow: "ellipsis" }}
+            >
+              <Typography noWrap>{album.name}</Typography>
+              <Typography variant="subtitle2">
+                {album.artists.map((artist) => artist.name).join(", ")}
+              </Typography>
+            </Container>
+          </Card>
+        </ListItem>
       ))}
-    </ul>
+    </List>
   );
 };
 

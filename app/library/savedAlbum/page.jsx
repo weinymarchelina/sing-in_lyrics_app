@@ -2,6 +2,9 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import AlbumList from "../../../components/AlbumList";
+import { IconButton, Container, Typography, Card } from "@mui/material";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 async function getSavedAlbum(page = 0) {
   try {
@@ -49,18 +52,37 @@ export default function SavedAlbum() {
   };
 
   return (
-    <main>
-      {currentPage > 1 && (
-        <button onClick={handlePreviousPage}>Previous Page</button>
-      )}
-      {isNextPage && <button onClick={handleNextPage}>Next Page</button>}
-      <br />
+    <Container sx={{ p: 3 }}>
+      <Typography variant="h3" component="h1" sx={{ mb: 3 }}>
+        Saved Albums
+      </Typography>
+
       {albums.length > 0 && (
-        <div>
-          <h1>All saved albums</h1>
+        <Container className="f-col" sx={{ px: 0 }}>
+          <Container
+            className="f-space"
+            sx={{ gap: 2, px: 0, alignItems: "center" }}
+          >
+            <Typography
+              variant="h6"
+              sx={{ textTransform: "uppercase" }}
+            >{`Page ${currentPage}`}</Typography>
+            <Card variant="outlined">
+              {currentPage > 1 && (
+                <IconButton onClick={handlePreviousPage}>
+                  <ArrowBackIosIcon />
+                </IconButton>
+              )}
+              {isNextPage && (
+                <IconButton onClick={handleNextPage}>
+                  <ArrowForwardIosIcon />
+                </IconButton>
+              )}
+            </Card>
+          </Container>
           <AlbumList albums={albums} />
-        </div>
+        </Container>
       )}
-    </main>
+    </Container>
   );
 }

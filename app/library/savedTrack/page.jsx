@@ -3,6 +3,9 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import TrackList from "../../../components/TrackList";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { IconButton, Container, Typography, Card } from "@mui/material";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 async function getSavedTrack(page = 1) {
   try {
@@ -30,45 +33,58 @@ export default function SavedTrack() {
   const page = useSearchParams().get("page");
   const currentPage = page ? parseInt(page) : 1;
 
-  // Function to fetch data for the current page
   const fetchData = async () => {
     const newData = await getSavedTrack(currentPage);
     setTracks(newData?.track_list || []);
     setIsNextPage(newData?.is_next_page || false);
   };
 
-  // Fetch data when the component mounts or when the currentPage changes
   useEffect(() => {
     fetchData();
   }, [currentPage]);
 
-  // Function to handle the "Next Page" button click
   const handleNextPage = () => {
     const nextPage = currentPage + 1;
     router.push(`${pathname}?page=${nextPage}`);
   };
 
-  // Function to handle the "Previous Page" button click
   const handlePreviousPage = () => {
     const prevPage = Math.max(currentPage - 1, 1);
     router.push(`${pathname}?page=${prevPage}`);
   };
 
   return (
-    <main>
-      <h1>SavedTrack</h1>
-      {currentPage > 1 && (
-        <button onClick={handlePreviousPage}>Previous Page</button>
-      )}
-      {isNextPage && <button onClick={handleNextPage}>Next Page</button>}
-      <br />
-      {!tracks.length && <Link href="/api/getSavedTrack">Get Data</Link>}
+    <Container sx={{ p: 3 }}>
+      <Typography variant="h3" component="h1" sx={{ mb: 3 }}>
+        Saved Tracks
+      </Typography>
+
       {tracks.length > 0 && (
-        <div>
-          <h1>All saved tracks</h1>
+        <Container className="f-col" sx={{ px: 0 }}>
+          <Container
+            className="f-space"
+            sx={{ gap: 2, px: 0, alignItems: "center" }}
+          >
+            <Typography
+              variant="h6"
+              sx={{ textTransform: "uppercase" }}
+            >{`Page ${currentPage}`}</Typography>
+            <Card variant="outlined">
+              {currentPage > 1 && (
+                <IconButton onClick={handlePreviousPage}>
+                  <ArrowBackIosIcon />
+                </IconButton>
+              )}
+              {isNextPage && (
+                <IconButton onClick={handleNextPage}>
+                  <ArrowForwardIosIcon />
+                </IconButton>
+              )}
+            </Card>
+          </Container>
           <TrackList tracks={tracks} />
-        </div>
+        </Container>
       )}
-    </main>
+    </Container>
   );
 }

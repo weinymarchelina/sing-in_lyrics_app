@@ -44,7 +44,7 @@ const Navbar = ({ trackId }) => {
         icon={<HomeIcon />}
         onClick={() => router.push("/library")}
       />
-      {matches && (
+      {trackId && (
         <BottomNavigationAction
           label="Lyric"
           value="/lyric"
