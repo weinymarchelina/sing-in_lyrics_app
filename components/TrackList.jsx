@@ -2,29 +2,56 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  List,
+  ListItem,
+  Box,
+  Typography,
+  Card,
+  Container,
+} from "@mui/material";
 
 const TrackList = ({ tracks }) => {
-  console.log(tracks);
   return (
-    <ul>
+    <List sx={{ mb: 15 }}>
       {tracks.map((track) => (
-        <li key={track.id}>
-          <h3>{track.name}</h3>
-          <h4>
-            <Link href={`/album/${track.album_id}`}>{track.album_name}</Link>
-          </h4>
-          <p>{track.artists.map((artist) => artist.name).join(", ")}</p>
-          <Link href={`/lyric/${track.id}`}>Open Lyric</Link>
-          <br />
-          <Image
-            src={track.album_img[1].url}
-            alt={`${track.album_name}_img`}
-            width={track.album_img[1].width}
-            height={track.album_img[1].height}
-          />
-        </li>
+        <ListItem
+          sx={{ px: 0, cursor: "pointer" }}
+          key={track.id}
+          onClick={() => router.push(`/lyric/${track.id}`)}
+        >
+          <Card
+            className="f-space"
+            variant="outlined"
+            sx={{
+              px: 0,
+              alignItems: "center",
+              width: "100%",
+              maxHeight: "100px",
+            }}
+          >
+            {track.album_img[1].url && (
+              <Box sx={{ minWidth: "100px" }}>
+                <Image
+                  src={track.album_img[1].url}
+                  alt={`${track.name}_img`}
+                  width={100}
+                  height={100}
+                />
+              </Box>
+            )}
+            <Container
+              sx={{ p: 2, overflow: "hidden", textOverflow: "ellipsis" }}
+            >
+              <Typography noWrap>{track.name}</Typography>
+              <Typography variant="subtitle2" noWrap>
+                {track.artists.map((artist) => artist.name).join(", ")}
+              </Typography>
+            </Container>
+          </Card>
+        </ListItem>
       ))}
-    </ul>
+    </List>
   );
 };
 

@@ -2,35 +2,58 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  List,
+  ListItem,
+  Box,
+  Typography,
+  Container,
+  Card,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const PlaylistItem = ({ playlists }) => {
-  /*
-        <Image
-            src={playlist.images[1].url} // Replace with the actual image URL
-            alt={`${playlist.name}_img`}
-            width={playlist.images[1].width} // Specify the width of the image
-            height={playlist.images[1].height}
-          />
- */
+  const router = useRouter();
 
   return (
-    <ul>
+    <List sx={{ mb: 15 }}>
       {playlists.map((playlist) => (
-        <li key={playlist.id}>
-          <h3>{playlist.name}</h3>
-          <p>{playlist.total_tracks} tracks</p>
-          {playlist?.img && playlist?.img[0]?.url && (
-            <Image
-              src={playlist.img[0].url}
-              alt={`${playlist.name}_img`}
-              width={300}
-              height={300}
-            />
-          )}
-          <Link href={`/playlist/${playlist.id}`}>See Tracks</Link>
-        </li>
+        <ListItem
+          sx={{ px: 0, cursor: "pointer" }}
+          key={playlist.id}
+          onClick={() => router.push(`/playlist/${playlist.id}`)}
+        >
+          <Card
+            className="f-space"
+            variant="outlined"
+            sx={{
+              alignItems: "center",
+              width: "100%",
+              maxHeight: "100px",
+            }}
+          >
+            {playlist?.img && playlist?.img[0]?.url && (
+              <Box sx={{ minWidth: "100px" }}>
+                <Image
+                  src={playlist.img[0].url}
+                  alt={`${playlist.name}_img`}
+                  width={100}
+                  height={100}
+                />
+              </Box>
+            )}
+            <Container
+              sx={{ p: 2, overflow: "hidden", textOverflow: "ellipsis" }}
+            >
+              <Typography noWrap>{playlist.name}</Typography>
+              <Typography variant="subtitle2">
+                {playlist.total_tracks} tracks
+              </Typography>
+            </Container>
+          </Card>
+        </ListItem>
       ))}
-    </ul>
+    </List>
   );
 };
 

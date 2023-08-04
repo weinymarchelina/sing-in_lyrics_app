@@ -1,7 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Container, Box, Typography, Card } from "@mui/material";
 import Link from "next/link";
+import AlbumIcon from "@mui/icons-material/Album";
+import AudiotrackIcon from "@mui/icons-material/Audiotrack";
+import QueueMusicIcon from "@mui/icons-material/QueueMusic";
 
 async function setCookieWithCode(token) {
   try {
@@ -25,15 +29,51 @@ export default function Library() {
   }, [searchParams]);
 
   return (
-    <main>
-      <h1>Library</h1>
-      <br />
-      <Link href="/library/playlist">Playlist</Link>
-      <br />
-      <Link href="/library/savedTrack">Saved Track</Link>
-      <br />
-      <Link href="/library/savedAlbum">Saved Album</Link>
-      <br />
-    </main>
+    <Container sx={{ p: 3 }}>
+      <Container sx={{ p: 0 }}>
+        <Typography variant="h2" component="h1" sx={{ fontWeight: "800" }}>
+          Library
+        </Typography>
+
+        <Typography variant="h5" component="h2" sx={{ mt: 3 }}>
+          Good afternoon!
+        </Typography>
+      </Container>
+
+      <Container sx={{ p: 0, my: 3 }}>
+        <Card
+          className="f-space"
+          sx={{ p: 2, gap: 2 }}
+          elevation={2}
+          variant="outlined"
+          onClick={() => router.push("/library/playlist")}
+        >
+          <Typography variant="h5">Playlist</Typography>
+          <QueueMusicIcon fontSize="large" />
+        </Card>
+
+        <Card
+          className="f-space"
+          sx={{ p: 2, gap: 2 }}
+          elevation={2}
+          variant="outlined"
+          onClick={() => router.push("/library/savedTrack")}
+        >
+          <Typography variant="h5">Saved Track</Typography>
+          <AudiotrackIcon fontSize="large" />
+        </Card>
+
+        <Card
+          className="f-space"
+          sx={{ p: 2, gap: 2 }}
+          elevation={2}
+          variant="outlined"
+          onClick={() => router.push("/library/savedAlbum")}
+        >
+          <Typography variant="h5">Saved Album</Typography>
+          <AlbumIcon fontSize="large" />
+        </Card>
+      </Container>
+    </Container>
   );
 }

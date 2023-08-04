@@ -2,6 +2,9 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import PlaylistList from "../../../components/PlaylistList";
+import { IconButton, Container, Typography, Card } from "@mui/material";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 async function getPlaylist(page = 0) {
   try {
@@ -25,7 +28,6 @@ export default function Playlist() {
   const [playlists, setPlaylists] = useState([]);
   const [isNextPage, setIsNextPage] = useState(false);
 
-  // Function to fetch data for the current page
   const fetchData = async () => {
     const newData = await getPlaylist(currentPage);
     console.log(newData?.playlist_list);
@@ -33,36 +35,50 @@ export default function Playlist() {
     setIsNextPage(newData?.is_next_page || false);
   };
 
-  // Fetch data when the component mounts or when the currentPage changes
   useEffect(() => {
     fetchData();
   }, [currentPage]);
 
-  // Function to handle the "Next Page" button click
   const handleNextPage = () => {
     setCurrentPage((prevPage) => prevPage + 1);
   };
 
-  // Function to handle the "Previous Page" button click
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
 
   return (
-    <main>
-      <h1>Playlist</h1>
-      {currentPage > 1 && (
-        <button onClick={handlePreviousPage}>Previous Page</button>
-      )}
-      {isNextPage && <button onClick={handleNextPage}>Next Page</button>}
-      <br />
-      {!playlists.length && <Link href="/api/getPlaylist">Get Data</Link>}
+    <Container sx={{ p: 3 }}>
+      <Typography variant="h2" component="h1" sx={{ mb: 3 }}>
+        Playlist
+      </Typography>
+
       {playlists.length > 0 && (
-        <div>
-          <h1>All playlists</h1>
+        <Container className="f-col" sx={{ px: 0 }}>
+          <Container
+            className="f-space"
+            sx={{ gap: 2, px: 0, alignItems: "center" }}
+          >
+            <Typography
+              variant="h6"
+              sx={{ textTransform: "uppercase" }}
+            >{`Page ${currentPage}`}</Typography>
+            <Card variant="outlined">
+              {currentPage > 1 && (
+                <IconButton onClick={handlePreviousPage}>
+                  <ArrowBackIosIcon />
+                </IconButton>
+              )}
+              {isNextPage && (
+                <IconButton onClick={handleNextPage}>
+                  <ArrowForwardIosIcon />
+                </IconButton>
+              )}
+            </Card>
+          </Container>
           <PlaylistList playlists={playlists} />
-        </div>
+        </Container>
       )}
-    </main>
+    </Container>
   );
 }
