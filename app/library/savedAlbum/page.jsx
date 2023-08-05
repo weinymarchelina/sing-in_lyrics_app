@@ -52,8 +52,15 @@ export default function SavedAlbum() {
   };
 
   return (
-    <Container sx={{ p: 3 }}>
-      <Typography variant="h3" component="h1" sx={{ mb: 3 }}>
+    <Container
+      sx={{
+        p: 3,
+        minHeight: "100vh",
+        backgroundColor: "#202020",
+        color: "#eee",
+      }}
+    >
+      <Typography variant="h3" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
         Saved Albums
       </Typography>
 
@@ -65,17 +72,21 @@ export default function SavedAlbum() {
           >
             <Typography
               variant="h6"
+              component="p"
               sx={{ textTransform: "uppercase" }}
             >{`Page ${currentPage}`}</Typography>
-            <Card variant="outlined">
+            <Card
+              variant="outlined"
+              sx={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+            >
               {currentPage > 1 && (
                 <IconButton onClick={handlePreviousPage}>
-                  <ArrowBackIosIcon />
+                  <ArrowBackIosIcon color="secondary" />
                 </IconButton>
               )}
               {isNextPage && (
                 <IconButton onClick={handleNextPage}>
-                  <ArrowForwardIosIcon />
+                  <ArrowForwardIosIcon color="secondary" />
                 </IconButton>
               )}
             </Card>

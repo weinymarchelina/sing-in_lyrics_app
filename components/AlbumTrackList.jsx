@@ -5,7 +5,7 @@ import Link from "next/link";
 import { List, ListItem, Typography, Card } from "@mui/material";
 import { useRouter } from "next/navigation";
 
-const AlbumTrackList = ({ tracks }) => {
+const AlbumTrackList = ({ tracks, textColor }) => {
   const router = useRouter();
   return (
     <List>
@@ -17,17 +17,20 @@ const AlbumTrackList = ({ tracks }) => {
           onClick={() => router.push(`/lyric/${track.id}`)}
         >
           <Card
+            variant="outlined"
             sx={{
               width: "100%",
               p: 2,
               overflow: "hidden",
               textOverflow: "ellipsis",
+              backgroundColor: "rgba(0, 0, 0, 0.15)",
+              color: textColor,
             }}
           >
-            <Typography sx={{ pb: 1 }} noWrap>
+            <Typography variant="h6" component="p" sx={{ pb: 1 }} noWrap>
               {track.name}
             </Typography>
-            <Typography variant="subtitle2" noWrap>
+            <Typography variant="subtitle2" component="p" noWrap>
               {track.artists.map((artist) => artist.name).join(", ")}
             </Typography>
           </Card>

@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <ThemeProvider theme={theme}>
         <body className={`${inter.className}`}>
-          <Box sx={{ pb: 2 }}>{children}</Box>
+          <Box>{children}</Box>
           {!isHomePage && <PlayerBar />}
         </body>
       </ThemeProvider>

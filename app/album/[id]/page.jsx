@@ -54,7 +54,13 @@ export default function AlbumTrack() {
           {albumInfo && (
             <Container sx={{ p: 0 }}>
               {albumInfo?.img && albumInfo?.img[0]?.url && (
-                <Box sx={{ minWidth: 250, minHeight: 250 }}>
+                <Box
+                  sx={{
+                    minWidth: 250,
+                    minHeight: 250,
+                    boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
+                  }}
+                >
                   <Image
                     src={albumInfo.img[0].url}
                     alt={`${albumInfo.name}_img`}
@@ -89,7 +95,13 @@ export default function AlbumTrack() {
                         <ListItem sx={{ px: 0 }} key={artist.id}>
                           <Card
                             className="f-space"
-                            sx={{ width: "100%", maxHeight: "100px" }}
+                            variant="outlined"
+                            sx={{
+                              width: "100%",
+                              maxHeight: "100px",
+                              backgroundColor: "rgba(0, 0, 0, 0.15)",
+                              color: textColor,
+                            }}
                           >
                             <Box sx={{ minWidth: "100px" }}>
                               <Image
@@ -126,9 +138,9 @@ export default function AlbumTrack() {
                 variant="h5"
                 component="h2"
               >
-                All saved albums
+                All tracks
               </Typography>
-              <AlbumTrackList tracks={tracks} />
+              <AlbumTrackList tracks={tracks} textColor={textColor} />
             </Container>
           )}
         </Container>

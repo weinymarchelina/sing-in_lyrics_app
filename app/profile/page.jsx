@@ -2,9 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import {
+  Container,
+  List,
+  ListItem,
+  Typography,
+  Box,
+  Card,
+  Button,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
+  const [bgColor, setBgColor] = useState("");
+  const [textColor, setTextColor] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -13,6 +26,8 @@ export default function ProfilePage() {
         const data = await response.json();
         console.log(data);
         setUserData(data);
+        setBgColor(data?.bg_color || "");
+        setTextColor(data?.text_color || "");
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
@@ -21,53 +36,214 @@ export default function ProfilePage() {
     fetchProfileData();
   }, []);
 
-  if (!userData) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div>
-      <h1>Welcome, {userData.name}</h1>
-      <Image
-        src={userData.img[1].url} // Replace with the actual image URL
-        alt={`${userData.name}_img`}
-        width={userData.img[1].width} // Specify the width of the image
-        height={userData.img[1].height} // Specify the height of the image
-      />
-      <h2>Your Top Artists This Month</h2>
-      <ul>
-        {userData.top_artists.map((artist, index) => (
-          <li key={artist.id}>
-            <h3>{`${index + 1}. ${artist.name}`}</h3>
-            <Image
-              src={artist.img[1].url} // Replace with the actual image URL
-              alt={`${artist.name}_img`}
-              width={artist.img[1].width} // Specify the width of the image
-              height={artist.img[1].height} // Specify the height of the image
-            />
-            {/*
-            <span>Popularity: {artist.popularity}</span>
-            */}
-          </li>
-        ))}
-      </ul>
-      <h2>Your Top Tracks This Month</h2>
-      <ul>
-        {userData.top_tracks.map((track, index) => (
-          <li key={track.id}>
-            <h3>{`${index + 1}. ${track.name}`}</h3>
-            <p>{track.artists.map((artist) => artist.name).join(", ")}</p>
-            <Image
-              src={track.album_img[1].url} // Replace with the actual image URL
-              alt={`${track.album_name}_img`}
-              width={track.album_img[1].width} // Specify the width of the image
-              height={track.album_img[1].height} // Specify the height of the image
-            />
+    <Container
+      sx={{ p: 3, pb: 25, backgroundColor: bgColor, color: textColor }}
+    >
+      {userData && (
+        <>
+          <Container sx={{ py: 3, px: 0 }}>
+            <Box
+              sx={{
+                p: 0,
+                minWidth: 250,
+                minHeight: 250,
+                boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
+              }}
+            >
+              <Image
+                src={userData.img[1].url ? userData.img[1].url : "/backup.jpg"}
+                alt={`${userData.name}_img`}
+                width={userData.img[1].width}
+                height={userData.img[1].height}
+              />
+            </Box>
+            <Typography sx={{ py: 3 }} variant="h3" component="h1">
+              {userData.name}'s Music Taste
+            </Typography>
+          </Container>
+          {userData?.top_artists.length > 0 && (
+            <Container className="f-col" sx={{ py: 3, px: 0 }}>
+              <Typography
+                variant="h4"
+                component="h2"
+                sx={{ alignSelf: "center", textAlign: "center" }}
+              >
+                Current Top Artists
+              </Typography>
+              <List>
+                <ListItem
+                  className="f-col"
+                  sx={{ pb: 3 }}
+                  key={userData.top_artists[0].id}
+                >
+                  <Box sx={{ py: 2 }}>
+                    <Image
+                      src={
+                        userData.top_artists[0].img[1].url
+                          ? userData.top_artists[0].img[1].url
+                          : "/backup.jpg"
+                      }
+                      alt={`${userData.top_artists[0].name}_img`}
+                      width={userData.top_artists[0].img[1].width}
+                      height={userData.top_artists[0].img[1].height}
+                    />
+                  </Box>
+                  <Typography
+                    variant="h4"
+                    component="p"
+                  >{`${userData.top_artists[0].name}`}</Typography>
+                </ListItem>
+                {userData.top_artists.map(
+                  (artist, index) =>
+                    index > 0 && (
+                      <ListItem key={artist.id}>
+                        <Card
+                          className="f-space"
+                          sx={{
+                            width: "100%",
+                            maxHeight: "100px",
+                            backgroundColor: "rgba(0, 0, 0, 0.15)",
+                            color: textColor,
+                          }}
+                          variant="outlined"
+                        >
+                          <Box sx={{ minWidth: "100px" }}>
+                            <Image
+                              src={
+                                artist.img[1].url
+                                  ? artist.img[1].url
+                                  : "/backup.jpg"
+                              }
+                              alt={`${artist.name}_img`}
+                              width={100}
+                              height={100}
+                            />
+                          </Box>
+                          <Container
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                            }}
+                          >
+                            <Typography variant="subtitle" component="p">{`${
+                              index + 1
+                            }. ${artist.name}`}</Typography>
+                          </Container>
+                        </Card>
 
-            {/* <span>Popularity: {track.popularity}</span> */}
-          </li>
-        ))}
-      </ul>
-    </div>
+                        {/*
+        <span>Popularity: {artist.popularity}</span>
+      */}
+                      </ListItem>
+                    )
+                )}
+              </List>
+            </Container>
+          )}
+          {userData?.top_tracks.length > 0 && (
+            <Container className="f-col" sx={{ py: 3, px: 0 }}>
+              <Typography
+                variant="h4"
+                component="h2"
+                sx={{ alignSelf: "center", textAlign: "center" }}
+              >
+                Current Top Tracks
+              </Typography>
+              <List>
+                <ListItem
+                  className="f-col"
+                  sx={{ pb: 3 }}
+                  key={userData.top_tracks[0].id}
+                >
+                  <Box sx={{ py: 2 }}>
+                    <Image
+                      src={
+                        userData.top_tracks[0].album_img[1]?.url
+                          ? userData.top_tracks[0].album_img[1]?.url
+                          : "/backup.jpg"
+                      }
+                      alt={`${userData.top_tracks[0].album_name}_img`}
+                      width={userData.top_tracks[0].album_img[1].width}
+                      height={userData.top_tracks[0].album_img[1].height}
+                    />
+                  </Box>
+                  <Typography variant="h4" component="p">
+                    {userData.top_tracks[0].name}
+                  </Typography>
+                </ListItem>
+                {userData.top_tracks.map(
+                  (track, index) =>
+                    index > 0 && (
+                      <ListItem key={track.id}>
+                        <Card
+                          className="f-space"
+                          sx={{
+                            width: "100%",
+                            maxHeight: "100px",
+                            backgroundColor: "rgba(0, 0, 0, 0.15)",
+                            color: textColor,
+                          }}
+                          variant="outlined"
+                        >
+                          <Box
+                            sx={{
+                              minWidth: "100px",
+                            }}
+                          >
+                            <Image
+                              src={
+                                track.album_img[1]?.url
+                                  ? track.album_img[1]?.url
+                                  : "/backup.jpg"
+                              }
+                              alt={`${track.album_name}_img`}
+                              width={100}
+                              height={100}
+                            />
+                          </Box>
+                          <Container
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                            }}
+                          >
+                            <Typography variant="subtitle" component="p">
+                              {`${index + 1}. ${track.name}`}
+                            </Typography>
+                          </Container>
+                        </Card>
+                      </ListItem>
+                    )
+                )}
+              </List>
+            </Container>
+          )}
+          <Container className="f-col" sx={{ width: "100%", py: 3 }}>
+            <Typography
+              variant="h4"
+              component="h2"
+              sx={{ alignSelf: "center", textAlign: "center", pb: 3 }}
+            >
+              Settings
+            </Typography>
+            <Button
+              variant="outlined"
+              sx={{
+                width: "100%",
+                py: 2,
+                color: textColor,
+                borderColor: textColor,
+              }}
+              onClick={() => router.push("/api/logout")}
+            >
+              <Typography>Logout</Typography>
+            </Button>
+          </Container>
+        </>
+      )}
+    </Container>
   );
 }

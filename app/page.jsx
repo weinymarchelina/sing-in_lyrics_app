@@ -44,13 +44,33 @@ export default async function Home() {
   }, []);
 
   return (
-    <main>
-      <Link href="/api/">Login</Link>
-      <h1>星音 Sing'in!</h1>
-      <h2>
+    <div
+      className="f-col"
+      style={{
+        padding: "3rem",
+        backgroundColor: "#202020",
+        color: "#eee",
+        minHeight: "100vh",
+      }}
+    >
+      <h1 style={{ fontSize: "2rem" }}>星音 Sing'in!</h1>
+      <h2 style={{ fontSize: "1.5rem" }}>
         Explore Pinyin, Zhuyin, and Jyutping Brilliance for Every Word. Sing
         along with the Lyric Book from Your Personalized Spotify Playlists.
       </h2>
-    </main>
+      <button
+        onClick={() => router.push("/api/")}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "1rem",
+        }}
+      >
+        Login
+      </button>
+    </div>
   );
 }

@@ -445,7 +445,7 @@ def get_playlist_tracks(playlist_id):
     sp = spotipy.Spotify(auth=token)
     
     current_page = int(request.args.get('page', 1))
-    limit = 20
+    limit = 50
     offset = limit * (current_page - 1)
 
     try:
@@ -625,11 +625,15 @@ def get_profile():
 
         track_list.append(tracks_info)
 
+    bg_color, text_color = get_album_color(user_info['images'][1]['url'])
+
     user_data = {
         'name': user_info['display_name'],
         'img': user_info['images'],
         'top_artists': artists_list,
-        'top_tracks': track_list
+        'top_tracks': track_list,
+        'bg_color': bg_color,
+        'text_color': text_color
     }
     
     return user_data

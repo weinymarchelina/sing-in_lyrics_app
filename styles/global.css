@@ -1,3 +1,7 @@
+.MuiTypography-root {
+  letter-spacing: 0.15rem;
+}
+
 html,
 body {
   margin: 0;

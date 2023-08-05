@@ -103,8 +103,15 @@ export default function PlayerBar() {
     <Container sx={{ position: "fixed", bottom: 0, left: 0, right: 0, px: 0 }}>
       {track && (
         <>
-          <Accordion elevation={2}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Accordion
+            elevation={2}
+            sx={{ backgroundColor: "rgba(0, 0, 0, 0.85)", color: "#eee" }}
+            style={{ margin: 0 }}
+          >
+            <AccordionSummary
+              sx={{ py: 1 }}
+              expandIcon={<ExpandMoreIcon color="secondary" />}
+            >
               <Container
                 sx={{
                   p: 0,
@@ -122,8 +129,10 @@ export default function PlayerBar() {
                   />
                 </Box>
                 <Box sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-                  <Typography>{track.name}</Typography>
-                  <Typography noWrap>
+                  <Typography variant="h6" component="p">
+                    {track.name}
+                  </Typography>
+                  <Typography>
                     {track.artists.map((artist) => artist.name).join(", ")}
                   </Typography>
                 </Box>
@@ -133,27 +142,28 @@ export default function PlayerBar() {
             <AccordionDetails sx={{ p: 0 }}>
               <Container
                 className="f-row"
-                sx={{ gap: 2, border: "1px solid #eee" }}
+                sx={{ gap: 2, borderTop: "1px solid #aaa" }}
               >
                 <IconButton onClick={() => handleSkipTrack("previous")}>
-                  <SkipPreviousIcon fontSize="large" />
+                  <SkipPreviousIcon fontSize="large" color="secondary" />
                 </IconButton>
                 <IconButton size="large" onClick={handlePlayPauseToggle}>
                   {isPlaying ? (
-                    <PauseCircleIcon fontSize="large" />
+                    <PauseCircleIcon fontSize="large" color="secondary" />
                   ) : (
-                    <PlayCircleIcon fontSize="large" />
+                    <PlayCircleIcon fontSize="large" color="secondary" />
                   )}
                 </IconButton>
                 <IconButton onClick={() => handleSkipTrack("next")}>
-                  <SkipNextIcon fontSize="large" />
+                  <SkipNextIcon fontSize="large" color="secondary" />
                 </IconButton>
               </Container>
               {nextTrack && (
                 <Container
                   sx={{
                     p: 2,
-                    border: "1px solid #eee",
+                    borderTop: "1px solid #aaa",
+                    borderBottom: "1px solid #aaa",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                   }}
@@ -171,7 +181,9 @@ export default function PlayerBar() {
           </Accordion>
         </>
       )}
-      <Navbar trackId={track?.id} />
+      <Container sx={{ position: "relative", minHeight: "4.25rem" }}>
+        <Navbar trackId={track?.id} />
+      </Container>
     </Container>
   );
 }

@@ -30,6 +30,8 @@ const AlbumList = ({ albums }) => {
               alignItems: "center",
               width: "100%",
               maxHeight: "100px",
+              backgroundColor: "#181818",
+              color: "#eee",
             }}
           >
             {album?.img && album?.img[0]?.url && (

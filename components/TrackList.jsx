@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 
-const TrackList = ({ tracks }) => {
+const TrackList = ({ tracks, textColor = "#eee" }) => {
   const router = useRouter();
   return (
     <List sx={{ mb: 15 }}>
@@ -30,6 +30,8 @@ const TrackList = ({ tracks }) => {
               alignItems: "center",
               width: "100%",
               maxHeight: "100px",
+              backgroundColor: "rgba(0, 0, 0, 0.15)",
+              color: textColor,
             }}
           >
             {track.album_img[1].url && (
@@ -45,8 +47,10 @@ const TrackList = ({ tracks }) => {
             <Container
               sx={{ p: 2, overflow: "hidden", textOverflow: "ellipsis" }}
             >
-              <Typography noWrap>{track.name}</Typography>
-              <Typography variant="subtitle2" noWrap>
+              <Typography variant="h6" component="p" noWrap>
+                {track.name}
+              </Typography>
+              <Typography variant="subtitle2" component="p" noWrap>
                 {track.artists.map((artist) => artist.name).join(", ")}
               </Typography>
             </Container>

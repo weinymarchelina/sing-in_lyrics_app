@@ -9,12 +9,12 @@ import {
   Typography,
   IconButton,
   Card,
-  ButtonGroup,
   ToggleButtonGroup,
-  ToggleButton,
 } from "@mui/material";
+import MuiToggleButton from "@mui/material/ToggleButton";
 import Image from "next/image";
 import Link from "next/link";
+import { styled } from "@mui/material/styles";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 
 async function savePreference(preference) {
@@ -52,12 +52,11 @@ async function getAudio(textList) {
 export default function LyricInfo() {
   const [mainData, setMainData] = useState(null);
   const [selectedPhonetic, setSelectedPhonetic] = useState("pinyin");
-  const [phoneticsOn, setPhoneticsOn] = useState(true);
   const [bgColor, setBgColor] = useState("");
   const [textColor, setTextColor] = useState("");
   const [audioUrl, setAudioUrl] = useState(null);
-  const trackId = useParams().id;
   const [phoneticIndex, setPhoneticIndex] = useState(-1);
+  const trackId = useParams().id;
   const [lyric, setLyric] = useState([]);
 
   const handlePhoneticsIndex = (newSelectedPhonetic) => {
@@ -76,6 +75,13 @@ export default function LyricInfo() {
     setSelectedPhonetic(newSelectedPhonetic);
     await savePreference(newSelectedPhonetic);
   };
+
+  const ToggleButton = styled(MuiToggleButton)({
+    "&.Mui-selected, &.Mui-selected:hover": {
+      color: textColor,
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
+    },
+  });
 
   useEffect(() => {
     async function fetchLyricData() {
@@ -102,7 +108,6 @@ export default function LyricInfo() {
 
         setBgColor(data?.bg_color);
         setTextColor(data?.text_color);
-        console.log(data?.lyric);
       } catch (error) {
         console.error("Error fetching lyric data:", error);
       }
@@ -111,30 +116,55 @@ export default function LyricInfo() {
     fetchLyricData();
   }, [trackId]);
 
-  if (!mainData) {
-    return <div>Loading...</div>;
-  }
-
-  const { track, is_lyric_available } = mainData;
-
-  const isChineseWord = (word) => {
-    const regex = /^[\u4e00-\u9fff]+$/;
-    console.log(`${word} = ${regex.test(word)}`);
-    return regex.test(word);
-  };
-
   const playAudio = () => {
     const audio = new Audio(audioUrl);
     audio.play();
+  };
+
+  const renderArtistList = () => {
+    return mainData?.track?.artists?.map((artist) => (
+      <ListItem sx={{ px: 0 }} key={artist.id}>
+        <Card
+          className="f-space"
+          variant="outlined"
+          sx={{
+            width: "100%",
+            maxHeight: "100px",
+            backgroundColor: "rgba(0, 0, 0, 0.15)",
+            color: textColor,
+          }}
+        >
+          <Box sx={{ minWidth: "100px" }}>
+            <Image
+              src={artist.img[1]?.url ? artist.img[1]?.url : "/backup.jpg"}
+              alt={`${artist.name}_img`}
+              width={100}
+              height={100}
+            />
+          </Box>
+          <Container
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+            }}
+          >
+            <Typography variant="h5" component="p">
+              {artist.name}
+            </Typography>
+          </Container>
+        </Card>
+      </ListItem>
+    ));
   };
 
   return (
     <Container sx={{ p: 3, backgroundColor: bgColor, color: textColor }}>
       {mainData && (
         <Container sx={{ py: 2, px: 0 }}>
-          {track && (
+          {mainData.track && (
             <Container sx={{ p: 0 }}>
-              {track.album_img && track.album_img[0]?.url && (
+              {mainData.track.album_img && mainData.track.album_img[0]?.url && (
                 <Box
                   sx={{
                     p: 0,
@@ -144,8 +174,8 @@ export default function LyricInfo() {
                   }}
                 >
                   <Image
-                    src={track.album_img[0].url}
-                    alt={`${track.album_name}_img`}
+                    src={mainData.track.album_img[0].url}
+                    alt={`${mainData.track.album_name}_img`}
                     width={325}
                     height={325}
                   />
@@ -153,19 +183,19 @@ export default function LyricInfo() {
               )}
               <Container sx={{ pt: 3, px: 0 }}>
                 <Typography variant="h4" component="h1">
-                  {track.name}
+                  {mainData.track.name}
                 </Typography>
                 <Typography
                   sx={{ py: 2, textTransform: "uppercase" }}
                   variant="h6"
                   component="h2"
                 >
-                  <Link href={`/album/${track.album_id}`}>
-                    {track.album_name}
+                  <Link href={`/album/${mainData.track.album_id}`}>
+                    Album : {mainData.track.album_name}
                   </Link>
                 </Typography>
 
-                {track?.artists && (
+                {mainData.track.artists && (
                   <Container sx={{ py: 3, px: 0 }}>
                     <Container
                       className="f-space"
@@ -180,44 +210,11 @@ export default function LyricInfo() {
                       </Typography>
                       {audioUrl && (
                         <IconButton onClick={playAudio}>
-                          <RecordVoiceOverIcon />
+                          <RecordVoiceOverIcon sx={{ color: textColor }} />
                         </IconButton>
                       )}
                     </Container>
-                    <List>
-                      {track.artists.map((artist) => (
-                        <ListItem sx={{ px: 0 }} key={artist.id}>
-                          <Card
-                            className="f-space"
-                            sx={{ width: "100%", maxHeight: "100px" }}
-                          >
-                            <Box sx={{ minWidth: "100px" }}>
-                              <Image
-                                src={
-                                  artist.img[1]?.url
-                                    ? artist.img[1]?.url
-                                    : "/backup.jpg"
-                                }
-                                alt={`${artist.name}_img`}
-                                width={100}
-                                height={100}
-                              />
-                            </Box>
-                            <Container
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-start",
-                              }}
-                            >
-                              <Typography variant="h5" component="p">
-                                {artist.name}
-                              </Typography>
-                            </Container>
-                          </Card>
-                        </ListItem>
-                      ))}
-                    </List>
+                    <List>{renderArtistList()}</List>
                   </Container>
                 )}
               </Container>
@@ -225,7 +222,7 @@ export default function LyricInfo() {
           )}
 
           <Container sx={{ mb: 15, px: 0 }}>
-            {is_lyric_available && (
+            {mainData.is_lyric_available && (
               <>
                 <Typography
                   sx={{ textTransform: "uppercase", py: 1 }}
@@ -239,11 +236,44 @@ export default function LyricInfo() {
                     value={selectedPhonetic}
                     onChange={handlePreference}
                     exclusive
+                    sx={{
+                      border: `1px solid ${
+                        textColor === "#202020" ? "#333" : "#bbb"
+                      }`,
+                    }}
                   >
-                    <ToggleButton value="original">Original</ToggleButton>
-                    <ToggleButton value="pinyin">Pinyin</ToggleButton>
-                    <ToggleButton value="zhuyin">Zhuyin</ToggleButton>
-                    <ToggleButton value="jyutping">Jyutping</ToggleButton>
+                    <ToggleButton
+                      value="original"
+                      sx={{
+                        color: textColor,
+                      }}
+                    >
+                      Original
+                    </ToggleButton>
+                    <ToggleButton
+                      value="pinyin"
+                      sx={{
+                        color: textColor,
+                      }}
+                    >
+                      Pinyin
+                    </ToggleButton>
+                    <ToggleButton
+                      value="zhuyin"
+                      sx={{
+                        color: textColor,
+                      }}
+                    >
+                      Zhuyin
+                    </ToggleButton>
+                    <ToggleButton
+                      value="jyutping"
+                      sx={{
+                        color: textColor,
+                      }}
+                    >
+                      Jyutping
+                    </ToggleButton>
                   </ToggleButtonGroup>
                 </Container>
                 {lyric.map((line) => (
@@ -314,7 +344,7 @@ export default function LyricInfo() {
                 ))}
               </>
             )}
-            {!is_lyric_available && (
+            {!mainData.is_lyric_available && (
               <Typography variant="h6" component="p">
                 Looks like this track doesn't have lyrics~
               </Typography>

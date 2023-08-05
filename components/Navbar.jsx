@@ -4,13 +4,14 @@ import Link from "next/link";
 import {
   AppBar,
   BottomNavigation,
-  BottomNavigationAction,
   Button,
   ButtonGroup,
   Card,
   Container,
   IconButton,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonIcon from "@mui/icons-material/Person";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
@@ -18,16 +19,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
-const Navbar = ({ trackId }) => {
+const Navbar = ({ trackId = "" }) => {
   const pathname = usePathname();
   const router = useRouter();
   const [value, setValue] = useState("/library");
   const matches = useMediaQuery("(max-width:720px)");
 
   useEffect(() => {
-    console.log(pathname);
-    setValue(pathname);
-  }, [pathname, value]);
+    const parts = pathname.split("/");
+    const newValue = "/" + parts[1];
+    setValue(newValue);
+  }, [pathname]);
+
+  const BottomNavigationAction = styled(MuiBottomNavigationAction)({
+    "&.Mui-selected, &.Mui-selected:hover": {
+      color: "#777",
+    },
+  });
 
   return (
     <BottomNavigation
@@ -37,41 +45,37 @@ const Navbar = ({ trackId }) => {
       onChange={(event, newValue) => {
         setValue(newValue);
       }}
+      sx={{
+        backgroundColor: "rgba(0, 0, 0, 0.85)",
+        height: "100%",
+        bottom: "0px",
+        position: "absolute",
+        bottom: "0px",
+        left: "0px",
+        right: "0px",
+      }}
     >
       <BottomNavigationAction
         label="Library"
         value="/library"
         icon={<HomeIcon />}
         onClick={() => router.push("/library")}
+        sx={{ color: "#eee", textTransform: "uppercase", gap: 0.5 }}
       />
-      {trackId && (
-        <BottomNavigationAction
-          label="Lyric"
-          value="/lyric"
-          icon={<LibraryMusicIcon />}
-          onClick={() => router.push(`/lyric/${trackId}`)}
-        />
-      )}
+      <BottomNavigationAction
+        label="Lyric"
+        value="/lyric"
+        icon={<LibraryMusicIcon />}
+        onClick={() => router.push(`/lyric/${trackId}`)}
+        sx={{ color: "#eee", textTransform: "uppercase", gap: 0.5 }}
+      />
       <BottomNavigationAction
         label="Profile"
         value="/profile"
         icon={<PersonIcon />}
         onClick={() => router.push("/profile")}
+        sx={{ color: "#eee", textTransform: "uppercase", gap: 0.5 }}
       />
-
-      {/*
-        <ButtonGroup>
-          <Button>
-            <Link href="/library">Library</Link>
-          </Button>
-          <Button>
-            <Link href="/profile">Profile</Link>
-          </Button>
-        </ButtonGroup>
-        <li>
-          <Link href="/api/logout">Logout</Link>
-        </li>
-       */}
     </BottomNavigation>
   );
 };

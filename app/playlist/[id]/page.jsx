@@ -36,8 +36,8 @@ export default function PlaylistTrack() {
   const playlistId = useParams().id;
   const page = useSearchParams().get("page");
   const currentPage = page ? parseInt(page) : 1;
-  const [bgColor, setBgColor] = useState("#fff");
-  const [textColor, setTextColor] = useState("#202020");
+  const [bgColor, setBgColor] = useState("");
+  const [textColor, setTextColor] = useState("");
 
   const fetchData = async () => {
     const newData = await getPlaylistTrack(playlistId, currentPage);
@@ -62,64 +62,83 @@ export default function PlaylistTrack() {
   };
 
   return (
-    <Container sx={{ p: 3, backgroundColor: bgColor, color: textColor }}>
-      {playlist && (
-        <Container
-          style={{
-            padding: "1rem",
-          }}
-        >
-          {playlist && (
-            <Container sx={{ p: 0 }}>
-              {playlist?.img && playlist?.img[0]?.url && (
-                <Box sx={{ minWidth: 250 }}>
-                  <Image
-                    src={playlist.img[0].url}
-                    alt={`${playlist.name}_img`}
-                    width={300}
-                    height={300}
-                  />
-                </Box>
-              )}
-              <Container sx={{ pt: 3, px: 0 }}>
-                <Typography variant="h3" component="h1">
-                  {playlist.name}
-                </Typography>
-                <Typography sx={{ py: 2 }}>
+    <Container
+      sx={{
+        p: 3,
+        pb: 15,
+        backgroundColor: bgColor,
+        color: textColor,
+        minHeight: "100vh",
+      }}
+    >
+      <Container sx={{ p: 0 }}>
+        {playlist.name && (
+          <Container sx={{ py: 2 }}>
+            {playlist?.img && playlist?.img[0]?.url && (
+              <Box
+                sx={{
+                  minWidth: 250,
+                  boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
+                }}
+              >
+                <Image
+                  src={playlist.img[0].url}
+                  alt={`${playlist.name}_img`}
+                  width={300}
+                  height={300}
+                />
+              </Box>
+            )}
+            <Container sx={{ pt: 3, px: 0 }}>
+              <Typography variant="h3" component="h1">
+                {playlist.name}
+              </Typography>
+              {playlist.total_tracks && (
+                <Typography
+                  sx={{ py: 2, textTransform: "uppercase" }}
+                  variant="h6"
+                  component="h2"
+                >
                   {playlist.total_tracks} tracks
                 </Typography>
-              </Container>
-              <Container
-                className="f-space"
-                sx={{ px: 0, alignItems: "center" }}
+              )}
+            </Container>
+            <Container
+              className="f-space"
+              sx={{ px: 0, py: 2, alignItems: "center" }}
+            >
+              <Typography
+                variant="h6"
+                component="p"
+                sx={{ textTransform: "uppercase" }}
+              >{`Page ${currentPage}`}</Typography>
+              <Card
+                variant="outlined"
+                sx={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
               >
-                <Typography
-                  variant="h6"
-                  sx={{ textTransform: "uppercase" }}
-                >{`Page ${currentPage}`}</Typography>
-                <Card variant="outlined">
-                  {page > 1 && (
-                    <IconButton onClick={handlePreviousPage}>
-                      <ArrowBackIosIcon />
-                    </IconButton>
-                  )}
-                  {playlist?.is_next_page && (
-                    <IconButton onClick={handleNextPage}>
-                      <ArrowForwardIosIcon />
-                    </IconButton>
-                  )}
-                </Card>
-              </Container>
+                {page > 1 && (
+                  <IconButton onClick={handlePreviousPage}>
+                    <ArrowBackIosIcon sx={{ color: textColor }} />
+                  </IconButton>
+                )}
+                {playlist?.is_next_page && (
+                  <IconButton onClick={handleNextPage}>
+                    <ArrowForwardIosIcon sx={{ color: textColor }} />
+                  </IconButton>
+                )}
+              </Card>
             </Container>
-          )}
-          {playlist?.track_list?.length > 0 && (
-            <Container sx={{ my: 5, px: 0 }}>
-              <Typography variant="h5">All saved tracks</Typography>
-              <TrackList tracks={playlist.track_list} />
-            </Container>
-          )}
-        </Container>
-      )}
+          </Container>
+        )}
+        {playlist?.track_list?.length > 0 && (
+          <Container sx={{ my: 5, px: 0 }}>
+            <Typography variant="h5" sx={{ textTransform: "uppercase" }}>
+              All tracks
+            </Typography>
+            <TrackList tracks={playlist.track_list} textColor={textColor} />
+          </Container>
+        )}
+      </Container>
     </Container>
   );
 }

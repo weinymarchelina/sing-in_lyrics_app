@@ -30,6 +30,8 @@ const PlaylistItem = ({ playlists }) => {
               alignItems: "center",
               width: "100%",
               maxHeight: "100px",
+              backgroundColor: "#181818",
+              color: "#eee",
             }}
           >
             {playlist?.img && playlist?.img[0]?.url && (
@@ -45,8 +47,10 @@ const PlaylistItem = ({ playlists }) => {
             <Container
               sx={{ p: 2, overflow: "hidden", textOverflow: "ellipsis" }}
             >
-              <Typography noWrap>{playlist.name}</Typography>
-              <Typography variant="subtitle2">
+              <Typography variant="h6" component="p" noWrap>
+                {playlist.name}
+              </Typography>
+              <Typography variant="subtitle2" component="p">
                 {playlist.total_tracks} tracks
               </Typography>
             </Container>
