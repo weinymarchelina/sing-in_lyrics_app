@@ -264,6 +264,7 @@ export default function PlayerBar() {
                           textDecoration: `${
                             smallScreen ? "none" : "underline"
                           }`,
+                          textUnderlineOffset: `${smallScreen ? "5px" : "1px"}`,
                         }}
                       >
                         <Link href={`/lyric/${nextTrack.id}`}>{`Next : ${

@@ -56,89 +56,98 @@ export default function AlbumTrack() {
     >
       <Box maxWidth={"lg"}>
         {albumInfo && (
-          <Box sx={{ py: 2, px: 0 }}>
-            {albumInfo && (
-              <Container sx={{ p: 0 }}>
-                {albumInfo?.img && albumInfo?.img[0]?.url && (
-                  <Box
-                    sx={{
-                      minWidth: 250,
-                      minHeight: 250,
-                      boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
-                    }}
+          <Container sx={{ py: 2, px: 0 }}>
+            <Container
+              sx={{
+                py: 3,
+                pb: 10,
+                px: 0,
+                gap: 5,
+                alignItems: "center",
+                maxWidth: `${smallScreen ? 320 : "auto"}`,
+              }}
+              className={smallScreen ? "f-col" : "f-row"}
+            >
+              {albumInfo?.img && albumInfo?.img[0]?.url && (
+                <Box
+                  sx={{
+                    flex: 1,
+                    maxWidth: 320,
+                    maxHeight: 320,
+                    boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
+                  }}
+                >
+                  <Image
+                    src={albumInfo.img[0].url}
+                    alt={`${albumInfo.name}_img`}
+                    width={300}
+                    height={300}
+                  />
+                </Box>
+              )}
+              <Container sx={{ pt: 3, px: 0, flex: 1 }}>
+                <Typography variant={smallScreen ? "h4" : "h3"} component="h1">
+                  {albumInfo.name}
+                </Typography>
+                {albumInfo.total_tracks && (
+                  <Typography
+                    sx={{ py: 2, textTransform: "uppercase" }}
+                    variant={smallScreen ? "h6" : "h5"}
+                    component="h2"
                   >
-                    <Image
-                      src={albumInfo.img[0].url}
-                      alt={`${albumInfo.name}_img`}
-                      width={325}
-                      height={325}
-                    />
-                  </Box>
-                )}
-                <Container sx={{ pt: 3, px: 0 }}>
-                  <Typography variant="h4" component="h1">
-                    {albumInfo.name}
+                    {albumInfo.total_tracks} tracks
                   </Typography>
-                  {albumInfo.total_tracks && (
-                    <Typography
-                      sx={{ py: 2, textTransform: "uppercase" }}
-                      variant="h6"
-                      component="h2"
-                    >
-                      {albumInfo.total_tracks} tracks
-                    </Typography>
-                  )}
-
-                  {albumInfo?.artists && (
-                    <Container sx={{ py: 3, px: 0 }}>
-                      <Typography
-                        sx={{ textTransform: "uppercase" }}
-                        variant="h5"
-                        component="h2"
+                )}
+              </Container>
+            </Container>
+            {albumInfo?.artists && (
+              <Container sx={{ py: 3, px: 0 }}>
+                <Typography
+                  sx={{ textTransform: "uppercase" }}
+                  variant="h5"
+                  component="h2"
+                >
+                  Artist
+                </Typography>
+                <List>
+                  {albumInfo.artists.map((artist) => (
+                    <ListItem sx={{ px: 0 }} key={artist.id}>
+                      <Card
+                        className="f-space"
+                        variant="outlined"
+                        sx={{
+                          width: "100%",
+                          maxHeight: "100px",
+                          backgroundColor: "rgba(0, 0, 0, 0.15)",
+                          color: textColor,
+                        }}
                       >
-                        Artist
-                      </Typography>
-                      <List>
-                        {albumInfo.artists.map((artist) => (
-                          <ListItem sx={{ px: 0 }} key={artist.id}>
-                            <Card
-                              className="f-space"
-                              variant="outlined"
-                              sx={{
-                                width: "100%",
-                                maxHeight: "100px",
-                                backgroundColor: "rgba(0, 0, 0, 0.15)",
-                                color: textColor,
-                              }}
-                            >
-                              <Box sx={{ minWidth: "100px" }}>
-                                <Image
-                                  src={artist.img[1].url}
-                                  alt={`${artist.name}_img`}
-                                  width={100}
-                                  height={100}
-                                />
-                              </Box>
-                              <Container
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "flex-start",
-                                }}
-                              >
-                                <Typography variant="h5" component="p">
-                                  {artist.name}
-                                </Typography>
-                              </Container>
-                            </Card>
-                          </ListItem>
-                        ))}
-                      </List>
-                    </Container>
-                  )}
-                </Container>
+                        <Box sx={{ minWidth: "100px" }}>
+                          <Image
+                            src={artist.img[1].url}
+                            alt={`${artist.name}_img`}
+                            width={100}
+                            height={100}
+                          />
+                        </Box>
+                        <Container
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <Typography variant="h5" component="p">
+                            {artist.name}
+                          </Typography>
+                        </Container>
+                      </Card>
+                    </ListItem>
+                  ))}
+                </List>
               </Container>
             )}
+
             {tracks.length > 0 && (
               <Container sx={{ mt: 2, mb: 15, px: 0 }}>
                 <Typography
@@ -151,7 +160,7 @@ export default function AlbumTrack() {
                 <AlbumTrackList tracks={tracks} textColor={textColor} />
               </Container>
             )}
-          </Box>
+          </Container>
         )}
       </Box>
     </Container>

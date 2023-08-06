@@ -76,42 +76,71 @@ export default function PlaylistTrack() {
     >
       <Box sx={{ p: 0 }} maxWidth={"lg"}>
         {playlist.name && (
-          <Container sx={{ py: 2 }}>
-            {playlist?.img && playlist?.img[0]?.url && (
-              <Box
-                sx={{
-                  minWidth: 250,
-                  boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
-                }}
-              >
-                <Image
-                  src={playlist.img[0].url}
-                  alt={`${playlist.name}_img`}
-                  width={300}
-                  height={300}
-                />
-              </Box>
-            )}
-            <Container sx={{ pt: 3, px: 0 }}>
-              <Typography variant="h3" component="h1">
-                {playlist.name}
-              </Typography>
-              {playlist.total_tracks && (
-                <Typography
-                  sx={{ py: 2, textTransform: "uppercase" }}
-                  variant="h6"
-                  component="h2"
+          <Container sx={{ py: 2, px: 0 }}>
+            <Container
+              sx={{
+                py: 3,
+                pb: 10,
+                px: 0,
+                gap: 5,
+                alignItems: "center",
+                maxWidth: `${smallScreen ? 320 : "auto"}`,
+              }}
+              className={smallScreen ? "f-col" : "f-row"}
+            >
+              {playlist?.img && playlist?.img[0]?.url && (
+                <Box
+                  sx={{
+                    flex: 1,
+                    maxWidth: 320,
+                    maxHeight: 320,
+                    boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
+                  }}
                 >
-                  {playlist.total_tracks} tracks
-                </Typography>
+                  <Image
+                    src={playlist.img[0].url}
+                    alt={`${playlist.name}_img`}
+                    width={300}
+                    height={300}
+                  />
+                </Box>
               )}
+              <Container sx={{ pt: 3, px: 0, flex: 1 }}>
+                <Typography variant={smallScreen ? "h3" : "h2"} component="h1">
+                  {playlist.name}
+                </Typography>
+                {playlist.total_tracks && (
+                  <Typography
+                    sx={{ py: 2, textTransform: "uppercase" }}
+                    variant={smallScreen ? "h6" : "h5"}
+                    component="h2"
+                  >
+                    {playlist.total_tracks} tracks
+                  </Typography>
+                )}
+              </Container>
             </Container>
+          </Container>
+        )}
+        {playlist?.track_list?.length > 0 && (
+          <Container sx={{ my: 5, px: 0 }}></Container>
+        )}
+        {playlist?.track_list?.length > 0 && (
+          <Container sx={{ my: 5, px: 0 }}>
+            <Typography
+              variant="h4"
+              sx={{ textTransform: "uppercase", py: 3 }}
+              component="h2"
+            >
+              All tracks
+            </Typography>
+
             <Container
               className="f-space"
-              sx={{ px: 0, py: 2, alignItems: "center" }}
+              sx={{ px: 0, alignItems: "flex-end" }}
             >
               <Typography
-                variant="h6"
+                variant="h5"
                 component="p"
                 sx={{ textTransform: "uppercase" }}
               >{`Page ${currentPage}`}</Typography>
@@ -131,13 +160,6 @@ export default function PlaylistTrack() {
                 )}
               </Card>
             </Container>
-          </Container>
-        )}
-        {playlist?.track_list?.length > 0 && (
-          <Container sx={{ my: 5, px: 0 }}>
-            <Typography variant="h5" sx={{ textTransform: "uppercase" }}>
-              All tracks
-            </Typography>
             <TrackList tracks={playlist.track_list} textColor={textColor} />
           </Container>
         )}

@@ -69,7 +69,7 @@ export default function Playlist() {
           <Container className="f-col" sx={{ px: 0 }}>
             <Container
               className="f-space"
-              sx={{ gap: 2, px: 0, alignItems: "center" }}
+              sx={{ gap: 2, px: 0, alignItems: "flex-end" }}
             >
               <Typography
                 variant="h6"

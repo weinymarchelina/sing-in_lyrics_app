@@ -16,6 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { styled } from "@mui/material/styles";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 async function savePreference(preference) {
   try {
@@ -58,6 +59,7 @@ export default function LyricInfo() {
   const [phoneticIndex, setPhoneticIndex] = useState(-1);
   const trackId = useParams().id;
   const [lyric, setLyric] = useState([]);
+  const smallScreen = useMediaQuery("(max-width:720px)");
 
   const handlePhoneticsIndex = (newSelectedPhonetic) => {
     const phoneticsList = ["original", "pinyin", "zhuyin", "jyutping"];
@@ -159,42 +161,62 @@ export default function LyricInfo() {
   };
 
   return (
-    <Container sx={{ p: 3, backgroundColor: bgColor, color: textColor }}>
-      {mainData && (
-        <Container sx={{ py: 2, px: 0 }}>
-          {mainData.track && (
-            <Container sx={{ p: 0 }}>
-              {mainData.track.album_img && mainData.track.album_img[0]?.url && (
-                <Box
+    <Container
+      className={smallScreen ? "" : "f-row"}
+      sx={{ p: 3, backgroundColor: bgColor, color: textColor }}
+    >
+      <Box maxWidth={"lg"}>
+        {mainData && (
+          <Container sx={{ py: 2, px: 0 }}>
+            {mainData.track && (
+              <Container sx={{ p: 0 }}>
+                <Container
                   sx={{
-                    p: 0,
-                    minWidth: 250,
-                    minHeight: 250,
-                    boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
+                    py: 3,
+                    pb: 10,
+                    px: 0,
+                    gap: 5,
+                    alignItems: "center",
+                    maxWidth: `${smallScreen ? 320 : "auto"}`,
                   }}
+                  className={smallScreen ? "f-col" : "f-row"}
                 >
-                  <Image
-                    src={mainData.track.album_img[0].url}
-                    alt={`${mainData.track.album_name}_img`}
-                    width={325}
-                    height={325}
-                  />
-                </Box>
-              )}
-              <Container sx={{ pt: 3, px: 0 }}>
-                <Typography variant="h4" component="h1">
-                  {mainData.track.name}
-                </Typography>
-                <Typography
-                  sx={{ py: 2, textTransform: "uppercase" }}
-                  variant="h6"
-                  component="h2"
-                >
-                  <Link href={`/album/${mainData.track.album_id}`}>
-                    Album : {mainData.track.album_name}
-                  </Link>
-                </Typography>
-
+                  {mainData.track.album_img &&
+                    mainData.track.album_img[0]?.url && (
+                      <Box
+                        sx={{
+                          flex: 1,
+                          maxWidth: 320,
+                          maxHeight: 320,
+                          boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
+                        }}
+                      >
+                        <Image
+                          src={mainData.track.album_img[0].url}
+                          alt={`${mainData.track.album_name}_img`}
+                          width={300}
+                          height={300}
+                        />
+                      </Box>
+                    )}
+                  <Container sx={{ pt: 3, px: 0, flex: 1 }}>
+                    <Typography
+                      variant={smallScreen ? "h3" : "h2"}
+                      component="h1"
+                    >
+                      {mainData.track.name}
+                    </Typography>
+                    <Typography
+                      sx={{ py: 2, textTransform: "uppercase" }}
+                      variant={smallScreen ? "h6" : "h5"}
+                      component="h2"
+                    >
+                      <Link href={`/album/${mainData.track.album_id}`}>
+                        Album : {mainData.track.album_name}
+                      </Link>
+                    </Typography>
+                  </Container>
+                </Container>
                 {mainData.track.artists && (
                   <Container sx={{ py: 3, px: 0 }}>
                     <Container
@@ -218,140 +240,140 @@ export default function LyricInfo() {
                   </Container>
                 )}
               </Container>
-            </Container>
-          )}
+            )}
 
-          <Container sx={{ mb: 15, px: 0 }}>
-            {mainData.is_lyric_available && (
-              <>
-                <Typography
-                  sx={{ textTransform: "uppercase", py: 1 }}
-                  variant="h5"
-                  component="h2"
-                >
-                  Lyrics
-                </Typography>
-                <Container sx={{ py: 2, px: 0 }}>
-                  <ToggleButtonGroup
-                    value={selectedPhonetic}
-                    onChange={handlePreference}
-                    exclusive
-                    sx={{
-                      border: `1px solid ${
-                        textColor === "#202020" ? "#333" : "#bbb"
-                      }`,
-                    }}
+            <Container sx={{ mb: 15, px: 0 }}>
+              {mainData.is_lyric_available && (
+                <>
+                  <Typography
+                    sx={{ textTransform: "uppercase", py: 1 }}
+                    variant="h5"
+                    component="h2"
                   >
-                    <ToggleButton
-                      value="original"
+                    Lyrics
+                  </Typography>
+                  <Container sx={{ py: 2, px: 0 }}>
+                    <ToggleButtonGroup
+                      value={selectedPhonetic}
+                      onChange={handlePreference}
+                      exclusive
                       sx={{
-                        color: textColor,
+                        border: `1px solid ${
+                          textColor === "#202020" ? "#333" : "#bbb"
+                        }`,
                       }}
                     >
-                      Original
-                    </ToggleButton>
-                    <ToggleButton
-                      value="pinyin"
-                      sx={{
-                        color: textColor,
-                      }}
-                    >
-                      Pinyin
-                    </ToggleButton>
-                    <ToggleButton
-                      value="zhuyin"
-                      sx={{
-                        color: textColor,
-                      }}
-                    >
-                      Zhuyin
-                    </ToggleButton>
-                    <ToggleButton
-                      value="jyutping"
-                      sx={{
-                        color: textColor,
-                      }}
-                    >
-                      Jyutping
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Container>
-                {lyric.map((line) => (
-                  <Container
-                    sx={{
-                      display: "flex",
-                      alignItems: "self-start",
-                      flexWrap: "wrap",
-                      maxWidth: "100%",
-                      px: 0,
-                      pb: 1,
-                    }}
-                  >
-                    {line.map((phrase) => {
-                      return (
-                        <Box sx={{ display: "flex" }}>
-                          {phrase.map((word_list) => {
-                            return (
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  py: 1,
-                                  pl: 0,
-                                  pr: 2,
-                                }}
-                              >
-                                {word_list.map((word) => {
-                                  return (
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        alignItems: "center",
-                                        justifyContent: "flex-end",
-                                      }}
-                                      style={{
-                                        paddingRight: `${
-                                          word.length > 1 ? "1.25rem" : "0"
-                                        }`,
-                                      }}
-                                    >
-                                      <Typography
-                                        sx={{
-                                          minHeight: "1rem",
-                                        }}
-                                      >
-                                        {word[phoneticIndex]}
-                                      </Typography>
-                                      <Typography
-                                        sx={{
-                                          fontSize: "1.65rem",
-                                          fontWeight: 500,
-                                        }}
-                                      >
-                                        {word[0]}
-                                      </Typography>
-                                    </Box>
-                                  );
-                                })}
-                              </Box>
-                            );
-                          })}
-                        </Box>
-                      );
-                    })}
+                      <ToggleButton
+                        value="original"
+                        sx={{
+                          color: textColor,
+                        }}
+                      >
+                        Original
+                      </ToggleButton>
+                      <ToggleButton
+                        value="pinyin"
+                        sx={{
+                          color: textColor,
+                        }}
+                      >
+                        Pinyin
+                      </ToggleButton>
+                      <ToggleButton
+                        value="zhuyin"
+                        sx={{
+                          color: textColor,
+                        }}
+                      >
+                        Zhuyin
+                      </ToggleButton>
+                      <ToggleButton
+                        value="jyutping"
+                        sx={{
+                          color: textColor,
+                        }}
+                      >
+                        Jyutping
+                      </ToggleButton>
+                    </ToggleButtonGroup>
                   </Container>
-                ))}
-              </>
-            )}
-            {!mainData.is_lyric_available && (
-              <Typography variant="h6" component="p">
-                Looks like this track doesn't have lyrics~
-              </Typography>
-            )}
+                  {lyric.map((line) => (
+                    <Container
+                      sx={{
+                        display: "flex",
+                        alignItems: "self-start",
+                        flexWrap: "wrap",
+                        maxWidth: "100%",
+                        px: 0,
+                        pb: 1,
+                      }}
+                    >
+                      {line.map((phrase) => {
+                        return (
+                          <Box sx={{ display: "flex" }}>
+                            {phrase.map((word_list) => {
+                              return (
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    py: 1,
+                                    pl: 0,
+                                    pr: 2,
+                                  }}
+                                >
+                                  {word_list.map((word) => {
+                                    return (
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          alignItems: "center",
+                                          justifyContent: "flex-end",
+                                        }}
+                                        style={{
+                                          paddingRight: `${
+                                            word.length > 1 ? "1.25rem" : "0"
+                                          }`,
+                                        }}
+                                      >
+                                        <Typography
+                                          sx={{
+                                            minHeight: "1rem",
+                                          }}
+                                        >
+                                          {word[phoneticIndex]}
+                                        </Typography>
+                                        <Typography
+                                          sx={{
+                                            fontSize: "1.65rem",
+                                            fontWeight: 500,
+                                          }}
+                                        >
+                                          {word[0]}
+                                        </Typography>
+                                      </Box>
+                                    );
+                                  })}
+                                </Box>
+                              );
+                            })}
+                          </Box>
+                        );
+                      })}
+                    </Container>
+                  ))}
+                </>
+              )}
+              {!mainData.is_lyric_available && (
+                <Typography variant="h6" component="p">
+                  Looks like this track doesn't have lyrics~
+                </Typography>
+              )}
+            </Container>
           </Container>
-        </Container>
-      )}
+        )}
+      </Box>
     </Container>
   );
 }

@@ -197,7 +197,7 @@ def get_saved_track():
     sp = spotipy.Spotify(auth=token)
 
     current_page = int(request.args.get('page', 1))
-    limit = 20
+    limit = 50
     offset = limit * (current_page - 1)
 
     response_data = sp.current_user_saved_tracks(limit=limit, offset=offset)
