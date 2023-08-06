@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 const TrackList = ({ tracks, textColor = "#eee" }) => {
   const router = useRouter();
   return (
-    <List sx={{ mb: 15 }}>
+    <List>
       {tracks.map((track) => (
         <ListItem
           sx={{ px: 0, cursor: "pointer" }}

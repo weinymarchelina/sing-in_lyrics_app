@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Container, Box, Typography, Button } from "@mui/material";
 import Image from "next/image";
-import useMediaQuery from "@mui/material/useMediaQuery";
 
 async function checkAuth() {
   try {
@@ -27,7 +26,6 @@ async function clearCookies() {
 
 export default async function Home() {
   const router = useRouter();
-  const extraLargeScreen = useMediaQuery("(min-width:1200px)");
 
   useEffect(() => {
     const handleAuth = async () => {
@@ -53,7 +51,6 @@ export default async function Home() {
         color: "#eee",
         minHeight: "100vh",
         textAlign: "center",
-        width: `${extraLargeScreen ? "700px" : "auto"}`,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

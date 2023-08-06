@@ -8,6 +8,8 @@ import PlayerBar from "../components/PlayerBar";
 import { Inter } from "next/font/google";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import Navbar from "../components/Navbar";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   const [isHomePage, setIsHomePage] = useState(false);
+  const matches = useMediaQuery("(max-width:720px)");
 
   useEffect(() => {
     if (pathname === "/") {
@@ -33,6 +36,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <ThemeProvider theme={theme}>
         <body className={`${inter.className}`}>
+          {!isHomePage && !matches && (
+            <Container sx={{ minHeight: "calc(2.5rem + 5vh)" }}>
+              <Navbar />
+            </Container>
+          )}
           <Box>{children}</Box>
           {!isHomePage && <PlayerBar />}
         </body>

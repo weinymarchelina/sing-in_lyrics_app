@@ -9,6 +9,9 @@ import {
   Card,
   Container,
   IconButton,
+  List,
+  ListItem,
+  Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
@@ -17,13 +20,11 @@ import PersonIcon from "@mui/icons-material/Person";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import useMediaQuery from "@mui/material/useMediaQuery";
 
-const Navbar = ({ trackId = "" }) => {
+const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [value, setValue] = useState("/library");
-  const matches = useMediaQuery("(max-width:720px)");
 
   useEffect(() => {
     const parts = pathname.split("/");
@@ -31,52 +32,59 @@ const Navbar = ({ trackId = "" }) => {
     setValue(newValue);
   }, [pathname]);
 
-  const BottomNavigationAction = styled(MuiBottomNavigationAction)({
-    "&.Mui-selected, &.Mui-selected:hover": {
-      color: "#777",
-    },
-  });
-
   return (
-    <BottomNavigation
+    <AppBar
       showLabels
       value={value}
-      className="f-row"
       onChange={(event, newValue) => {
         setValue(newValue);
       }}
+      className="f-row"
       sx={{
-        backgroundColor: "rgba(0, 0, 0, 0.85)",
-        height: "100%",
-        bottom: "0px",
-        position: "absolute",
-        bottom: "0px",
-        left: "0px",
-        right: "0px",
+        backgroundColor: "black",
+        height: "calc(2.5rem + 5vh)",
       }}
     >
-      <BottomNavigationAction
-        label="Library"
-        value="/library"
-        icon={<HomeIcon />}
-        onClick={() => router.push("/library")}
-        sx={{ color: "#eee", textTransform: "uppercase", gap: 0.5 }}
-      />
-      <BottomNavigationAction
-        label="Lyric"
-        value="/lyric"
-        icon={<LibraryMusicIcon />}
-        onClick={() => router.push(`/lyric/${trackId}`)}
-        sx={{ color: "#eee", textTransform: "uppercase", gap: 0.5 }}
-      />
-      <BottomNavigationAction
-        label="Profile"
-        value="/profile"
-        icon={<PersonIcon />}
-        onClick={() => router.push("/profile")}
-        sx={{ color: "#eee", textTransform: "uppercase", gap: 0.5 }}
-      />
-    </BottomNavigation>
+      <Container
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+
+          // maxWidth: "1200px",
+        }}
+      >
+        <Container
+          className="f-row"
+          sx={{ width: "200px", m: 0, cursor: "pointer" }}
+          onClick={() => router.push("/library")}
+        >
+          <img src="/base_brand.png" alt="singin_icon" />
+        </Container>
+        <List className="f-row" sx={{ px: 2 }}>
+          <ListItem>
+            <Typography variant="button">
+              <Link href={"/library/playlist"}>Playlist</Link>
+            </Typography>
+          </ListItem>
+          <ListItem>
+            <Typography variant="button" noWrap>
+              <Link href={"/library/savedTrack"}>Saved Track</Link>
+            </Typography>
+          </ListItem>
+          <ListItem>
+            <Typography variant="button" noWrap>
+              <Link href={"/library/savedAlbum"}>Saved Album</Link>
+            </Typography>
+          </ListItem>
+          <ListItem>
+            <Typography variant="button">
+              <Link href={"/profile"}>Profile</Link>
+            </Typography>
+          </ListItem>
+        </List>
+      </Container>
+    </AppBar>
   );
 };
 

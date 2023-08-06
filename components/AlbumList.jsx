@@ -16,7 +16,7 @@ const AlbumList = ({ albums }) => {
   const router = useRouter();
 
   return (
-    <List sx={{ mb: 15 }}>
+    <List>
       {albums.map((album) => (
         <ListItem
           sx={{ px: 0, cursor: "pointer" }}

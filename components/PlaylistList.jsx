@@ -16,7 +16,7 @@ const PlaylistItem = ({ playlists }) => {
   const router = useRouter();
 
   return (
-    <List sx={{ mb: 15 }}>
+    <List>
       {playlists.map((playlist) => (
         <ListItem
           sx={{ px: 0, cursor: "pointer" }}

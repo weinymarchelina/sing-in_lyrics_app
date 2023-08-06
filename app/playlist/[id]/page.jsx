@@ -8,6 +8,7 @@ import {
   useSearchParams,
   usePathname,
 } from "next/navigation";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import Image from "next/image";
 import { Box, Container, Card, IconButton, Typography } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -38,6 +39,7 @@ export default function PlaylistTrack() {
   const currentPage = page ? parseInt(page) : 1;
   const [bgColor, setBgColor] = useState("");
   const [textColor, setTextColor] = useState("");
+  const smallScreen = useMediaQuery("(max-width:720px)");
 
   const fetchData = async () => {
     const newData = await getPlaylistTrack(playlistId, currentPage);
@@ -63,15 +65,16 @@ export default function PlaylistTrack() {
 
   return (
     <Container
+      className={smallScreen ? "" : "f-row"}
       sx={{
         p: 3,
-        pb: 15,
+        pb: 30,
         backgroundColor: bgColor,
         color: textColor,
         minHeight: "100vh",
       }}
     >
-      <Container sx={{ p: 0 }}>
+      <Box sx={{ p: 0 }} maxWidth={"lg"}>
         {playlist.name && (
           <Container sx={{ py: 2 }}>
             {playlist?.img && playlist?.img[0]?.url && (
@@ -138,7 +141,7 @@ export default function PlaylistTrack() {
             <TrackList tracks={playlist.track_list} textColor={textColor} />
           </Container>
         )}
-      </Container>
+      </Box>
     </Container>
   );
 }

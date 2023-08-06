@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import PlaylistList from "../../../components/PlaylistList";
-import { IconButton, Container, Typography, Card } from "@mui/material";
+import { Box, IconButton, Container, Typography, Card } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
@@ -27,6 +28,7 @@ export default function Playlist() {
   const [currentPage, setCurrentPage] = useState(1);
   const [playlists, setPlaylists] = useState([]);
   const [isNextPage, setIsNextPage] = useState(false);
+  const smallScreen = useMediaQuery("(max-width:720px)");
 
   const fetchData = async () => {
     const newData = await getPlaylist(currentPage);
@@ -49,47 +51,51 @@ export default function Playlist() {
 
   return (
     <Container
+      className={smallScreen ? "" : "f-row"}
       sx={{
         p: 3,
+        pb: 30,
         minHeight: "100vh",
         backgroundColor: "#202020",
         color: "#eee",
       }}
     >
-      <Typography variant="h2" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
-        Playlist
-      </Typography>
+      <Box className="f-col" maxWidth={"lg"}>
+        <Typography variant="h2" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
+          Playlist
+        </Typography>
 
-      {playlists.length > 0 && (
-        <Container className="f-col" sx={{ px: 0 }}>
-          <Container
-            className="f-space"
-            sx={{ gap: 2, px: 0, alignItems: "center" }}
-          >
-            <Typography
-              variant="h6"
-              component="p"
-              sx={{ textTransform: "uppercase" }}
-            >{`Page ${currentPage}`}</Typography>
-            <Card
-              variant="outlined"
-              sx={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+        {playlists.length > 0 && (
+          <Container className="f-col" sx={{ px: 0 }}>
+            <Container
+              className="f-space"
+              sx={{ gap: 2, px: 0, alignItems: "center" }}
             >
-              {currentPage > 1 && (
-                <IconButton onClick={handlePreviousPage}>
-                  <ArrowBackIosIcon color="secondary" />
-                </IconButton>
-              )}
-              {isNextPage && (
-                <IconButton onClick={handleNextPage}>
-                  <ArrowForwardIosIcon color="secondary" />
-                </IconButton>
-              )}
-            </Card>
+              <Typography
+                variant="h6"
+                component="p"
+                sx={{ textTransform: "uppercase" }}
+              >{`Page ${currentPage}`}</Typography>
+              <Card
+                variant="outlined"
+                sx={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+              >
+                {currentPage > 1 && (
+                  <IconButton onClick={handlePreviousPage}>
+                    <ArrowBackIosIcon color="secondary" />
+                  </IconButton>
+                )}
+                {isNextPage && (
+                  <IconButton onClick={handleNextPage}>
+                    <ArrowForwardIosIcon color="secondary" />
+                  </IconButton>
+                )}
+              </Card>
+            </Container>
+            <PlaylistList playlists={playlists} />
           </Container>
-          <PlaylistList playlists={playlists} />
-        </Container>
-      )}
+        )}
+      </Box>
     </Container>
   );
 }

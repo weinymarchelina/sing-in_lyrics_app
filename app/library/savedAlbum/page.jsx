@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import AlbumList from "../../../components/AlbumList";
-import { IconButton, Container, Typography, Card } from "@mui/material";
+import { Box, IconButton, Container, Typography, Card } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
@@ -27,8 +28,8 @@ export default function SavedAlbum() {
   const [currentPage, setCurrentPage] = useState(1);
   const [albums, setAlbums] = useState([]);
   const [isNextPage, setIsNextPage] = useState(false);
+  const smallScreen = useMediaQuery("(max-width:720px)");
 
-  // Function to fetch data for the current page
   const fetchData = async () => {
     const newData = await getSavedAlbum(currentPage);
     setAlbums(newData?.album_data || []);
@@ -36,64 +37,65 @@ export default function SavedAlbum() {
     console.log(newData?.album_data);
   };
 
-  // Fetch data when the component mounts or when the currentPage changes
   useEffect(() => {
     fetchData();
   }, [currentPage]);
 
-  // Function to handle the "Next Page" button click
   const handleNextPage = () => {
     setCurrentPage((prevPage) => prevPage + 1);
   };
 
-  // Function to handle the "Previous Page" button click
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
 
   return (
     <Container
+      className={smallScreen ? "" : "f-row"}
       sx={{
         p: 3,
+        pb: 30,
         minHeight: "100vh",
         backgroundColor: "#202020",
         color: "#eee",
       }}
     >
-      <Typography variant="h3" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
-        Saved Albums
-      </Typography>
+      <Box className="f-col" maxWidth={"lg"}>
+        <Typography variant="h3" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
+          Saved Albums
+        </Typography>
 
-      {albums.length > 0 && (
-        <Container className="f-col" sx={{ px: 0 }}>
-          <Container
-            className="f-space"
-            sx={{ gap: 2, px: 0, alignItems: "center" }}
-          >
-            <Typography
-              variant="h6"
-              component="p"
-              sx={{ textTransform: "uppercase" }}
-            >{`Page ${currentPage}`}</Typography>
-            <Card
-              variant="outlined"
-              sx={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+        {albums.length > 0 && (
+          <Container className="f-col" sx={{ px: 0 }}>
+            <Container
+              className="f-space"
+              sx={{ gap: 2, px: 0, alignItems: "center" }}
             >
-              {currentPage > 1 && (
-                <IconButton onClick={handlePreviousPage}>
-                  <ArrowBackIosIcon color="secondary" />
-                </IconButton>
-              )}
-              {isNextPage && (
-                <IconButton onClick={handleNextPage}>
-                  <ArrowForwardIosIcon color="secondary" />
-                </IconButton>
-              )}
-            </Card>
+              <Typography
+                variant="h6"
+                component="p"
+                sx={{ textTransform: "uppercase" }}
+              >{`Page ${currentPage}`}</Typography>
+              <Card
+                variant="outlined"
+                sx={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+              >
+                {currentPage > 1 && (
+                  <IconButton onClick={handlePreviousPage}>
+                    <ArrowBackIosIcon color="secondary" />
+                  </IconButton>
+                )}
+                {isNextPage && (
+                  <IconButton onClick={handleNextPage}>
+                    <ArrowForwardIosIcon color="secondary" />
+                  </IconButton>
+                )}
+              </Card>
+            </Container>
+            <AlbumList albums={albums} />
           </Container>
-          <AlbumList albums={albums} />
-        </Container>
-      )}
+        )}
+      </Box>
     </Container>
   );
 }

@@ -60,47 +60,52 @@ export default function Library() {
   return (
     <Container
       sx={{
-        p: 3,
+        px: 3,
+        py: 5,
         backgroundColor: "#202020",
         color: "#eee",
         minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
       }}
     >
-      <Container sx={{ p: 0 }}>
-        <Typography
-          variant="h2"
-          component="h1"
-          sx={{ fontWeight: "800", letterSpacing: ".2rem" }}
-        >
-          Library
-        </Typography>
+      <Box maxWidth={"sm"}>
+        <Container sx={{ p: 0 }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{ fontWeight: "800", letterSpacing: ".2rem" }}
+          >
+            Library
+          </Typography>
 
-        <Typography
-          variant="h5"
-          component="h2"
-          sx={{ mt: 3, letterSpacing: ".125rem" }}
-        >
-          Let's dive into your musical world ✨
-        </Typography>
-      </Container>
+          <Typography
+            variant="h5"
+            component="h2"
+            sx={{ mt: 3, letterSpacing: ".125rem" }}
+          >
+            Let's dive into your musical world ✨
+          </Typography>
+        </Container>
 
-      <Container sx={{ p: 0, my: 3 }}>
-        <LibraryCard
-          title="Playlist"
-          icon={<QueueMusicIcon fontSize="large" />}
-          route="playlist"
-        />
-        <LibraryCard
-          title="Saved Track"
-          icon={<AudiotrackIcon fontSize="large" />}
-          route="savedTrack"
-        />
-        <LibraryCard
-          title="Saved Album"
-          icon={<AlbumIcon fontSize="large" />}
-          route="savedAlbum"
-        />
-      </Container>
+        <Container sx={{ p: 0, my: 3 }}>
+          <LibraryCard
+            title="Playlist"
+            icon={<QueueMusicIcon fontSize="large" />}
+            route="playlist"
+          />
+          <LibraryCard
+            title="Saved Track"
+            icon={<AudiotrackIcon fontSize="large" />}
+            route="savedTrack"
+          />
+          <LibraryCard
+            title="Saved Album"
+            icon={<AlbumIcon fontSize="large" />}
+            route="savedAlbum"
+          />
+        </Container>
+      </Box>
     </Container>
   );
 }
