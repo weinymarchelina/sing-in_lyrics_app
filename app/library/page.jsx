@@ -1,7 +1,8 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Container, Typography, Card } from "@mui/material";
+import { Container, Typography, Card, Button, Icon, Box } from "@mui/material";
+import Image from "next/image";
 import AlbumIcon from "@mui/icons-material/Album";
 import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 import QueueMusicIcon from "@mui/icons-material/QueueMusic";
