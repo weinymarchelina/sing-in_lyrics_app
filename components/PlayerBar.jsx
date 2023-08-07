@@ -100,6 +100,7 @@ export default function PlayerBar() {
       setTrack(data.current_track);
       setNextTrack(data.next_track);
       console.log(data);
+      setIsPlaying(true);
     }
   };
 
@@ -216,7 +217,7 @@ export default function PlayerBar() {
                 >
                   <Box sx={{ minWidth: "50px" }}>
                     <Image
-                      src={track.album_img[2].url}
+                      src={track.album_img[1].url}
                       alt={`${track.album_name}_img`}
                       width={50}
                       height={50}

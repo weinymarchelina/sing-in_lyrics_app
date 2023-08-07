@@ -31,6 +31,7 @@ success_action_done = "Action done."
 @app.route("/api")
 def login():
     auth_url = create_spotify_oauth().get_authorize_url()
+    redirect(auth_url)
     return redirect(auth_url)
 
 @app.route("/api/redirect")
@@ -41,7 +42,7 @@ def redirect_page():
     token_info = create_spotify_oauth().get_access_token(code)
     session[TOKEN_INFO] = token_info
 
-    return redirect("http://localhost:3000/library?token=" + token_info["access_token"])
+    return redirect(f"http://localhost:3000/library?token={token_info['access_token']}&refresh_token={token_info['refresh_token']}&expires_at={token_info['expires_at']}")
 
 @app.route("/api/getCurrentTrack", methods=["GET"])
 def get_current_track():
@@ -51,9 +52,25 @@ def get_current_track():
         'redirect_user': True,
     }
 
+    new_token_info = {}
+
     if not token:
-        return redirect_response 
-    
+        return redirect_response
+    else:
+        try:
+            refresh_token = request.cookies.get("refresh_token")
+            expires_at = request.cookies.get("expires_at")
+
+            current_time = int(time.time())
+            is_expired = int(expires_at) - current_time < 60
+            if (is_expired):
+                new_token_info = refresh_access_token(refresh_token)
+                # print(new_token_info)
+        except Exception as err:
+            # print(err)
+            return redirect_response
+
+
     sp = None
     current_player = None
     next_tracks_list = None
@@ -63,7 +80,7 @@ def get_current_track():
         current_player =  sp.current_user_playing_track()
         next_tracks_list =  sp.queue()['queue']
     except Exception as err:
-        print(err)
+        # print(err)
        
         return redirect_response
 
@@ -120,10 +137,17 @@ def get_current_track():
         'is_playing': is_playing,
     }
 
-    response = {
+    response_data = {
         'current_track': current_playing_track_data,
         'next_track': next_track_info_data
     }
+
+    response = make_response(response_data)
+
+    if new_token_info != {}:
+        response.set_cookie("access_token", new_token_info['access_token'], httponly=True)
+        response.set_cookie("refresh_token", new_token_info['refresh_token'], httponly=True)
+        response.set_cookie("expires_at", str(new_token_info['expires_at']), httponly=True)
 
     return response
 
@@ -646,11 +670,16 @@ def create_spotify_oauth():
         scope="user-library-read user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-top-read"
     )
 
-@app.route('/api/getCookie', methods=["GET"])
+@app.route('/api/getCookie', methods=["POST"])
 def set_cookie():
-    token = request.args.get('token', None)
+    # token = request.args.get('token', None)
+    data = request.get_json()
+    auth_data = data.get('auth_data', {})
+    # print(auth_data)
     response = make_response("Cookie set successfully")
-    response.set_cookie("access_token", token, httponly=True)
+    response.set_cookie("access_token", auth_data['token'], httponly=True)
+    response.set_cookie("refresh_token", auth_data['refresh_token'], httponly=True)
+    response.set_cookie("expires_at", auth_data['expires_at'], httponly=True)
 
     return response
 
@@ -658,32 +687,56 @@ def set_cookie():
 def logout():
     response = make_response(redirect("http://localhost:3000/"))
     response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    response.delete_cookie("expires_at")
 
     return response
 
 @app.route('/api/checkToken', methods=["GET"])
 def check_token():
     token = request.cookies.get("access_token")
+    refresh_token = request.cookies.get("refresh_token")
+    expires_at = request.cookies.get("expires_at")
 
     redirect_response = {
         'is_auth': False,
         'is_checked': False
     }
 
+    new_token_info = {}
+
     if token:
         try:
-            sp = spotipy.Spotify(auth=token)
-            user = sp.current_user()
+            current_time = int(time.time())
+            is_expired = int(expires_at) - current_time < 60
 
-            redirect_response['is_checked'] = True
-            
-            if user:
+            if (is_expired):
+                new_token_info = refresh_access_token(refresh_token)
+                # print(new_token_info)
+                redirect_response['is_checked'] = True
                 redirect_response['is_auth'] = True
+                
+            else:
+                sp = spotipy.Spotify(auth=token)
+                user = sp.current_user()
+
+                redirect_response['is_checked'] = True
+
+                if user:
+                    redirect_response['is_auth'] = True
                 
         except Exception as err:
             print(err)
 
-    return redirect_response 
+
+    response = make_response(redirect_response)
+
+    if new_token_info != {}:
+        response.set_cookie("access_token", new_token_info['access_token'], httponly=True)
+        response.set_cookie("refresh_token", new_token_info['refresh_token'], httponly=True)
+        response.set_cookie("expires_at", str(new_token_info['expires_at']), httponly=True)
+
+    return response 
 
 @app.route('/api/setPreference', methods=["GET"])
 def set_preference():
@@ -701,6 +754,20 @@ def get_audio():
     response = make_response(audio_response)
     response.headers['Content-Type'] = 'audio/mpeg'
     return response
+
+#
+
+def refresh_access_token(refresh_token):
+    spotify_oauth = create_spotify_oauth()
+    token_info = spotify_oauth.refresh_access_token(refresh_token)
+    # print(token_info)
+    return {
+        'access_token': token_info['access_token'],
+        'refresh_token': token_info['refresh_token'],
+        'expires_at': token_info['expires_at']
+    }
+
+
 
 #
 

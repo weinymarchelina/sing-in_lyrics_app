@@ -7,9 +7,15 @@ import AlbumIcon from "@mui/icons-material/Album";
 import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 import QueueMusicIcon from "@mui/icons-material/QueueMusic";
 
-async function setCookieWithCode(token) {
+async function setCookieWithCode(data) {
   try {
-    await fetch(`http://localhost:3000/api/getCookie?token=${token}`);
+    await fetch("http://localhost:3000/api/getCookie", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ auth_data: data }),
+    });
   } catch (error) {
     console.log("Error setting cookie: ", error);
   }
@@ -50,9 +56,17 @@ export default function Library() {
 
   useEffect(() => {
     const token = searchParams.get("token");
+    const refresh_token = searchParams.get("refresh_token");
+    const expires_at = searchParams.get("expires_at");
+    const data = {
+      token,
+      refresh_token,
+      expires_at,
+    };
+    console.log(data);
 
     if (token) {
-      setCookieWithCode(token);
+      setCookieWithCode(data);
       router.push("/library");
     }
   }, [searchParams]);

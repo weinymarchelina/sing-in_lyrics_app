@@ -243,15 +243,15 @@ export default function LyricInfo() {
             )}
 
             <Container sx={{ mb: 15, px: 0 }}>
+              <Typography
+                sx={{ textTransform: "uppercase", py: 1 }}
+                variant="h5"
+                component="h2"
+              >
+                Lyrics
+              </Typography>
               {mainData.is_lyric_available && (
                 <>
-                  <Typography
-                    sx={{ textTransform: "uppercase", py: 1 }}
-                    variant="h5"
-                    component="h2"
-                  >
-                    Lyrics
-                  </Typography>
                   <Container sx={{ py: 2, px: 0 }}>
                     <ToggleButtonGroup
                       value={selectedPhonetic}
@@ -366,7 +366,7 @@ export default function LyricInfo() {
                 </>
               )}
               {!mainData.is_lyric_available && (
-                <Typography variant="h6" component="p">
+                <Typography variant="h6" component="p" sx={{ pt: 3 }}>
                   Looks like this track doesn't have lyrics~
                 </Typography>
               )}
