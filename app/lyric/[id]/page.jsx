@@ -165,7 +165,7 @@ export default function LyricInfo() {
       className={smallScreen ? "" : "f-row"}
       sx={{ p: 3, backgroundColor: bgColor, color: textColor }}
     >
-      <Box maxWidth={"lg"}>
+      <Box maxWidth={"lg"} sx={{ width: "100%" }}>
         {mainData && (
           <Container sx={{ py: 2, px: 0 }}>
             {mainData.track && (

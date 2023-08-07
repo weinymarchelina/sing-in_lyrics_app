@@ -7,6 +7,7 @@ import string
 import spotipy
 import requests
 import colorgram
+from pycnnum import num2cn
 import pinyin_jyutping_sentence
 from PIL import Image
 from gtts import gTTS
@@ -767,8 +768,6 @@ def refresh_access_token(refresh_token):
         'expires_at': token_info['expires_at']
     }
 
-
-
 #
 
 def add_spaces_to_parentheses_and_brackets(text):
@@ -780,7 +779,7 @@ def add_spaces_to_parentheses_and_brackets(text):
     return text
 
 def split_chinese_english_words(word):
-    pattern = r"([\u4e00-\u9fff]+|[\u3100-\u312F]+|[a-zA-Z]+|[\uac00-\ud7af]+|[ぁ-ゔ]+|[ァ-ヴー]+|[一-龠]+)"  
+    pattern = r"([\u4e00-\u9fff]+|[\u3100-\u312F]+|[a-zA-Z]+|[\uac00-\ud7af]+|[ぁ-ゔ]+|[ァ-ヴー]+|[一-龠]+|\d+)"  
     word_list = re.findall(pattern, word)
     return word_list
 
@@ -1066,7 +1065,8 @@ def generate_audio_files(track_info_list):
     }
 
     for key, value in track_info_list.items():
-        phrase = ' '.join(split_chinese_english_words(value))
+        word_list = split_chinese_english_words(value)
+        phrase = ' '.join(word_list)
         track_info_list[key] = f"{translation[key]} {phrase}"
 
 

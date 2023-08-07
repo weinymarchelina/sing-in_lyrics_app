@@ -60,7 +60,7 @@ export default function Playlist() {
         color: "#eee",
       }}
     >
-      <Box className="f-col" maxWidth={"lg"}>
+      <Box className="f-col" sx={{ width: "100%" }} maxWidth={"lg"}>
         <Typography variant="h2" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
           Playlist
         </Typography>

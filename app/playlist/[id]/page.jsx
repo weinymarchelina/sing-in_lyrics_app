@@ -74,7 +74,7 @@ export default function PlaylistTrack() {
         minHeight: "100vh",
       }}
     >
-      <Box sx={{ p: 0 }} maxWidth={"lg"}>
+      <Box sx={{ p: 0, width: "100%" }} maxWidth={"lg"}>
         {playlist.name && (
           <Container sx={{ py: 2, px: 0 }}>
             <Container

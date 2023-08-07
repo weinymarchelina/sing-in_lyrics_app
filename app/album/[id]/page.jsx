@@ -54,7 +54,7 @@ export default function AlbumTrack() {
       className={smallScreen ? "" : "f-row"}
       sx={{ p: 3, backgroundColor: bgColor, color: textColor }}
     >
-      <Box maxWidth={"lg"}>
+      <Box maxWidth={"lg"} sx={{ width: "100%" }}>
         {albumInfo && (
           <Container sx={{ py: 2, px: 0 }}>
             <Container

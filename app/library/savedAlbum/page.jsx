@@ -60,7 +60,7 @@ export default function SavedAlbum() {
         color: "#eee",
       }}
     >
-      <Box className="f-col" maxWidth={"lg"}>
+      <Box className="f-col" maxWidth={"lg"} sx={{ width: "100%" }}>
         <Typography variant="h3" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
           Saved Albums
         </Typography>

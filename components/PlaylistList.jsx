@@ -50,7 +50,11 @@ const PlaylistItem = ({ playlists }) => {
               <Typography variant="h6" component="p" noWrap>
                 {playlist.name}
               </Typography>
-              <Typography variant="subtitle2" component="p">
+              <Typography
+                variant="subtitle2"
+                component="p"
+                sx={{ textTransform: "uppercase" }}
+              >
                 {playlist.total_tracks} tracks
               </Typography>
             </Container>

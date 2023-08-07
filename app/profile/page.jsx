@@ -43,7 +43,7 @@ export default function ProfilePage() {
       className={smallScreen ? "" : "f-row"}
       sx={{ p: 3, pb: 25, backgroundColor: bgColor, color: textColor }}
     >
-      <Box className="f-col" maxWidth={"lg"}>
+      <Box className="f-col" maxWidth={"lg"} sx={{ width: "100%" }}>
         {userData && (
           <>
             <Container
@@ -75,7 +75,12 @@ export default function ProfilePage() {
                 />
               </Box>
               <Typography
-                sx={{ py: 3, flex: 1, width: "calc(5vw + 300px)" }}
+                sx={{
+                  py: 3,
+                  flex: 1,
+                  width: "calc(1vw + 300px)",
+                  fontWeight: 600,
+                }}
                 variant={smallScreen ? "h3" : "h2"}
                 component="h1"
               >

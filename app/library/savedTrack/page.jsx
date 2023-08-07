@@ -73,7 +73,7 @@ export default function SavedTrack() {
         color: "#eee",
       }}
     >
-      <Box className="f-col" maxWidth={"lg"}>
+      <Box className="f-col" sx={{ width: "100%" }} maxWidth={"lg"}>
         <Typography variant="h3" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
           Saved Tracks
         </Typography>
