@@ -3,11 +3,9 @@ import os
 import re
 import time
 import random
-import string
 import spotipy
 import requests
 import colorgram
-from pycnnum import num2cn
 import pinyin_jyutping_sentence
 from PIL import Image
 from gtts import gTTS
@@ -786,6 +784,10 @@ def split_chinese_english_words(word):
 def convert_to_pinyin_jyutping(word):
     if ('\u4e00' <= word <= '\u9fff'):
         pinyin = pinyin_jyutping_sentence.pinyin(word, spaces=True)
+
+        if "都" in word:
+            pinyin = pinyin.replace("dū", "dōu")
+
         jyutping = pinyin_jyutping_sentence.jyutping(word, spaces=True).replace("妳", "něi").replace("喔", "āk").replace("涙", "leoi").replace("綑", "kwán")
     else:
         pinyin = word

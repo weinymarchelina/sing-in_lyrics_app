@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
   Box,
+  Button,
   List,
   ListItem,
   Container,
@@ -16,6 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { styled } from "@mui/material/styles";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
 async function savePreference(preference) {
@@ -59,6 +61,7 @@ export default function LyricInfo() {
   const [phoneticIndex, setPhoneticIndex] = useState(-1);
   const trackId = useParams().id;
   const [lyric, setLyric] = useState([]);
+  const [joinedLyrics, setJoinedLyrics] = useState([]);
   const smallScreen = useMediaQuery("(max-width:720px)");
 
   const handlePhoneticsIndex = (newSelectedPhonetic) => {
@@ -105,11 +108,51 @@ export default function LyricInfo() {
 
         const audioUrl = await getAudio(script);
         setAudioUrl(audioUrl);
-
         setLyric(data?.lyric);
-
         setBgColor(data?.bg_color);
         setTextColor(data?.text_color);
+        console.log(data?.lyric);
+
+        const fullLyricsList = [];
+
+        for (let i = 0; i < 4; i++) {
+          const phoneticLyrics = [];
+
+          for (const line of data?.lyric) {
+            let fullLine = "";
+
+            for (const phrase of line) {
+              let fullPhrase = "";
+
+              for (const word of phrase) {
+                let fullWord = "";
+
+                for (const letter of word) {
+                  if (!letter[i]) {
+                    continue;
+                  }
+
+                  fullWord += letter[i];
+
+                  if (i !== 0) {
+                    fullWord += " ";
+                  }
+                }
+
+                fullPhrase += fullWord + " ";
+              }
+
+              fullLine += fullPhrase;
+            }
+
+            phoneticLyrics.push(fullLine);
+          }
+
+          fullLyricsList.push(phoneticLyrics);
+        }
+        setJoinedLyrics(fullLyricsList);
+
+        console.log(fullLyricsList);
       } catch (error) {
         console.error("Error fetching lyric data:", error);
       }
@@ -121,6 +164,46 @@ export default function LyricInfo() {
   const playAudio = () => {
     const audio = new Audio(audioUrl);
     audio.play();
+  };
+
+  const handleCopyLyric = (index) => {
+    let text = "";
+
+    if (phoneticIndex > 0) {
+      const phoneticLyric = joinedLyrics[phoneticIndex][index];
+
+      if (phoneticLyric !== " ") {
+        text += phoneticLyric + "\n";
+      }
+
+      text += joinedLyrics[0][index];
+    } else text = joinedLyrics[0][index];
+
+    console.log(text);
+
+    navigator.clipboard.writeText(text);
+  };
+
+  const copyAllLyrics = () => {
+    let text = "";
+
+    for (const lines of joinedLyrics[0]) {
+      const linesIndex = joinedLyrics[0].indexOf(lines);
+
+      if (phoneticIndex > 0) {
+        const phoneticLyric = joinedLyrics[phoneticIndex][linesIndex];
+        console.log(phoneticLyric);
+
+        if (phoneticLyric !== " ") {
+          text += phoneticLyric + "\n";
+        }
+      }
+      text += lines + "\n";
+    }
+
+    console.log(text);
+
+    navigator.clipboard.writeText(text);
   };
 
   const renderArtistList = () => {
@@ -243,16 +326,37 @@ export default function LyricInfo() {
             )}
 
             <Container sx={{ mb: 15, px: 0 }}>
-              <Typography
-                sx={{ textTransform: "uppercase", py: 1 }}
-                variant="h5"
-                component="h2"
-              >
-                Lyrics
-              </Typography>
+              <Container className="f-space" sx={{ p: 0 }}>
+                <Typography
+                  sx={{ textTransform: "uppercase", py: 1 }}
+                  variant="h5"
+                  component="h2"
+                >
+                  Lyrics
+                </Typography>
+                {smallScreen && (
+                  <Button
+                    onClick={copyAllLyrics}
+                    endIcon={<ContentCopyIcon />}
+                    variant="outlined"
+                    sx={{ color: textColor, borderColor: textColor }}
+                  >
+                    Copy Lyrics
+                  </Button>
+                )}
+              </Container>
+
               {mainData.is_lyric_available && (
                 <>
-                  <Container sx={{ py: 2, px: 0 }}>
+                  <Container
+                    sx={{
+                      py: 2,
+                      px: 0,
+                      width: "100%",
+                      display: "flex",
+                      gap: 2,
+                    }}
+                  >
                     <ToggleButtonGroup
                       value={selectedPhonetic}
                       onChange={handlePreference}
@@ -296,9 +400,20 @@ export default function LyricInfo() {
                         Jyutping
                       </ToggleButton>
                     </ToggleButtonGroup>
+                    {!smallScreen && (
+                      <Button
+                        onClick={copyAllLyrics}
+                        endIcon={<ContentCopyIcon />}
+                        variant="outlined"
+                        sx={{ color: textColor, borderColor: textColor }}
+                      >
+                        Copy Lyrics
+                      </Button>
+                    )}
                   </Container>
-                  {lyric.map((line) => (
+                  {lyric.map((line, index) => (
                     <Container
+                      key={index}
                       sx={{
                         display: "flex",
                         alignItems: "self-start",
@@ -307,58 +422,62 @@ export default function LyricInfo() {
                         px: 0,
                         pb: 1,
                       }}
+                      onClick={() => handleCopyLyric(index)}
                     >
                       {line.map((phrase) => {
                         return (
-                          <Box sx={{ display: "flex" }}>
-                            {phrase.map((word_list) => {
-                              return (
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    flexWrap: "wrap",
-                                    py: 1,
-                                    pl: 0,
-                                    pr: 2,
-                                  }}
-                                >
-                                  {word_list.map((word) => {
-                                    return (
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          flexDirection: "column",
-                                          alignItems: "center",
-                                          justifyContent: "flex-end",
-                                        }}
-                                        style={{
-                                          paddingRight: `${
-                                            word.length > 1 ? "1.25rem" : "0"
-                                          }`,
-                                        }}
-                                      >
-                                        <Typography
+                          <>
+                            <Box sx={{ display: "flex" }}>
+                              {phrase.map((word_list) => {
+                                return (
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      flexWrap: "wrap",
+                                      py: 1,
+                                      pl: 0,
+                                      pr: 2,
+                                    }}
+                                  >
+                                    {word_list.map((word) => {
+                                      return (
+                                        <Box
                                           sx={{
-                                            minHeight: "1rem",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "flex-end",
+                                            cursor: "pointer",
+                                          }}
+                                          style={{
+                                            paddingRight: `${
+                                              word.length > 1 ? "1.25rem" : "0"
+                                            }`,
                                           }}
                                         >
-                                          {word[phoneticIndex]}
-                                        </Typography>
-                                        <Typography
-                                          sx={{
-                                            fontSize: "1.65rem",
-                                            fontWeight: 500,
-                                          }}
-                                        >
-                                          {word[0]}
-                                        </Typography>
-                                      </Box>
-                                    );
-                                  })}
-                                </Box>
-                              );
-                            })}
-                          </Box>
+                                          <Typography
+                                            sx={{
+                                              minHeight: "1rem",
+                                            }}
+                                          >
+                                            {word[phoneticIndex]}
+                                          </Typography>
+                                          <Typography
+                                            sx={{
+                                              fontSize: "1.65rem",
+                                              fontWeight: 500,
+                                            }}
+                                          >
+                                            {word[0]}
+                                          </Typography>
+                                        </Box>
+                                      );
+                                    })}
+                                  </Box>
+                                );
+                              })}
+                            </Box>
+                          </>
                         );
                       })}
                     </Container>

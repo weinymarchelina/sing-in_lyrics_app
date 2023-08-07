@@ -75,7 +75,8 @@ export default function Library() {
     <Container
       sx={{
         px: 3,
-        py: 5,
+        pt: 5,
+        pb: "calc(15rem - 15vh)",
         backgroundColor: "#202020",
         color: "#eee",
         minHeight: "100vh",

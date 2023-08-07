@@ -133,7 +133,7 @@ export default function PlayerBar() {
                 >
                   <Box sx={{ minWidth: "4rem" }}>
                     <Image
-                      src={track.album_img[2].url}
+                      src={track.album_img[0].url}
                       alt={`${track.album_name}_img`}
                       width={track.album_img[2].width}
                       height={track.album_img[2].height}

@@ -63,3 +63,8 @@ img {
 .buttonAdd:hover {
   background-color: rgba(245, 245, 245, 0.76);
 }
+
+::selection {
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+}

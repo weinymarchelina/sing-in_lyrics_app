@@ -152,9 +152,10 @@ export default function ProfilePage() {
                                 justifyContent: "flex-start",
                               }}
                             >
-                              <Typography variant="subtitle" component="p">{`${
-                                index + 1
-                              }. ${artist.name}`}</Typography>
+                              <Typography
+                                variant={smallScreen ? "subtitle" : "h5"}
+                                component="p"
+                              >{`${index + 1}. ${artist.name}`}</Typography>
                             </Container>
                           </Card>
 
@@ -235,7 +236,10 @@ export default function ProfilePage() {
                                 justifyContent: "flex-start",
                               }}
                             >
-                              <Typography variant="subtitle" component="p">
+                              <Typography
+                                variant={smallScreen ? "subtitle" : "h5"}
+                                component="p"
+                              >
                                 {`${index + 1}. ${track.name}`}
                               </Typography>
                             </Container>
