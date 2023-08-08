@@ -1,11 +1,8 @@
 "use client";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import PlaylistList from "../../../components/PlaylistList";
-import { Box, IconButton, Container, Typography, Card } from "@mui/material";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ListLayout from "../../../components/ListLayout";
+import PaginationButton from "../../../components/PaginationButton";
 
 async function getPlaylist(page = 0) {
   try {
@@ -26,9 +23,8 @@ async function getPlaylist(page = 0) {
 
 export default function Playlist() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [playlists, setPlaylists] = useState([]);
   const [isNextPage, setIsNextPage] = useState(false);
-  const smallScreen = useMediaQuery("(max-width:720px)");
+  const [playlists, setPlaylists] = useState([]);
 
   const fetchData = async () => {
     const newData = await getPlaylist(currentPage);
@@ -41,61 +37,23 @@ export default function Playlist() {
     fetchData();
   }, [currentPage]);
 
-  const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
-  };
+  const buttonCardContent = (
+    <PaginationButton
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
+      isNextPage={isNextPage}
+    />
+  );
 
-  const handlePreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-  };
+  const listContent = <PlaylistList playlists={playlists} />;
 
   return (
-    <Container
-      className={smallScreen ? "" : "f-row"}
-      sx={{
-        p: 3,
-        pb: 30,
-        minHeight: "100vh",
-        backgroundColor: "#202020",
-        color: "#eee",
-      }}
-    >
-      <Box className="f-col" sx={{ width: "100%" }} maxWidth={"lg"}>
-        <Typography variant="h2" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
-          Playlist
-        </Typography>
-
-        {playlists.length > 0 && (
-          <Container className="f-col" sx={{ px: 0 }}>
-            <Container
-              className="f-space"
-              sx={{ gap: 2, px: 0, alignItems: "flex-end" }}
-            >
-              <Typography
-                variant="h6"
-                component="p"
-                sx={{ textTransform: "uppercase" }}
-              >{`Page ${currentPage}`}</Typography>
-              <Card
-                variant="outlined"
-                sx={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
-              >
-                {currentPage > 1 && (
-                  <IconButton onClick={handlePreviousPage}>
-                    <ArrowBackIosIcon color="secondary" />
-                  </IconButton>
-                )}
-                {isNextPage && (
-                  <IconButton onClick={handleNextPage}>
-                    <ArrowForwardIosIcon color="secondary" />
-                  </IconButton>
-                )}
-              </Card>
-            </Container>
-            <PlaylistList playlists={playlists} />
-          </Container>
-        )}
-      </Box>
-    </Container>
+    <ListLayout
+      pageTitle="Playlist"
+      items={playlists}
+      currentPage={currentPage}
+      buttonCardContent={buttonCardContent}
+      listContent={listContent}
+    />
   );
 }

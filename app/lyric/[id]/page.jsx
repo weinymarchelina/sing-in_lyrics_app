@@ -11,6 +11,9 @@ import {
   IconButton,
   Card,
   ToggleButtonGroup,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
 } from "@mui/material";
 import MuiToggleButton from "@mui/material/ToggleButton";
 import Image from "next/image";
@@ -19,6 +22,7 @@ import { styled } from "@mui/material/styles";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import MainHeroPage from "../../../components/MainHeroPage";
 
 async function savePreference(preference) {
   try {
@@ -55,13 +59,17 @@ async function getAudio(textList) {
 export default function LyricInfo() {
   const [mainData, setMainData] = useState(null);
   const [selectedPhonetic, setSelectedPhonetic] = useState("pinyin");
-  const [bgColor, setBgColor] = useState("");
-  const [textColor, setTextColor] = useState("");
+  const [bgColor, setBgColor] = useState("#202020");
+  const [textColor, setTextColor] = useState("#eee");
   const [audioUrl, setAudioUrl] = useState(null);
   const [phoneticIndex, setPhoneticIndex] = useState(-1);
   const trackId = useParams().id;
+  const [mainImageData, setMainImageData] = useState([]);
   const [lyric, setLyric] = useState([]);
+  const [isLyricAvailable, setIsLyricAvailable] = useState(false);
   const [joinedLyrics, setJoinedLyrics] = useState([]);
+  const [trackInfoPhonetics, setTrackInfoPhonetics] = useState([]);
+  const [artistsPhonetics, setArtistsPhonetics] = useState([]);
   const smallScreen = useMediaQuery("(max-width:720px)");
 
   const handlePhoneticsIndex = (newSelectedPhonetic) => {
@@ -88,6 +96,36 @@ export default function LyricInfo() {
     },
   });
 
+  const combineWords = (line, index) => {
+    let fullLine = "";
+
+    for (const phrase of line) {
+      let fullPhrase = "";
+
+      for (const word of phrase) {
+        let fullWord = "";
+
+        for (const letter of word) {
+          if (!letter[index]) {
+            continue;
+          }
+
+          fullWord += letter[index];
+
+          if (index !== 0) {
+            fullWord += " ";
+          }
+        }
+
+        fullPhrase += fullWord + " ";
+      }
+
+      fullLine += fullPhrase;
+    }
+
+    return fullLine;
+  };
+
   useEffect(() => {
     async function fetchLyricData() {
       try {
@@ -111,7 +149,28 @@ export default function LyricInfo() {
         setLyric(data?.lyric);
         setBgColor(data?.bg_color);
         setTextColor(data?.text_color);
-        console.log(data?.lyric);
+        setIsLyricAvailable(data?.is_lyric_available);
+
+        setMainImageData(data?.track.album_img);
+        console.log(data?.track.album_img);
+
+        setTrackInfoPhonetics(data?.track_phonetics);
+        setArtistsPhonetics(data?.artist_phonetics);
+        console.log(data?.track_phonetics);
+        console.log(data?.artist_phonetics);
+
+        const trackInfoPhoneticsList = [];
+
+        for (let i = 0; i < 4; i++) {
+          const phoneticVersion = [];
+
+          for (const line of data?.track_phonetics) {
+            const fullLine = combineWords(line, i);
+            phoneticVersion.push(fullLine);
+          }
+
+          trackInfoPhoneticsList.push(phoneticVersion);
+        }
 
         const fullLyricsList = [];
 
@@ -119,40 +178,14 @@ export default function LyricInfo() {
           const phoneticLyrics = [];
 
           for (const line of data?.lyric) {
-            let fullLine = "";
-
-            for (const phrase of line) {
-              let fullPhrase = "";
-
-              for (const word of phrase) {
-                let fullWord = "";
-
-                for (const letter of word) {
-                  if (!letter[i]) {
-                    continue;
-                  }
-
-                  fullWord += letter[i];
-
-                  if (i !== 0) {
-                    fullWord += " ";
-                  }
-                }
-
-                fullPhrase += fullWord + " ";
-              }
-
-              fullLine += fullPhrase;
-            }
-
+            const fullLine = combineWords(line, i);
             phoneticLyrics.push(fullLine);
           }
 
           fullLyricsList.push(phoneticLyrics);
         }
-        setJoinedLyrics(fullLyricsList);
 
-        console.log(fullLyricsList);
+        setJoinedLyrics(fullLyricsList);
       } catch (error) {
         console.error("Error fetching lyric data:", error);
       }
@@ -184,8 +217,12 @@ export default function LyricInfo() {
     navigator.clipboard.writeText(text);
   };
 
-  const copyAllLyrics = () => {
+  const copyAllLyrics = (event) => {
+    event.stopPropagation();
+
     let text = "";
+
+    console.log(joinedLyrics);
 
     for (const lines of joinedLyrics[0]) {
       const linesIndex = joinedLyrics[0].indexOf(lines);
@@ -206,8 +243,106 @@ export default function LyricInfo() {
     navigator.clipboard.writeText(text);
   };
 
+  const renderLines = (
+    line,
+    phoneticFontSize = "1rem",
+    letterPadding = null
+  ) => {
+    return line.map((phrase) => {
+      return (
+        <>
+          <Box sx={{ display: "flex" }}>
+            {phrase.map((word_list) => {
+              return (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    py: 1,
+                    pl: 0,
+                    pr: 2,
+                  }}
+                >
+                  {word_list.map((word) => {
+                    return (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "flex-end",
+                          cursor: "pointer",
+                        }}
+                        style={{
+                          paddingRight: letterPadding
+                            ? letterPadding
+                            : `${word.length > 1 ? "1.25rem" : "0"}`,
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            minHeight: "1rem",
+                            fontSize: phoneticFontSize,
+                          }}
+                        >
+                          {word[phoneticIndex]}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontSize: "1.65rem",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {word[0]}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              );
+            })}
+          </Box>
+        </>
+      );
+    });
+  };
+
+  const renderLyrics = (lyric) => {
+    return lyric.map((line, index) => (
+      <Container
+        key={index}
+        sx={{
+          display: "flex",
+          alignItems: "self-start",
+          flexWrap: "wrap",
+          maxWidth: "100%",
+          px: 0,
+          pb: 1,
+        }}
+        onClick={() => handleCopyLyric(index)}
+      >
+        {renderLines(line)}
+      </Container>
+    ));
+  };
+
+  const renderArtistName = (name, index) => {
+    const chineseRegExp = /[\u4e00-\u9fff]/;
+    const fullName = combineWords(artistsPhonetics[index], 0);
+
+    if (chineseRegExp.test(fullName) && phoneticIndex > 0) {
+      return renderLines(artistsPhonetics[index], "0.9rem", "0.5rem");
+    } else {
+      return (
+        <Typography variant="h5" component="p">
+          {name}
+        </Typography>
+      );
+    }
+  };
+
   const renderArtistList = () => {
-    return mainData?.track?.artists?.map((artist) => (
+    return mainData?.track?.artists?.map((artist, index) => (
       <ListItem sx={{ px: 0 }} key={artist.id}>
         <Card
           className="f-space"
@@ -219,7 +354,7 @@ export default function LyricInfo() {
             color: textColor,
           }}
         >
-          <Box sx={{ minWidth: "100px" }}>
+          <Box sx={{ width: "115px" }}>
             <Image
               src={artist.img[1]?.url ? artist.img[1]?.url : "/backup.jpg"}
               alt={`${artist.name}_img`}
@@ -234,265 +369,258 @@ export default function LyricInfo() {
               justifyContent: "flex-start",
             }}
           >
-            <Typography variant="h5" component="p">
-              {artist.name}
-            </Typography>
+            {artistsPhonetics.length > 0 &&
+              renderArtistName(artist.name, index)}
           </Container>
         </Card>
       </ListItem>
     ));
   };
 
-  return (
-    <Container
-      className={smallScreen ? "" : "f-row"}
-      sx={{ p: 3, backgroundColor: bgColor, color: textColor }}
-    >
-      <Box maxWidth={"lg"} sx={{ width: "100%" }}>
-        {mainData && (
-          <Container sx={{ py: 2, px: 0 }}>
-            {mainData.track && (
-              <Container sx={{ p: 0 }}>
-                <Container
-                  sx={{
-                    py: 3,
-                    pb: 10,
-                    px: 0,
-                    gap: 5,
-                    alignItems: "center",
-                    maxWidth: `${smallScreen ? 320 : "auto"}`,
-                  }}
-                  className={smallScreen ? "f-col" : "f-row"}
-                >
-                  {mainData.track.album_img &&
-                    mainData.track.album_img[0]?.url && (
-                      <Box
-                        sx={{
-                          flex: 1,
-                          maxWidth: 320,
-                          maxHeight: 320,
-                          boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
-                        }}
-                      >
-                        <Image
-                          src={mainData.track.album_img[0].url}
-                          alt={`${mainData.track.album_name}_img`}
-                          width={300}
-                          height={300}
-                        />
-                      </Box>
-                    )}
-                  <Container sx={{ pt: 3, px: 0, flex: 1 }}>
-                    <Typography
-                      variant={smallScreen ? "h3" : "h2"}
-                      component="h1"
-                    >
-                      {mainData.track.name}
-                    </Typography>
-                    <Typography
-                      sx={{ py: 2, textTransform: "uppercase" }}
-                      variant={smallScreen ? "h6" : "h5"}
-                      component="h2"
-                    >
-                      <Link href={`/album/${mainData.track.album_id}`}>
-                        Album : {mainData.track.album_name}
-                      </Link>
-                    </Typography>
-                  </Container>
-                </Container>
-                {mainData.track.artists && (
-                  <Container sx={{ py: 3, px: 0 }}>
-                    <Container
-                      className="f-space"
-                      sx={{ px: 0, alignItems: "center" }}
-                    >
-                      <Typography
-                        sx={{ textTransform: "uppercase" }}
-                        variant="h5"
-                        component="h2"
-                      >
-                        Artist
-                      </Typography>
-                      {audioUrl && (
-                        <IconButton onClick={playAudio}>
-                          <RecordVoiceOverIcon sx={{ color: textColor }} />
-                        </IconButton>
-                      )}
-                    </Container>
-                    <List>{renderArtistList()}</List>
-                  </Container>
-                )}
+  const heroContent = mainData?.track && (
+    <>
+      <Typography variant={smallScreen ? "h3" : "h2"} component="h1">
+        {mainData?.track.name}
+      </Typography>
+      <Typography
+        sx={{ py: 2, textTransform: "uppercase" }}
+        variant={smallScreen ? "h6" : "h5"}
+        component="h2"
+      >
+        <Link href={`/album/${mainData?.track.album_id}`}>
+          Album : {mainData?.track.album_name}
+        </Link>
+      </Typography>
+    </>
+  );
+
+  const mainContent = (
+    <>
+      {trackInfoPhonetics.length > 0 && (
+        <Accordion
+          className="f-col"
+          sx={{
+            px: 0,
+            backgroundColor: bgColor,
+            color: textColor,
+            border: "none",
+          }}
+        >
+          <AccordionSummary className="f-space">
+            <Typography
+              sx={{
+                textTransform: "uppercase",
+                flex: 1,
+                alignSelf: "flex-end",
+              }}
+              variant="h5"
+              component="h2"
+            >
+              Track Info
+            </Typography>
+
+            {audioUrl && (
+              <Container
+                sx={{
+                  flex: 1,
+                  gap: 2,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <IconButton onClick={playAudio}>
+                  <RecordVoiceOverIcon sx={{ color: textColor }} />
+                </IconButton>
               </Container>
             )}
-
-            <Container sx={{ mb: 15, px: 0 }}>
-              <Container className="f-space" sx={{ p: 0 }}>
-                <Typography
-                  sx={{ textTransform: "uppercase", py: 1 }}
-                  variant="h5"
-                  component="h2"
-                >
-                  Lyrics
-                </Typography>
-                {smallScreen && (
-                  <Button
-                    onClick={copyAllLyrics}
-                    endIcon={<ContentCopyIcon />}
-                    variant="outlined"
-                    sx={{ color: textColor, borderColor: textColor }}
-                  >
-                    Copy Lyrics
-                  </Button>
-                )}
+          </AccordionSummary>
+          <AccordionDetails>
+            <Container sx={{ px: 0, py: 2 }}>
+              <Typography sx={{ textTransform: "uppercase", py: 1 }}>
+                Track Name :{" "}
+              </Typography>
+              <Container
+                sx={{
+                  display: "flex",
+                  alignItems: "self-start",
+                  flexWrap: "wrap",
+                  maxWidth: "100%",
+                  px: 0,
+                  pb: 1,
+                }}
+              >
+                {renderLines(trackInfoPhonetics[0])}
               </Container>
+            </Container>
+            <Container sx={{ px: 0, py: 2 }}>
+              <Typography sx={{ textTransform: "uppercase", py: 1 }}>
+                Album Name :{" "}
+              </Typography>
+              <Container
+                sx={{
+                  display: "flex",
+                  alignItems: "self-start",
+                  flexWrap: "wrap",
+                  maxWidth: "100%",
+                  px: 0,
+                  pb: 1,
+                }}
+              >
+                {renderLines(trackInfoPhonetics[1])}
+              </Container>
+            </Container>
+          </AccordionDetails>
+        </Accordion>
+      )}
+      {mainData?.track.artists && (
+        <Accordion
+          sx={{
+            backgroundColor: bgColor,
+            color: textColor,
+            border: "none",
+          }}
+          defaultExpanded={true}
+        >
+          <AccordionSummary
+            className="f-space"
+            sx={{
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              sx={{ textTransform: "uppercase", flex: 1 }}
+              variant="h5"
+              component="h2"
+            >
+              Artist
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <List>{renderArtistList()}</List>
+          </AccordionDetails>
+        </Accordion>
+      )}
 
-              {mainData.is_lyric_available && (
-                <>
-                  <Container
+      {mainData?.track?.name && (
+        <Accordion
+          sx={{
+            mb: 15,
+            px: 0,
+            backgroundColor: bgColor,
+            color: textColor,
+            border: "none",
+          }}
+          defaultExpanded={true}
+        >
+          <AccordionSummary className="f-space" sx={{ width: "100%" }}>
+            <Typography
+              sx={{ textTransform: "uppercase", py: 1, flex: 1 }}
+              variant="h5"
+              component="h2"
+            >
+              Lyrics
+            </Typography>
+            {smallScreen && isLyricAvailable && (
+              <Button
+                onClick={copyAllLyrics}
+                endIcon={<ContentCopyIcon />}
+                variant="outlined"
+                sx={{ color: textColor, borderColor: textColor }}
+              >
+                Copy Lyrics
+              </Button>
+            )}
+          </AccordionSummary>
+          <AccordionDetails>
+            {isLyricAvailable && (
+              <>
+                <Container
+                  sx={{
+                    py: 2,
+                    px: 0,
+                    width: "100%",
+                    display: "flex",
+                    gap: 2,
+                  }}
+                >
+                  <ToggleButtonGroup
+                    value={selectedPhonetic}
+                    onChange={handlePreference}
+                    exclusive
                     sx={{
-                      py: 2,
-                      px: 0,
-                      width: "100%",
-                      display: "flex",
-                      gap: 2,
+                      border: `1px solid ${
+                        textColor === "#202020" ? "#333" : "#bbb"
+                      }`,
                     }}
                   >
-                    <ToggleButtonGroup
-                      value={selectedPhonetic}
-                      onChange={handlePreference}
-                      exclusive
+                    <ToggleButton
+                      value="original"
                       sx={{
-                        border: `1px solid ${
-                          textColor === "#202020" ? "#333" : "#bbb"
-                        }`,
+                        color: textColor,
                       }}
                     >
-                      <ToggleButton
-                        value="original"
-                        sx={{
-                          color: textColor,
-                        }}
-                      >
-                        Original
-                      </ToggleButton>
-                      <ToggleButton
-                        value="pinyin"
-                        sx={{
-                          color: textColor,
-                        }}
-                      >
-                        Pinyin
-                      </ToggleButton>
-                      <ToggleButton
-                        value="zhuyin"
-                        sx={{
-                          color: textColor,
-                        }}
-                      >
-                        Zhuyin
-                      </ToggleButton>
-                      <ToggleButton
-                        value="jyutping"
-                        sx={{
-                          color: textColor,
-                        }}
-                      >
-                        Jyutping
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                    {!smallScreen && (
-                      <Button
-                        onClick={copyAllLyrics}
-                        endIcon={<ContentCopyIcon />}
-                        variant="outlined"
-                        sx={{ color: textColor, borderColor: textColor }}
-                      >
-                        Copy Lyrics
-                      </Button>
-                    )}
-                  </Container>
-                  {lyric.map((line, index) => (
-                    <Container
-                      key={index}
+                      Original
+                    </ToggleButton>
+                    <ToggleButton
+                      value="pinyin"
                       sx={{
-                        display: "flex",
-                        alignItems: "self-start",
-                        flexWrap: "wrap",
-                        maxWidth: "100%",
-                        px: 0,
-                        pb: 1,
+                        color: textColor,
                       }}
-                      onClick={() => handleCopyLyric(index)}
                     >
-                      {line.map((phrase) => {
-                        return (
-                          <>
-                            <Box sx={{ display: "flex" }}>
-                              {phrase.map((word_list) => {
-                                return (
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      flexWrap: "wrap",
-                                      py: 1,
-                                      pl: 0,
-                                      pr: 2,
-                                    }}
-                                  >
-                                    {word_list.map((word) => {
-                                      return (
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            alignItems: "center",
-                                            justifyContent: "flex-end",
-                                            cursor: "pointer",
-                                          }}
-                                          style={{
-                                            paddingRight: `${
-                                              word.length > 1 ? "1.25rem" : "0"
-                                            }`,
-                                          }}
-                                        >
-                                          <Typography
-                                            sx={{
-                                              minHeight: "1rem",
-                                            }}
-                                          >
-                                            {word[phoneticIndex]}
-                                          </Typography>
-                                          <Typography
-                                            sx={{
-                                              fontSize: "1.65rem",
-                                              fontWeight: 500,
-                                            }}
-                                          >
-                                            {word[0]}
-                                          </Typography>
-                                        </Box>
-                                      );
-                                    })}
-                                  </Box>
-                                );
-                              })}
-                            </Box>
-                          </>
-                        );
-                      })}
-                    </Container>
-                  ))}
-                </>
-              )}
-              {!mainData.is_lyric_available && (
-                <Typography variant="h6" component="p" sx={{ pt: 3 }}>
-                  Looks like this track doesn't have lyrics~
-                </Typography>
-              )}
-            </Container>
-          </Container>
-        )}
-      </Box>
-    </Container>
+                      Pinyin
+                    </ToggleButton>
+                    <ToggleButton
+                      value="zhuyin"
+                      sx={{
+                        color: textColor,
+                      }}
+                    >
+                      Zhuyin
+                    </ToggleButton>
+                    <ToggleButton
+                      value="jyutping"
+                      sx={{
+                        color: textColor,
+                      }}
+                    >
+                      Jyutping
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                  {!smallScreen && (
+                    <Button
+                      onClick={copyAllLyrics}
+                      endIcon={<ContentCopyIcon />}
+                      variant="outlined"
+                      sx={{ color: textColor, borderColor: textColor }}
+                    >
+                      Copy Lyrics
+                    </Button>
+                  )}
+                </Container>
+                {renderLyrics(lyric)}
+              </>
+            )}
+            {!isLyricAvailable && (
+              <Typography variant="h6" component="p" sx={{ pt: 3 }}>
+                Looks like this track doesn't have lyrics~
+              </Typography>
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
+    </>
+  );
+
+  return (
+    <MainHeroPage
+      smallScreen={smallScreen}
+      bgColor={bgColor}
+      textColor={textColor}
+      heroCondition={mainData?.track.name}
+      imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
+      imgAlt={`${mainData?.track.name}_img`}
+      heroContent={heroContent}
+      mainContent={mainContent}
+    />
   );
 }

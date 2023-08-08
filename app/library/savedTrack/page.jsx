@@ -1,19 +1,8 @@
 "use client";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import TrackList from "../../../components/TrackList";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  Box,
-  IconButton,
-  Container,
-  Typography,
-  Card,
-  Paper,
-} from "@mui/material";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ListLayout from "../../../components/ListLayout";
+import PaginationButton from "../../../components/PaginationButton";
 
 async function getSavedTrack(page = 1) {
   try {
@@ -33,14 +22,9 @@ async function getSavedTrack(page = 1) {
 }
 
 export default function SavedTrack() {
-  const [tracks, setTracks] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isNextPage, setIsNextPage] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const smallScreen = useMediaQuery("(max-width:720px)");
-  const page = useSearchParams().get("page");
-  const currentPage = page ? parseInt(page) : 1;
+  const [tracks, setTracks] = useState([]);
 
   const fetchData = async () => {
     const newData = await getSavedTrack(currentPage);
@@ -52,63 +36,23 @@ export default function SavedTrack() {
     fetchData();
   }, [currentPage]);
 
-  const handleNextPage = () => {
-    const nextPage = currentPage + 1;
-    router.push(`${pathname}?page=${nextPage}`);
-  };
+  const buttonCardContent = (
+    <PaginationButton
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
+      isNextPage={isNextPage}
+    />
+  );
 
-  const handlePreviousPage = () => {
-    const prevPage = Math.max(currentPage - 1, 1);
-    router.push(`${pathname}?page=${prevPage}`);
-  };
+  const listContent = <TrackList tracks={tracks} />;
 
   return (
-    <Container
-      className={smallScreen ? "" : "f-row"}
-      sx={{
-        p: 3,
-        pb: 30,
-        minHeight: "100vh",
-        backgroundColor: "#202020",
-        color: "#eee",
-      }}
-    >
-      <Box className="f-col" sx={{ width: "100%" }} maxWidth={"lg"}>
-        <Typography variant="h3" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
-          Saved Tracks
-        </Typography>
-
-        {tracks.length > 0 && (
-          <Container className="f-col" sx={{ px: 0 }}>
-            <Container
-              className="f-space"
-              sx={{ gap: 2, px: 0, alignItems: "center" }}
-            >
-              <Typography
-                variant="h6"
-                component="p"
-                sx={{ textTransform: "uppercase" }}
-              >{`Page ${currentPage}`}</Typography>
-              <Card
-                variant="outlined"
-                sx={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
-              >
-                {currentPage > 1 && (
-                  <IconButton onClick={handlePreviousPage}>
-                    <ArrowBackIosIcon color="secondary" />
-                  </IconButton>
-                )}
-                {isNextPage && (
-                  <IconButton onClick={handleNextPage}>
-                    <ArrowForwardIosIcon color="secondary" />
-                  </IconButton>
-                )}
-              </Card>
-            </Container>
-            <TrackList tracks={tracks} />
-          </Container>
-        )}
-      </Box>
-    </Container>
+    <ListLayout
+      pageTitle="Saved Track"
+      items={tracks}
+      currentPage={currentPage}
+      buttonCardContent={buttonCardContent}
+      listContent={listContent}
+    />
   );
 }

@@ -4,10 +4,11 @@ import "../styles/global.css";
 import theme from "../styles/theme";
 import { ThemeProvider } from "@emotion/react";
 import { Container, Box } from "@mui/material";
+import Loading from "./loading";
 import PlayerBar from "../components/PlayerBar";
 import { Inter } from "next/font/google";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Navbar from "../components/Navbar";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
@@ -41,7 +42,7 @@ export default function RootLayout({ children }) {
               <Navbar />
             </Container>
           )}
-          <Box>{children}</Box>
+          <Suspense fallback={<Loading />}>{children}</Suspense>
           {!isHomePage && <PlayerBar />}
         </body>
       </ThemeProvider>

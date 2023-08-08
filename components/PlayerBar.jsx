@@ -139,7 +139,10 @@ export default function PlayerBar() {
                       height={track.album_img[2].height}
                     />
                   </Box>
-                  <Box sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <Box
+                    sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                    onClick={handleClickLyric}
+                  >
                     <Typography variant="h6" component="p">
                       {track.name}
                     </Typography>
@@ -223,7 +226,10 @@ export default function PlayerBar() {
                       height={50}
                     />
                   </Box>
-                  <Box sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <Box
+                    sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                    onClick={handleClickLyric}
+                  >
                     <Typography
                       variant={smallScreen ? "h6" : "p"}
                       component="p"

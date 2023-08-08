@@ -12,6 +12,7 @@ import {
   Button,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import MainHeroPage from "../../components/MainHeroPage";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
 export default function ProfilePage() {
@@ -21,8 +22,9 @@ export default function ProfilePage() {
   const [popularArtists, setPopularArtists] = useState([]);
   const [popularTracks, setPopularTracks] = useState([]);
   const [showAllTracks, setShowAllTracks] = useState(false);
-  const [bgColor, setBgColor] = useState("");
-  const [textColor, setTextColor] = useState("");
+  const [mainImageData, setMainImageData] = useState([]);
+  const [bgColor, setBgColor] = useState("#202020");
+  const [textColor, setTextColor] = useState("#eee");
   const router = useRouter();
   const smallScreen = useMediaQuery("(max-width:820px)");
 
@@ -57,6 +59,8 @@ export default function ProfilePage() {
 
         setBgColor(data?.bg_color || "");
         setTextColor(data?.text_color || "");
+        setMainImageData(data?.img);
+        console.log(data?.img);
 
         const popularArtistsList = getMostPopularItems(data?.top_artists, 5);
         const popularTracksList = getMostPopularItems(data?.top_tracks, 16);
@@ -113,7 +117,7 @@ export default function ProfilePage() {
               }}
               variant="outlined"
             >
-              <Box sx={{ width: "120px" }}>
+              <Box sx={{ width: "115px" }}>
                 <Image
                   src={item.img[1]?.url ? item.img[1]?.url : "/backup.jpg"}
                   alt={`${item.name}_img`}
@@ -195,6 +199,106 @@ export default function ProfilePage() {
       </Container>
     );
   };
+
+  const heroContent = (
+    <>
+      {userData?.name && (
+        <Typography
+          sx={{
+            py: 3,
+            flex: 1,
+            fontWeight: 600,
+          }}
+          variant={smallScreen ? "h3" : "h2"}
+          component="h1"
+        >
+          {userData?.name}'s Music Taste
+        </Typography>
+      )}
+    </>
+  );
+
+  const mainContent = (
+    <>
+      {topArtists.length > 0 && (
+        <Container className="f-col" sx={{ py: 3, px: 0 }}>
+          <Typography
+            variant="h4"
+            component="h2"
+            sx={{ alignSelf: "center", textAlign: "center" }}
+          >
+            Current Top Artists
+          </Typography>
+          {renderItemList(topArtists)}
+          {renderPopularItemList(popularArtists)}
+        </Container>
+      )}
+      {topTracks.length > 0 && (
+        <Container className="f-col" sx={{ py: 3, px: 0 }}>
+          <Typography
+            variant="h4"
+            component="h2"
+            sx={{ alignSelf: "center", textAlign: "center" }}
+          >
+            Current Top Tracks
+          </Typography>
+          {renderItemList(topTracks)}
+          {userData.top_tracks.length > 20 && (
+            <Button
+              variant="outlined"
+              onClick={handleMoreTracks}
+              sx={{
+                m: 2,
+                color: textColor,
+                borderColor: textColor,
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              {showAllTracks && "View Fewer Tracks"}
+              {!showAllTracks && "View More Tracks"}
+            </Button>
+          )}
+          {renderPopularItemList(popularTracks)}
+        </Container>
+      )}
+      {userData && (
+        <Container className="f-col" sx={{ width: "100%", py: 3 }}>
+          <Typography
+            variant="h4"
+            component="h2"
+            sx={{ alignSelf: "center", textAlign: "center", pb: 3 }}
+          >
+            Settings
+          </Typography>
+          <Button
+            variant="outlined"
+            sx={{
+              width: "100%",
+              py: 2,
+              color: textColor,
+              borderColor: textColor,
+            }}
+            onClick={() => router.push("/api/logout")}
+          >
+            <Typography>Logout</Typography>
+          </Button>
+        </Container>
+      )}
+    </>
+  );
+
+  return (
+    <MainHeroPage
+      smallScreen={smallScreen}
+      bgColor={bgColor}
+      textColor={textColor}
+      heroCondition={userData?.name}
+      imgUrl={mainImageData[1]?.url}
+      imgAlt={`${userData?.name}_img`}
+      heroContent={heroContent}
+      mainContent={mainContent}
+    />
+  );
 
   return (
     <Container

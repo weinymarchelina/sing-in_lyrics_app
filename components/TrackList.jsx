@@ -35,7 +35,7 @@ const TrackList = ({ tracks, textColor = "#eee" }) => {
             }}
           >
             {track.album_img[1].url && (
-              <Box sx={{ minWidth: "100px" }}>
+              <Box sx={{ width: "115px" }}>
                 <Image
                   src={track.album_img[1].url}
                   alt={`${track.name}_img`}

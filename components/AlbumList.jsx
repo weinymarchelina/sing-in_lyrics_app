@@ -35,7 +35,7 @@ const AlbumList = ({ albums }) => {
             }}
           >
             {album?.img && album?.img[0]?.url && (
-              <Box sx={{ minWidth: "100px" }}>
+              <Box sx={{ width: "115px" }}>
                 <Image
                   src={album.img[0].url}
                   alt={`${album.name}_img`}

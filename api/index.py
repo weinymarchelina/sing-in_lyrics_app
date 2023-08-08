@@ -69,7 +69,7 @@ def get_current_track():
                 new_token_info = refresh_access_token(refresh_token)
                 # print(new_token_info)
         except Exception as err:
-            # print(err)
+            print(err)
             return redirect_response
 
 
@@ -405,12 +405,14 @@ def get_track_lyric(track_id):
 
     #
 
-    name_list = [track_info['name'], track_album['name']]
+    track_info_list = [track_info['name'], track_album['name']]
+    track_phonetics_data = get_phonetics(track_info_list)
 
+    track_artist_name_list = []
     for artists_item in track_info['artists']:
-        name_list.append(artists_item['name'])
-
-    track_phonetics_data = get_phonetics(name_list)
+        track_artist_name_list.append(artists_item['name'])
+    track_artist_phonetics_data = get_phonetics(track_artist_name_list)
+    
 
     #
 
@@ -456,6 +458,7 @@ def get_track_lyric(track_id):
         'is_lyric_available': is_lyric_available,
         'lyric': lyric_data,
         'track_phonetics': track_phonetics_data,
+        'artist_phonetics': track_artist_phonetics_data,
         'bg_color': bg_color,
         'text_color': text_color,
         'preference': preference,
