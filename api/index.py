@@ -22,6 +22,7 @@ CORS(app)
 
 app.config['SESSION_COOKIE_NAME'] = "Spotify Cookie"
 app.secret_key = os.getenv("SECRET_KEY")
+base_url = os.getenv("BASE_URL")
 TOKEN_INFO = "token_info"
 
 error_not_found = "The page you are looking for is not found."
@@ -41,7 +42,9 @@ def redirect_page():
     token_info = create_spotify_oauth().get_access_token(code)
     session[TOKEN_INFO] = token_info
 
-    return redirect(f"http://localhost:3000/library?token={token_info['access_token']}&refresh_token={token_info['refresh_token']}&expires_at={token_info['expires_at']}")
+    return redirect(f"{base_url}/library?token={token_info['access_token']}&refresh_token={token_info['refresh_token']}&expires_at={token_info['expires_at']}")
+
+#
 
 @app.route("/api/getCurrentTrack", methods=["GET"])
 def get_current_track():
@@ -209,6 +212,8 @@ def previous_track():
     time.sleep(0.5)
 
     return get_current_track()
+
+#
 
 @app.route("/api/getSavedTrack", methods=["GET"])
 def get_saved_track():
@@ -611,8 +616,8 @@ def get_profile():
     sp = spotipy.Spotify(auth=token)
 
     user_info = sp.current_user()
-    user_top_artists = sp.current_user_top_artists(limit=10, time_range='short_term')['items']
-    user_top_tracks = sp.current_user_top_tracks(limit=10, time_range='short_term')['items']
+    user_top_artists = sp.current_user_top_artists(limit=15, time_range='short_term')['items']
+    user_top_tracks = sp.current_user_top_tracks(limit=50, time_range='short_term')['items']
 
     artists_list = []
     track_list = []
@@ -639,7 +644,7 @@ def get_profile():
             tracks_artists.append(tracks_artists_info)
 
         tracks_info = {
-            'album_img': tracks_info['album']['images'],
+            'img': tracks_info['album']['images'],
             'id': tracks_info['id'],
             'name': tracks_info['name'],
             'popularity': tracks_info['popularity'],
@@ -661,35 +666,7 @@ def get_profile():
     
     return user_data
 
-def create_spotify_oauth():
-    return SpotifyOAuth(
-        client_id=os.getenv("CLIENT_ID"),
-        client_secret=os.getenv("CLIENT_SECRET"),
-        redirect_uri=url_for("redirect_page", _external=True),
-        scope="user-library-read user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-top-read"
-    )
-
-@app.route('/api/getCookie', methods=["POST"])
-def set_cookie():
-    # token = request.args.get('token', None)
-    data = request.get_json()
-    auth_data = data.get('auth_data', {})
-    # print(auth_data)
-    response = make_response("Cookie set successfully")
-    response.set_cookie("access_token", auth_data['token'], httponly=True)
-    response.set_cookie("refresh_token", auth_data['refresh_token'], httponly=True)
-    response.set_cookie("expires_at", auth_data['expires_at'], httponly=True)
-
-    return response
-
-@app.route('/api/logout', methods=["GET"])
-def logout():
-    response = make_response(redirect("http://localhost:3000/"))
-    response.delete_cookie("access_token")
-    response.delete_cookie("refresh_token")
-    response.delete_cookie("expires_at")
-
-    return response
+#
 
 @app.route('/api/checkToken', methods=["GET"])
 def check_token():
@@ -737,6 +714,28 @@ def check_token():
 
     return response 
 
+@app.route('/api/getCookie', methods=["POST"])
+def set_cookie():
+    # token = request.args.get('token', None)
+    data = request.get_json()
+    auth_data = data.get('auth_data', {})
+    # print(auth_data)
+    response = make_response("Cookie set successfully")
+    response.set_cookie("access_token", auth_data['token'], httponly=True)
+    response.set_cookie("refresh_token", auth_data['refresh_token'], httponly=True)
+    response.set_cookie("expires_at", auth_data['expires_at'], httponly=True)
+
+    return response
+
+@app.route('/api/logout', methods=["GET"])
+def logout():
+    response = make_response(redirect(f"{base_url}/"))
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    response.delete_cookie("expires_at")
+
+    return response
+
 @app.route('/api/setPreference', methods=["GET"])
 def set_preference():
     preference = request.args.get('preference', None)
@@ -755,6 +754,14 @@ def get_audio():
     return response
 
 #
+
+def create_spotify_oauth():
+    return SpotifyOAuth(
+        client_id=os.getenv("CLIENT_ID"),
+        client_secret=os.getenv("CLIENT_SECRET"),
+        redirect_uri=url_for("redirect_page", _external=True),
+        scope="user-library-read user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-top-read"
+    )
 
 def refresh_access_token(refresh_token):
     spotify_oauth = create_spotify_oauth()
@@ -978,31 +985,6 @@ def create_word_mapping(hanzi_list, pinyin_list, zhuyin_list, jyutping_list):
         result.append(new_line)
 
     return result
-
-def word_map_experiment(hanzi_list, jyutping_list):
-    result = []
-    for (hanzi_line, jyutping_line) in zip(hanzi_list, jyutping_list):
-        new_line = []
-
-        for (hanzi_phrase, jyutping_phrase) in zip(hanzi_line, jyutping_line):
-            phrase_pair = []
-
-            tokenized_h_p = tokenize_phrase(hanzi_phrase)
-            tokenized_j_p = tokenize_phrase(jyutping_phrase)
-
-            for (hanzi_word, jyutping_word) in zip(tokenized_h_p, tokenized_j_p):
-                word_pair = [hanzi_word]
-
-                if (hanzi_word != jyutping_word):
-                    word_pair = [hanzi_word, jyutping_word]
-                
-                phrase_pair.append(word_pair)
-            
-            new_line.append(phrase_pair)
-
-        result.append(new_line)
-
-    return result  
 
 #
 

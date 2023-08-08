@@ -16,10 +16,28 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
+  const [topArtists, setTopArtists] = useState([]);
+  const [topTracks, setTopTracks] = useState([]);
+  const [popularArtists, setPopularArtists] = useState([]);
+  const [popularTracks, setPopularTracks] = useState([]);
+  const [showAllTracks, setShowAllTracks] = useState(false);
   const [bgColor, setBgColor] = useState("");
   const [textColor, setTextColor] = useState("");
   const router = useRouter();
-  const smallScreen = useMediaQuery("(max-width:720px)");
+  const smallScreen = useMediaQuery("(max-width:820px)");
+
+  const getMostPopularItems = (_itemList, _amount) => {
+    let amount = _amount;
+    const itemList = _itemList.slice();
+
+    if (_amount < 0 || itemList.length < _amount) {
+      amount = itemList.length;
+    }
+
+    const sortedItems = itemList.sort((a, b) => b.popularity - a.popularity);
+
+    return sortedItems.slice(0, amount);
+  };
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -28,8 +46,22 @@ export default function ProfilePage() {
         const data = await response.json();
         console.log(data);
         setUserData(data);
+
+        setTopArtists(data?.top_artists);
+
+        if (data?.top_tracks.length > 20) {
+          setTopTracks(data?.top_tracks.slice(0, 20));
+        } else {
+          setTopTracks(data?.top_tracks);
+        }
+
         setBgColor(data?.bg_color || "");
         setTextColor(data?.text_color || "");
+
+        const popularArtistsList = getMostPopularItems(data?.top_artists, 5);
+        const popularTracksList = getMostPopularItems(data?.top_tracks, 16);
+        setPopularArtists(popularArtistsList);
+        setPopularTracks(popularTracksList);
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
@@ -37,6 +69,132 @@ export default function ProfilePage() {
 
     fetchProfileData();
   }, []);
+
+  const handleMoreTracks = () => {
+    if (!showAllTracks) {
+      setTopTracks(userData.top_tracks);
+    } else {
+      setTopTracks(userData?.top_tracks.slice(0, 20));
+    }
+
+    setShowAllTracks(!showAllTracks);
+  };
+
+  const listItemStyle = {
+    width: "100%",
+    maxHeight: "100px",
+    backgroundColor: "rgba(0, 0, 0, 0.20)",
+    color: textColor,
+  };
+
+  const renderItemList = (items) => {
+    return (
+      <List>
+        <ListItem className="f-col" sx={{ pb: 3 }} key={items[0].id}>
+          <Box sx={{ py: 2 }}>
+            <Image
+              src={items[0].img[0].url ? items[0].img[0].url : "/backup.jpg"}
+              alt={`${items[0].name}_img`}
+              width={items[0].img[1].width}
+              height={items[0].img[1].height}
+            />
+          </Box>
+          <Typography
+            variant="h4"
+            component="p"
+          >{`${items[0].name}`}</Typography>
+        </ListItem>
+        {items.slice(1).map((item, index) => (
+          <ListItem key={item.id}>
+            <Card
+              className="f-space"
+              sx={{
+                ...listItemStyle,
+              }}
+              variant="outlined"
+            >
+              <Box sx={{ width: "120px" }}>
+                <Image
+                  src={item.img[1]?.url ? item.img[1]?.url : "/backup.jpg"}
+                  alt={`${item.name}_img`}
+                  width={100}
+                  height={100}
+                />
+              </Box>
+              <Container
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <Typography
+                  variant={smallScreen ? "subtitle" : "h5"}
+                  component="p"
+                >
+                  {`${index + 2}. ${item.name}`}
+                </Typography>
+              </Container>
+            </Card>
+          </ListItem>
+        ))}
+      </List>
+    );
+  };
+
+  const renderPopularItemList = (items) => {
+    return (
+      <Container
+        sx={{
+          display: "flex",
+          flexDirection: `${smallScreen ? "column" : "row"}`,
+          pt: 2,
+        }}
+      >
+        <Container sx={{ flex: 1, flexGrow: 1, px: 0, pb: 0, pt: 2 }}>
+          <Typography sx={{ textTransform: "uppercase", pr: 3 }} variant="h5">
+            Popularity
+          </Typography>
+        </Container>
+        <List
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            flex: 2,
+            flexGrow: 5,
+            gap: 2,
+          }}
+        >
+          {items.map((item) => (
+            <ListItem
+              className="f-col"
+              key={item.id}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: `${smallScreen ? "center" : "flex-end"}`,
+                flex: 1,
+                px: 0,
+                py: 1,
+                textAlign: `${smallScreen ? "center" : "right"}`,
+              }}
+            >
+              <Box sx={{ width: "100px", pb: 1 }}>
+                <Image
+                  src={item.img[1]?.url ? item.img[1]?.url : "/backup.jpg"}
+                  alt={`${item.name}_img`}
+                  width={100}
+                  height={100}
+                />
+              </Box>
+              <Typography>{item.name}</Typography>
+            </ListItem>
+          ))}
+        </List>
+      </Container>
+    );
+  };
 
   return (
     <Container
@@ -87,7 +245,7 @@ export default function ProfilePage() {
                 {userData.name}'s Music Taste
               </Typography>
             </Container>
-            {userData?.top_artists.length > 0 && (
+            {topArtists.length > 0 && (
               <Container className="f-col" sx={{ py: 3, px: 0 }}>
                 <Typography
                   variant="h4"
@@ -96,79 +254,11 @@ export default function ProfilePage() {
                 >
                   Current Top Artists
                 </Typography>
-                <List>
-                  <ListItem
-                    className="f-col"
-                    sx={{ pb: 3 }}
-                    key={userData.top_artists[0].id}
-                  >
-                    <Box sx={{ py: 2 }}>
-                      <Image
-                        src={
-                          userData.top_artists[0].img[0].url
-                            ? userData.top_artists[0].img[0].url
-                            : "/backup.jpg"
-                        }
-                        alt={`${userData.top_artists[0].name}_img`}
-                        width={userData.top_artists[0].img[1].width}
-                        height={userData.top_artists[0].img[1].height}
-                      />
-                    </Box>
-                    <Typography
-                      variant="h4"
-                      component="p"
-                    >{`${userData.top_artists[0].name}`}</Typography>
-                  </ListItem>
-                  {userData.top_artists.map(
-                    (artist, index) =>
-                      index > 0 && (
-                        <ListItem key={artist.id}>
-                          <Card
-                            className="f-space"
-                            sx={{
-                              width: "100%",
-                              maxHeight: "100px",
-                              backgroundColor: "rgba(0, 0, 0, 0.15)",
-                              color: textColor,
-                            }}
-                            variant="outlined"
-                          >
-                            <Box sx={{ minWidth: "100px" }}>
-                              <Image
-                                src={
-                                  artist.img[1].url
-                                    ? artist.img[1].url
-                                    : "/backup.jpg"
-                                }
-                                alt={`${artist.name}_img`}
-                                width={100}
-                                height={100}
-                              />
-                            </Box>
-                            <Container
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-start",
-                              }}
-                            >
-                              <Typography
-                                variant={smallScreen ? "subtitle" : "h5"}
-                                component="p"
-                              >{`${index + 1}. ${artist.name}`}</Typography>
-                            </Container>
-                          </Card>
-
-                          {/*
-        <span>Popularity: {artist.popularity}</span>
-      */}
-                        </ListItem>
-                      )
-                  )}
-                </List>
+                {renderItemList(topArtists)}
+                {renderPopularItemList(popularArtists)}
               </Container>
             )}
-            {userData?.top_tracks.length > 0 && (
+            {topTracks.length > 0 && (
               <Container className="f-col" sx={{ py: 3, px: 0 }}>
                 <Typography
                   variant="h4"
@@ -177,77 +267,23 @@ export default function ProfilePage() {
                 >
                   Current Top Tracks
                 </Typography>
-                <List>
-                  <ListItem
-                    className="f-col"
-                    sx={{ pb: 3 }}
-                    key={userData.top_tracks[0].id}
+                {renderItemList(topTracks)}
+                {userData.top_tracks.length > 20 && (
+                  <Button
+                    variant="outlined"
+                    onClick={handleMoreTracks}
+                    sx={{
+                      m: 2,
+                      color: textColor,
+                      borderColor: textColor,
+                      backgroundColor: "rgba(0, 0, 0, 0.05)",
+                    }}
                   >
-                    <Box sx={{ py: 2 }}>
-                      <Image
-                        src={
-                          userData.top_tracks[0].album_img[0]?.url
-                            ? userData.top_tracks[0].album_img[0]?.url
-                            : "/backup.jpg"
-                        }
-                        alt={`${userData.top_tracks[0].album_name}_img`}
-                        width={userData.top_tracks[0].album_img[1].width}
-                        height={userData.top_tracks[0].album_img[1].height}
-                      />
-                    </Box>
-                    <Typography variant="h4" component="p">
-                      {userData.top_tracks[0].name}
-                    </Typography>
-                  </ListItem>
-                  {userData.top_tracks.map(
-                    (track, index) =>
-                      index > 0 && (
-                        <ListItem key={track.id}>
-                          <Card
-                            className="f-space"
-                            sx={{
-                              width: "100%",
-                              maxHeight: "100px",
-                              backgroundColor: "rgba(0, 0, 0, 0.15)",
-                              color: textColor,
-                            }}
-                            variant="outlined"
-                          >
-                            <Box
-                              sx={{
-                                minWidth: "100px",
-                              }}
-                            >
-                              <Image
-                                src={
-                                  track.album_img[1]?.url
-                                    ? track.album_img[1]?.url
-                                    : "/backup.jpg"
-                                }
-                                alt={`${track.album_name}_img`}
-                                width={100}
-                                height={100}
-                              />
-                            </Box>
-                            <Container
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-start",
-                              }}
-                            >
-                              <Typography
-                                variant={smallScreen ? "subtitle" : "h5"}
-                                component="p"
-                              >
-                                {`${index + 1}. ${track.name}`}
-                              </Typography>
-                            </Container>
-                          </Card>
-                        </ListItem>
-                      )
-                  )}
-                </List>
+                    {showAllTracks && "View Fewer Tracks"}
+                    {!showAllTracks && "View More Tracks"}
+                  </Button>
+                )}
+                {renderPopularItemList(popularTracks)}
               </Container>
             )}
             <Container className="f-col" sx={{ width: "100%", py: 3 }}>
