@@ -13,9 +13,9 @@ from dragonmapper import hanzi
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect, make_response
 from flask_cors import CORS
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()
+load_dotenv(find_dotenv())
 
 app = Flask(__name__)
 CORS(app)
@@ -798,12 +798,21 @@ def convert_to_pinyin_jyutping(word):
         if "都" in word:
             pinyin = pinyin.replace("dū", "dōu")
 
+        if "強" in word:
+            pinyin = pinyin.replace("jiàng", "qiáng")
+
         jyutping = pinyin_jyutping_sentence.jyutping(word, spaces=True).replace("妳", "něi").replace("喔", "āk").replace("涙", "leoi").replace("綑", "kwán")
     else:
         pinyin = word
         jyutping = word
 
     return pinyin, jyutping
+
+def has_chinese_characters(word):
+    for char in word:
+        if '\u4e00' <= char <= '\u9fff':
+            return True
+    return False
 
 def hanzi_converter(line):
     words = line.split(" ")
@@ -813,7 +822,7 @@ def hanzi_converter(line):
     original_list = []
     
     for word in words:
-        if ('\u4e00' <= word <= '\u9fff'):
+        if (has_chinese_characters(word)):
             splitted_word_list = split_chinese_english_words(word) 
             cleaned_word = ' '.join(splitted_word_list) #
 

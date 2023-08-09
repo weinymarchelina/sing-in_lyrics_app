@@ -6,9 +6,7 @@ import PaginationButton from "../../../components/PaginationButton";
 
 async function getSavedAlbum(page = 0) {
   try {
-    const url = `http://localhost:3000/api/getSavedAlbum${
-      page ? `?page=${page}` : ""
-    }`;
+    const url = `/api/getSavedAlbum${page ? `?page=${page}` : ""}`;
     const res = await fetch(url, {
       next: {
         revalidate: 5,

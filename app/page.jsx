@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Container, Box, Typography, Button } from "@mui/material";
 import Image from "next/image";
+const baseUrl = process.env.BASE_URL;
 
 async function checkAuth() {
   try {
-    const res = await fetch(`http://localhost:3000/api/checkToken`);
+    const res = await fetch(`/api/checkToken`);
 
     const data = res.json();
 
@@ -18,7 +19,7 @@ async function checkAuth() {
 
 async function clearCookies() {
   try {
-    await fetch(`http://localhost:3000/api/logout`);
+    await fetch(`/api/logout`);
   } catch (error) {
     console.log("Error setting cookie: ", error);
   }
@@ -30,8 +31,6 @@ export default async function Home() {
   useEffect(() => {
     const handleAuth = async () => {
       const data = await checkAuth();
-
-      console.log(data);
 
       if (data?.is_auth) {
         router.push("/library");

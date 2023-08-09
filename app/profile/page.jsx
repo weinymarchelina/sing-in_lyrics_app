@@ -44,9 +44,8 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/profile");
+        const response = await fetch("/api/profile");
         const data = await response.json();
-        console.log(data);
         setUserData(data);
 
         setTopArtists(data?.top_artists);
@@ -60,7 +59,6 @@ export default function ProfilePage() {
         setBgColor(data?.bg_color || "");
         setTextColor(data?.text_color || "");
         setMainImageData(data?.img);
-        console.log(data?.img);
 
         const popularArtistsList = getMostPopularItems(data?.top_artists, 5);
         const popularTracksList = getMostPopularItems(data?.top_tracks, 16);
@@ -252,6 +250,11 @@ export default function ProfilePage() {
                 color: textColor,
                 borderColor: textColor,
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
+                ":hover": {
+                  borderColor: textColor,
+                  color: textColor,
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                },
               }}
             >
               {showAllTracks && "View Fewer Tracks"}
@@ -277,6 +280,11 @@ export default function ProfilePage() {
               py: 2,
               color: textColor,
               borderColor: textColor,
+              ":hover": {
+                borderColor: textColor,
+                color: textColor,
+                backgroundColor: "rgba(0, 0, 0, 0.1)",
+              },
             }}
             onClick={() => router.push("/api/logout")}
           >
@@ -298,122 +306,5 @@ export default function ProfilePage() {
       heroContent={heroContent}
       mainContent={mainContent}
     />
-  );
-
-  return (
-    <Container
-      className={smallScreen ? "" : "f-row"}
-      sx={{ p: 3, pb: 25, backgroundColor: bgColor, color: textColor }}
-    >
-      <Box className="f-col" maxWidth={"lg"} sx={{ width: "100%" }}>
-        {userData && (
-          <>
-            <Container
-              className={smallScreen ? "f-col" : "f-row"}
-              sx={{
-                py: 3,
-                pb: 10,
-                px: 0,
-                gap: 5,
-                alignItems: "center",
-                maxWidth: `${smallScreen ? 320 : "auto"}`,
-              }}
-            >
-              <Box
-                sx={{
-                  boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
-                  flex: 1,
-                  maxWidth: 320,
-                  maxHeight: 320,
-                }}
-              >
-                <Image
-                  src={
-                    userData.img[1].url ? userData.img[1].url : "/backup.jpg"
-                  }
-                  alt={`${userData.name}_img`}
-                  width={320}
-                  height={330}
-                />
-              </Box>
-              <Typography
-                sx={{
-                  py: 3,
-                  flex: 1,
-                  width: "calc(1vw + 300px)",
-                  fontWeight: 600,
-                }}
-                variant={smallScreen ? "h3" : "h2"}
-                component="h1"
-              >
-                {userData.name}'s Music Taste
-              </Typography>
-            </Container>
-            {topArtists.length > 0 && (
-              <Container className="f-col" sx={{ py: 3, px: 0 }}>
-                <Typography
-                  variant="h4"
-                  component="h2"
-                  sx={{ alignSelf: "center", textAlign: "center" }}
-                >
-                  Current Top Artists
-                </Typography>
-                {renderItemList(topArtists)}
-                {renderPopularItemList(popularArtists)}
-              </Container>
-            )}
-            {topTracks.length > 0 && (
-              <Container className="f-col" sx={{ py: 3, px: 0 }}>
-                <Typography
-                  variant="h4"
-                  component="h2"
-                  sx={{ alignSelf: "center", textAlign: "center" }}
-                >
-                  Current Top Tracks
-                </Typography>
-                {renderItemList(topTracks)}
-                {userData.top_tracks.length > 20 && (
-                  <Button
-                    variant="outlined"
-                    onClick={handleMoreTracks}
-                    sx={{
-                      m: 2,
-                      color: textColor,
-                      borderColor: textColor,
-                      backgroundColor: "rgba(0, 0, 0, 0.05)",
-                    }}
-                  >
-                    {showAllTracks && "View Fewer Tracks"}
-                    {!showAllTracks && "View More Tracks"}
-                  </Button>
-                )}
-                {renderPopularItemList(popularTracks)}
-              </Container>
-            )}
-            <Container className="f-col" sx={{ width: "100%", py: 3 }}>
-              <Typography
-                variant="h4"
-                component="h2"
-                sx={{ alignSelf: "center", textAlign: "center", pb: 3 }}
-              >
-                Settings
-              </Typography>
-              <Button
-                variant="outlined"
-                sx={{
-                  width: "100%",
-                  py: 2,
-                  color: textColor,
-                  borderColor: textColor,
-                }}
-                onClick={() => router.push("/api/logout")}
-              >
-                <Typography>Logout</Typography>
-              </Button>
-            </Container>
-          </>
-        )}
-      </Box>
-    </Container>
   );
 }

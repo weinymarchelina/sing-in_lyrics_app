@@ -6,9 +6,7 @@ import PaginationButton from "../../../components/PaginationButton";
 
 async function getSavedTrack(page = 1) {
   try {
-    const url = `http://localhost:3000/api/getSavedTrack${
-      page ? `?page=${page}` : ""
-    }`;
+    const url = `/api/getSavedTrack${page ? `?page=${page}` : ""}`;
     const res = await fetch(url, {
       next: {
         revalidate: 5,

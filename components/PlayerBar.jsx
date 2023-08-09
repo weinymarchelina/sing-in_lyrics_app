@@ -31,7 +31,7 @@ import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 
 async function getCurrentTrack() {
   try {
-    const res = await fetch("http://localhost:3000/api/getCurrentTrack", {
+    const res = await fetch("/api/getCurrentTrack", {
       cache: "no-store",
     });
     const data = await res.json();
@@ -44,7 +44,7 @@ async function getCurrentTrack() {
 
 async function handlePlayback(action) {
   try {
-    const url = `http://localhost:3000/api/${action}Track`;
+    const url = `/api/${action}Track`;
     const res = await fetch(url, {
       cache: "no-store",
     });
@@ -75,7 +75,6 @@ export default function PlayerBar() {
       setNextTrack(data.next_track);
       setIsPlaying(data.current_track?.is_playing);
     }
-    console.log(data);
   };
 
   useEffect(() => {
@@ -89,7 +88,6 @@ export default function PlayerBar() {
     if (data) {
       setTrack(data.current_track);
       setNextTrack(data.next_track);
-      console.log(data);
     }
   };
 
@@ -99,7 +97,6 @@ export default function PlayerBar() {
     if (data) {
       setTrack(data.current_track);
       setNextTrack(data.next_track);
-      console.log(data);
       setIsPlaying(true);
     }
   };

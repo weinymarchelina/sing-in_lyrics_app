@@ -9,7 +9,7 @@ import QueueMusicIcon from "@mui/icons-material/QueueMusic";
 
 async function setCookieWithCode(data) {
   try {
-    await fetch("http://localhost:3000/api/getCookie", {
+    await fetch("/api/getCookie", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +63,6 @@ export default function Library() {
       refresh_token,
       expires_at,
     };
-    console.log(data);
 
     if (token) {
       setCookieWithCode(data);

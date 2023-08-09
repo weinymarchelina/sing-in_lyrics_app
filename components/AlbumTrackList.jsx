@@ -13,7 +13,7 @@ const AlbumTrackList = ({ tracks, textColor }) => {
         <ListItem
           className="f-col"
           key={track.id}
-          sx={{ alignItems: "flex-start", px: 0 }}
+          sx={{ alignItems: "flex-start", px: 0, cursor: "pointer" }}
           onClick={() => router.push(`/lyric/${track.id}`)}
         >
           <Card

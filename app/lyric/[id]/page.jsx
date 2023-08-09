@@ -26,9 +26,7 @@ import MainHeroPage from "../../../components/MainHeroPage";
 
 async function savePreference(preference) {
   try {
-    await fetch(
-      `http://localhost:3000/api/setPreference?preference=${preference}`
-    );
+    await fetch(`/api/setPreference?preference=${preference}`);
   } catch (error) {
     console.log("Error setting preference: ", error);
   }
@@ -36,7 +34,7 @@ async function savePreference(preference) {
 
 async function getAudio(textList) {
   try {
-    const response = await fetch("http://localhost:3000/api/getAudio", {
+    const response = await fetch("/api/getAudio", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -129,9 +127,7 @@ export default function LyricInfo() {
   useEffect(() => {
     async function fetchLyricData() {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/lyric/${trackId}`
-        );
+        const response = await fetch(`/api/lyric/${trackId}`);
         const data = await response.json();
 
         setMainData(data);
@@ -152,12 +148,9 @@ export default function LyricInfo() {
         setIsLyricAvailable(data?.is_lyric_available);
 
         setMainImageData(data?.track.album_img);
-        console.log(data?.track.album_img);
 
         setTrackInfoPhonetics(data?.track_phonetics);
         setArtistsPhonetics(data?.artist_phonetics);
-        console.log(data?.track_phonetics);
-        console.log(data?.artist_phonetics);
 
         const trackInfoPhoneticsList = [];
 
@@ -194,7 +187,8 @@ export default function LyricInfo() {
     fetchLyricData();
   }, [trackId]);
 
-  const playAudio = () => {
+  const playAudio = (event) => {
+    event.stopPropagation();
     const audio = new Audio(audioUrl);
     audio.play();
   };
@@ -212,8 +206,6 @@ export default function LyricInfo() {
       text += joinedLyrics[0][index];
     } else text = joinedLyrics[0][index];
 
-    console.log(text);
-
     navigator.clipboard.writeText(text);
   };
 
@@ -222,14 +214,11 @@ export default function LyricInfo() {
 
     let text = "";
 
-    console.log(joinedLyrics);
-
     for (const lines of joinedLyrics[0]) {
       const linesIndex = joinedLyrics[0].indexOf(lines);
 
       if (phoneticIndex > 0) {
         const phoneticLyric = joinedLyrics[phoneticIndex][linesIndex];
-        console.log(phoneticLyric);
 
         if (phoneticLyric !== " ") {
           text += phoneticLyric + "\n";
@@ -525,7 +514,15 @@ export default function LyricInfo() {
                 onClick={copyAllLyrics}
                 endIcon={<ContentCopyIcon />}
                 variant="outlined"
-                sx={{ color: textColor, borderColor: textColor }}
+                sx={{
+                  color: textColor,
+                  borderColor: textColor,
+                  ":hover": {
+                    borderColor: textColor,
+                    color: textColor,
+                    backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  },
+                }}
               >
                 Copy Lyrics
               </Button>
@@ -591,7 +588,15 @@ export default function LyricInfo() {
                       onClick={copyAllLyrics}
                       endIcon={<ContentCopyIcon />}
                       variant="outlined"
-                      sx={{ color: textColor, borderColor: textColor }}
+                      sx={{
+                        color: textColor,
+                        borderColor: textColor,
+                        ":hover": {
+                          borderColor: textColor,
+                          color: textColor,
+                          backgroundColor: "rgba(0, 0, 0, 0.1)",
+                        },
+                      }}
                     >
                       Copy Lyrics
                     </Button>

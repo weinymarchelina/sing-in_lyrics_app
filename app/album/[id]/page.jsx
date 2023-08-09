@@ -16,7 +16,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 
 async function getAlbumTrack(albumId) {
   try {
-    const url = `http://localhost:3000/api/album/${albumId}`;
+    const url = `/api/album/${albumId}`;
     const res = await fetch(url, {
       next: {
         revalidate: 5,
@@ -44,7 +44,6 @@ export default function AlbumTrack() {
     setTracks(newData?.track_list || []);
     setAlbumInfo(newData?.base_album_info || {});
     setMainImageData(newData?.base_album_info.img);
-    console.log(newData?.base_album_info.img);
     setBgColor(newData?.bg_color);
     setTextColor(newData?.text_color);
   };

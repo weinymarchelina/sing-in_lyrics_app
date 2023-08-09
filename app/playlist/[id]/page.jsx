@@ -16,8 +16,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 async function getPlaylistTrack(playlistId, page = 1) {
   try {
-    const url = `http://localhost:3000/api/playlist/${playlistId}?page=${page}`;
-    console.log(url);
+    const url = `/api/playlist/${playlistId}?page=${page}`;
     const res = await fetch(url, {
       next: {
         revalidate: 5,
@@ -46,7 +45,6 @@ export default function PlaylistTrack() {
     const newData = await getPlaylistTrack(playlistId, currentPage);
     setPlaylist(newData || {});
     setMainImageData(newData?.img);
-    console.log(newData?.img);
     setBgColor(newData?.bg_color);
     setTextColor(newData?.text_color);
   };
