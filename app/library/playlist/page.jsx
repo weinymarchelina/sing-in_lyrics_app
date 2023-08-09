@@ -16,7 +16,7 @@ async function getPlaylist(page = 0) {
 
     return await res.json();
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 

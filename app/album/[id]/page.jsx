@@ -25,7 +25,7 @@ async function getAlbumTrack(albumId) {
 
     return await res.json();
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 

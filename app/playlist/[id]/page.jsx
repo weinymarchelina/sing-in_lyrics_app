@@ -10,7 +10,6 @@ import PaginationButton from "../../../components/PaginationButton";
 async function getPlaylistTrack(playlistId, page = 1) {
   try {
     const url = `http://localhost:3000/api/playlist/${playlistId}?page=${page}`;
-    console.log(url);
     const res = await fetch(url, {
       next: {
         revalidate: 5,
@@ -19,7 +18,7 @@ async function getPlaylistTrack(playlistId, page = 1) {
 
     return await res.json();
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 

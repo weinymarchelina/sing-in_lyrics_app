@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import {
   Box,
   Button,
@@ -28,7 +28,7 @@ async function savePreference(preference) {
   try {
     await fetch(`/api/setPreference?preference=${preference}`);
   } catch (error) {
-    console.log("Error setting preference: ", error);
+    console.error("Error setting preference: ", error);
   }
 }
 
@@ -50,7 +50,7 @@ async function getAudio(textList) {
     const audioUrl = URL.createObjectURL(audioBlob);
     return audioUrl;
   } catch (error) {
-    console.log("Error getting audio: ", error);
+    console.error("Error getting audio: ", error);
   }
 }
 
@@ -62,6 +62,8 @@ export default function LyricInfo() {
   const [audioUrl, setAudioUrl] = useState(null);
   const [phoneticIndex, setPhoneticIndex] = useState(-1);
   const trackId = useParams().id;
+  const status = useSearchParams().get("status");
+  const router = useRouter();
   const [mainImageData, setMainImageData] = useState([]);
   const [lyric, setLyric] = useState([]);
   const [isLyricAvailable, setIsLyricAvailable] = useState(false);
@@ -124,34 +126,49 @@ export default function LyricInfo() {
     return fullLine;
   };
 
-  useEffect(() => {
-    async function fetchLyricData() {
-      try {
-        const response = await fetch(`/api/lyric/${trackId}`);
-        const data = await response.json();
+  async function fetchLyricData() {
+    let additional = "";
 
-        setMainData(data);
-        setSelectedPhonetic(data?.preference || "pinyin");
-        handlePhoneticsIndex(data?.preference);
+    if (status) {
+      additional = "?status=next";
+    }
 
-        const script = {
-          name: data?.track.name,
-          album_name: data?.track.album_name,
-          artists: data?.track.artists.map((artist) => artist.name).join(", "),
-        };
+    try {
+      const response = await fetch(`/api/lyric/${trackId}${additional}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching lyric data:", error);
+    }
+  }
 
-        const audioUrl = await getAudio(script);
-        setAudioUrl(audioUrl);
-        setLyric(data?.lyric);
-        setBgColor(data?.bg_color);
-        setTextColor(data?.text_color);
-        setIsLyricAvailable(data?.is_lyric_available);
+  async function processLyricData() {
+    const data = await fetchLyricData();
+    if (data?.redirect) {
+      router.push("/lyric/current");
+    } else {
+      setMainData(data);
+      setSelectedPhonetic(data?.preference || "pinyin");
+      handlePhoneticsIndex(data?.preference);
 
-        setMainImageData(data?.track.album_img);
+      const script = {
+        name: data?.track?.name,
+        album_name: data?.track?.album_name,
+        artists: data?.track?.artists.map((artist) => artist.name).join(", "),
+      };
 
-        setTrackInfoPhonetics(data?.track_phonetics);
-        setArtistsPhonetics(data?.artist_phonetics);
+      const audioUrl = await getAudio(script);
+      setAudioUrl(audioUrl);
+      setLyric(data?.lyric);
+      setBgColor(data?.bg_color);
+      setTextColor(data?.text_color);
+      setIsLyricAvailable(data?.is_lyric_available);
 
+      setMainImageData(data?.track?.album_img);
+
+      setTrackInfoPhonetics(data?.track_phonetics);
+      setArtistsPhonetics(data?.artist_phonetics);
+
+      if (data?.track_phonetics) {
         const trackInfoPhoneticsList = [];
 
         for (let i = 0; i < 4; i++) {
@@ -164,7 +181,9 @@ export default function LyricInfo() {
 
           trackInfoPhoneticsList.push(phoneticVersion);
         }
+      }
 
+      if (data?.is_lyric_available) {
         const fullLyricsList = [];
 
         for (let i = 0; i < 4; i++) {
@@ -179,12 +198,12 @@ export default function LyricInfo() {
         }
 
         setJoinedLyrics(fullLyricsList);
-      } catch (error) {
-        console.error("Error fetching lyric data:", error);
       }
     }
+  }
 
-    fetchLyricData();
+  useEffect(() => {
+    processLyricData();
   }, [trackId]);
 
   const playAudio = (event) => {
@@ -226,8 +245,6 @@ export default function LyricInfo() {
       }
       text += lines + "\n";
     }
-
-    console.log(text);
 
     navigator.clipboard.writeText(text);
   };
@@ -369,15 +386,15 @@ export default function LyricInfo() {
   const heroContent = mainData?.track && (
     <>
       <Typography variant={smallScreen ? "h3" : "h2"} component="h1">
-        {mainData?.track.name}
+        {mainData?.track?.name}
       </Typography>
       <Typography
         sx={{ py: 2, textTransform: "uppercase" }}
         variant={smallScreen ? "h6" : "h5"}
         component="h2"
       >
-        <Link href={`/album/${mainData?.track.album_id}`}>
-          Album : {mainData?.track.album_name}
+        <Link href={`/album/${mainData?.track?.album_id}`}>
+          Album : {mainData?.track?.album_name}
         </Link>
       </Typography>
     </>
@@ -385,7 +402,7 @@ export default function LyricInfo() {
 
   const mainContent = (
     <>
-      {trackInfoPhonetics.length > 0 && (
+      {trackInfoPhonetics?.length > 0 && (
         <Accordion
           className="f-col"
           sx={{
@@ -461,7 +478,7 @@ export default function LyricInfo() {
           </AccordionDetails>
         </Accordion>
       )}
-      {mainData?.track.artists && (
+      {mainData?.track?.artists && (
         <Accordion
           sx={{
             backgroundColor: bgColor,
@@ -621,15 +638,17 @@ export default function LyricInfo() {
   );
 
   return (
-    <MainHeroPage
-      smallScreen={smallScreen}
-      bgColor={bgColor}
-      textColor={textColor}
-      heroCondition={mainData?.track.name}
-      imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
-      imgAlt={`${mainData?.track.name}_img`}
-      heroContent={heroContent}
-      mainContent={mainContent}
-    />
+    mainData && (
+      <MainHeroPage
+        smallScreen={smallScreen}
+        bgColor={bgColor}
+        textColor={textColor}
+        heroCondition={mainData?.track?.name}
+        imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
+        imgAlt={`${mainData?.track?.name}_img`}
+        heroContent={heroContent}
+        mainContent={mainContent}
+      />
+    )
   );
 }

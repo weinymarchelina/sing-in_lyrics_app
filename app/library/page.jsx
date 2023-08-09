@@ -16,7 +16,7 @@ async function setCookieWithCode(data) {
       body: JSON.stringify({ auth_data: data }),
     });
   } catch (error) {
-    console.log("Error setting cookie: ", error);
+    console.error("Error setting cookie: ", error);
   }
 }
 

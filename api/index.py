@@ -67,7 +67,6 @@ def get_current_track():
             is_expired = int(expires_at) - current_time < 60
             if (is_expired):
                 new_token_info = refresh_access_token(refresh_token)
-                # print(new_token_info)
         except Exception as err:
             print(err)
             return redirect_response
@@ -82,8 +81,7 @@ def get_current_track():
         current_player =  sp.current_user_playing_track()
         next_tracks_list =  sp.queue()['queue']
     except Exception as err:
-        # print(err)
-       
+        print(err)
         return redirect_response
 
     #
@@ -375,22 +373,42 @@ def get_track_lyric(track_id):
 
     sp = spotipy.Spotify(auth=token)
 
+    redirect_to_current = False
+
     track_artist_list = []
 
     try:
-        track_info = sp.track(track_id)
-        
-        for artists_item in track_info['artists']:
-            artist_img = sp.artist(artists_item['id'])['images']
-            artist_data = {
-                'name': artists_item['name'],
-                'id': artists_item['id'],
-                'img': artist_img
-            }
+        if track_id == "current":
+            track_info = sp.current_user_playing_track()['item']
+        else:
+            status = request.args.get('status', None)
+            if (status == 'next'):
+                current_track_id = sp.current_user_playing_track()['item']['id']
 
-            track_artist_list.append(artist_data)
+                if current_track_id == track_id:
+                    redirect_to_current = True
+
+            if not redirect_to_current:
+                track_info = sp.track(track_id)
+
+        if not redirect_to_current:
+            for artists_item in track_info['artists']:
+                artist_img = sp.artist(artists_item['id'])['images']
+                artist_data = {
+                    'name': artists_item['name'],
+                    'id': artists_item['id'],
+                    'img': artist_img
+                }
+
+                track_artist_list.append(artist_data)
     except Exception:
         return error_not_found
+    
+
+    if redirect_to_current:
+        return {
+            'redirect': True
+        }
 
     track_album = track_info['album']
 
@@ -416,14 +434,14 @@ def get_track_lyric(track_id):
 
     #
 
-    lyric_url = f"https://spotify-lyric-api.herokuapp.com/?trackid={track_id}"
+    lyric_url = f"https://spotify-lyric-api.herokuapp.com/?trackid={track_info['id']}"
 
     lyric_response = requests.get(lyric_url)
 
     lyric_data = {}
     is_lyric_available = True
 
-    if lyric_response.status_code != 200:
+    if lyric_response.status_code == 404:
         is_lyric_available = False
     else:
         lines_list = []
@@ -462,6 +480,7 @@ def get_track_lyric(track_id):
         'bg_color': bg_color,
         'text_color': text_color,
         'preference': preference,
+        'redirect' : False
     }
 
     return full_data
@@ -691,7 +710,6 @@ def check_token():
 
             if (is_expired):
                 new_token_info = refresh_access_token(refresh_token)
-                # print(new_token_info)
                 redirect_response['is_checked'] = True
                 redirect_response['is_auth'] = True
                 
@@ -719,10 +737,8 @@ def check_token():
 
 @app.route('/api/getCookie', methods=["POST"])
 def set_cookie():
-    # token = request.args.get('token', None)
     data = request.get_json()
     auth_data = data.get('auth_data', {})
-    # print(auth_data)
     response = make_response("Cookie set successfully")
     response.set_cookie("access_token", auth_data['token'], httponly=True)
     response.set_cookie("refresh_token", auth_data['refresh_token'], httponly=True)
@@ -769,7 +785,6 @@ def create_spotify_oauth():
 def refresh_access_token(refresh_token):
     spotify_oauth = create_spotify_oauth()
     token_info = spotify_oauth.refresh_access_token(refresh_token)
-    # print(token_info)
     return {
         'access_token': token_info['access_token'],
         'refresh_token': token_info['refresh_token'],

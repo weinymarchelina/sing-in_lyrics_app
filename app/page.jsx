@@ -10,7 +10,7 @@ async function checkAuth() {
     const data = res.json();
     return data;
   } catch (error) {
-    console.log("Error checking authentication: ", error);
+    console.error("Error checking authentication: ", error);
   }
 }
 
@@ -18,7 +18,7 @@ async function clearCookies() {
   try {
     await fetch("/api/logout");
   } catch (error) {
-    console.log("Error clearing cookies: ", error);
+    console.error("Error clearing cookies: ", error);
   }
 }
 

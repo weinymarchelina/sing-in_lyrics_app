@@ -13,11 +13,6 @@ import {
   ListItem,
   Typography,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
-import HomeIcon from "@mui/icons-material/Home";
-import PersonIcon from "@mui/icons-material/Person";
-import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

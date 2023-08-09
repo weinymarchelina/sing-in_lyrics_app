@@ -32,7 +32,7 @@ async function getCurrentTrack() {
     const data = await res.json();
     return data;
   } catch (error) {
-    console.log("Error getting track:", error);
+    console.error("Error getting track:", error);
     return null;
   }
 }
@@ -45,7 +45,7 @@ async function handlePlayback(action) {
     });
     return await res.json();
   } catch (error) {
-    console.log(`Error doing ${action} action:`, error);
+    console.error(`Error doing ${action} action:`, error);
   }
 }
 
@@ -99,7 +99,7 @@ export default function PlayerBar() {
 
   const handleClickLyric = (event) => {
     event.stopPropagation();
-    router.push(`/lyric/${track.id}`);
+    router.push(`/lyric/current`);
   };
 
   return (
@@ -176,9 +176,9 @@ export default function PlayerBar() {
                     }}
                   >
                     <Typography noWrap>
-                      <Link href={`/lyric/${nextTrack.id}`}>{`Next : ${
-                        nextTrack.name
-                      } • ${nextTrack.artists
+                      <Link
+                        href={`/lyric/${nextTrack.id}?status=next`}
+                      >{`Next : ${nextTrack.name} • ${nextTrack.artists
                         .map((artist) => artist.name)
                         .join(", ")}`}</Link>
                     </Typography>
@@ -267,9 +267,9 @@ export default function PlayerBar() {
                           textUnderlineOffset: `${smallScreen ? "5px" : "1px"}`,
                         }}
                       >
-                        <Link href={`/lyric/${nextTrack.id}`}>{`Next : ${
-                          nextTrack.name
-                        } • ${nextTrack.artists
+                        <Link
+                          href={`/lyric/${nextTrack.id}?status=next`}
+                        >{`Next : ${nextTrack.name} • ${nextTrack.artists
                           .map((artist) => artist.name)
                           .join(", ")}`}</Link>
                       </Typography>

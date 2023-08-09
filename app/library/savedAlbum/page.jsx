@@ -16,7 +16,7 @@ async function getSavedAlbum(page = 1) {
 
     return await res.json();
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
