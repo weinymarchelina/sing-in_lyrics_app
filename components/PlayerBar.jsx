@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import BottomNavbar from "../components/BottomNavbar";
+import BottomNavbar from "./BottomNavbar";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,11 +12,6 @@ import {
   Box,
   Icon,
   Container,
-  BottomNavigation,
-  Card,
-  AppBar,
-  Paper,
-  CardContent,
   Accordion,
   AccordionDetails,
   AccordionSummary,
@@ -58,6 +53,7 @@ export default function PlayerBar() {
   const [track, setTrack] = useState(null);
   const [nextTrack, setNextTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(true);
+
   const pathname = usePathname();
   const router = useRouter();
 

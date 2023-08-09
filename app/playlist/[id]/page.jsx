@@ -1,22 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import TrackList from "../../../components/TrackList";
-import {
-  useRouter,
-  useParams,
-  useSearchParams,
-  usePathname,
-} from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Image from "next/image";
-import { Box, Container, Card, IconButton, Typography } from "@mui/material";
+import { Container, Card, Typography } from "@mui/material";
 import MainHeroPage from "../../../components/MainHeroPage";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import PaginationButton from "../../../components/PaginationButton";
 
 async function getPlaylistTrack(playlistId, page = 1) {
   try {
-    const url = `/api/playlist/${playlistId}?page=${page}`;
+    const url = `http://localhost:3000/api/playlist/${playlistId}?page=${page}`;
+    console.log(url);
     const res = await fetch(url, {
       next: {
         revalidate: 5,
@@ -31,11 +25,10 @@ async function getPlaylistTrack(playlistId, page = 1) {
 
 export default function PlaylistTrack() {
   const [playlist, setPlaylist] = useState({});
-  const router = useRouter();
-  const pathname = usePathname();
   const playlistId = useParams().id;
   const page = useSearchParams().get("page");
-  const currentPage = page ? parseInt(page) : 1;
+  const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
+  const [isNextPage, setIsNextPage] = useState(false);
   const [bgColor, setBgColor] = useState("#202020");
   const [textColor, setTextColor] = useState("#eee");
   const [mainImageData, setMainImageData] = useState([]);
@@ -44,6 +37,7 @@ export default function PlaylistTrack() {
   const fetchData = async () => {
     const newData = await getPlaylistTrack(playlistId, currentPage);
     setPlaylist(newData || {});
+    setIsNextPage(newData?.is_next_page);
     setMainImageData(newData?.img);
     setBgColor(newData?.bg_color);
     setTextColor(newData?.text_color);
@@ -52,16 +46,6 @@ export default function PlaylistTrack() {
   useEffect(() => {
     fetchData();
   }, [playlistId, page]);
-
-  const handleNextPage = () => {
-    const nextPage = currentPage + 1;
-    router.push(`${pathname}?page=${nextPage}`);
-  };
-
-  const handlePreviousPage = () => {
-    const prevPage = Math.max(currentPage - 1, 1);
-    router.push(`${pathname}?page=${prevPage}`);
-  };
 
   const heroContent = (
     <>
@@ -105,16 +89,11 @@ export default function PlaylistTrack() {
               variant="outlined"
               sx={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
             >
-              {page > 1 && (
-                <IconButton onClick={handlePreviousPage}>
-                  <ArrowBackIosIcon sx={{ color: textColor }} />
-                </IconButton>
-              )}
-              {playlist?.is_next_page && (
-                <IconButton onClick={handleNextPage}>
-                  <ArrowForwardIosIcon sx={{ color: textColor }} />
-                </IconButton>
-              )}
+              <PaginationButton
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                isNextPage={isNextPage}
+              />
             </Card>
           </Container>
           <TrackList tracks={playlist.track_list} textColor={textColor} />

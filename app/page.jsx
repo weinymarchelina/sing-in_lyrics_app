@@ -1,44 +1,41 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Box, Typography, Button } from "@mui/material";
+import { Container, Typography, Button, Box } from "@mui/material";
 import Image from "next/image";
-const baseUrl = process.env.BASE_URL;
 
 async function checkAuth() {
   try {
-    const res = await fetch(`/api/checkToken`);
-
+    const res = await fetch("/api/checkToken");
     const data = res.json();
-
     return data;
   } catch (error) {
-    console.log("Error setting cookie: ", error);
+    console.log("Error checking authentication: ", error);
   }
 }
 
 async function clearCookies() {
   try {
-    await fetch(`/api/logout`);
+    await fetch("/api/logout");
   } catch (error) {
-    console.log("Error setting cookie: ", error);
+    console.log("Error clearing cookies: ", error);
   }
 }
 
-export default async function Home() {
+function Home() {
   const router = useRouter();
 
+  const handleAuth = async () => {
+    const data = await checkAuth();
+
+    if (data?.is_auth) {
+      router.push("/library");
+    } else {
+      await clearCookies();
+    }
+  };
+
   useEffect(() => {
-    const handleAuth = async () => {
-      const data = await checkAuth();
-
-      if (data?.is_auth) {
-        router.push("/library");
-      } else {
-        await clearCookies();
-      }
-    };
-
     handleAuth();
   }, []);
 
@@ -49,15 +46,15 @@ export default async function Home() {
         backgroundColor: "#202020",
         color: "#eee",
         minHeight: "100vh",
-        textAlign: "center",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        textAlign: "center",
       }}
     >
-      <Container className="f-col" maxWidth={"xs"}>
+      <Container maxWidth="xs" className="f-col">
         <Container className="f-col">
-          <img src="/base_brand.png" alt="singin_icon" />
+          <img src="/base_brand.png" alt="signin_icon" />
         </Container>
         <Container>
           <Typography
@@ -67,17 +64,12 @@ export default async function Home() {
             Elevate Your Music Experience with Lyric Books
           </Typography>
         </Container>
-        <Container
-          className="f-row"
-          sx={{ py: 3, textAlign: "center", maxWidth: "225px" }}
-        >
-          <img src="/user_music.svg" alt="singin_icon" />
+        <Container className="f-row" sx={{ py: 3, maxWidth: "225px" }}>
+          <img src="/user_music.svg" alt="signin_icon" />
         </Container>
-
-        <Container className="f-row" sx={{ py: 1 }} maxWidth={"xs"}>
+        <Container className="f-row" sx={{ py: 1 }} maxWidth="xs">
           <Button
             onClick={() => router.push("/api")}
-            className="f-row"
             color="secondary"
             variant="contained"
             sx={{ width: "100%", gap: 1 }}
@@ -99,3 +91,5 @@ export default async function Home() {
     </Container>
   );
 }
+
+export default Home;

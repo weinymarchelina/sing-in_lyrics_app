@@ -23,7 +23,7 @@ const Layout = ({
       }}
     >
       <Box className="f-col" maxWidth={"lg"} sx={{ width: "100%" }}>
-        {items.length > 0 && (
+        {items?.length > 0 && (
           <>
             <Typography
               variant="h3"

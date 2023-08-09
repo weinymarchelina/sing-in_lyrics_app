@@ -41,34 +41,33 @@ export default function ProfilePage() {
     return sortedItems.slice(0, amount);
   };
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const response = await fetch("/api/profile");
-        const data = await response.json();
-        setUserData(data);
+  const fetchProfileData = async () => {
+    try {
+      const response = await fetch("/api/profile");
+      const data = await response.json();
+      setUserData(data);
+      setTopArtists(data?.top_artists);
 
-        setTopArtists(data?.top_artists);
-
-        if (data?.top_tracks.length > 20) {
-          setTopTracks(data?.top_tracks.slice(0, 20));
-        } else {
-          setTopTracks(data?.top_tracks);
-        }
-
-        setBgColor(data?.bg_color || "");
-        setTextColor(data?.text_color || "");
-        setMainImageData(data?.img);
-
-        const popularArtistsList = getMostPopularItems(data?.top_artists, 5);
-        const popularTracksList = getMostPopularItems(data?.top_tracks, 16);
-        setPopularArtists(popularArtistsList);
-        setPopularTracks(popularTracksList);
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
+      if (data?.top_tracks.length > 20) {
+        setTopTracks(data?.top_tracks.slice(0, 20));
+      } else {
+        setTopTracks(data?.top_tracks);
       }
-    };
 
+      setBgColor(data?.bg_color);
+      setTextColor(data?.text_color);
+      setMainImageData(data?.img);
+
+      const popularArtistsList = getMostPopularItems(data?.top_artists, 5);
+      const popularTracksList = getMostPopularItems(data?.top_tracks, 16);
+      setPopularArtists(popularArtistsList);
+      setPopularTracks(popularTracksList);
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchProfileData();
   }, []);
 
@@ -198,6 +197,36 @@ export default function ProfilePage() {
     );
   };
 
+  const outlinedButton = (clickEventFunction, children) => {
+    return (
+      <Button
+        variant="outlined"
+        onClick={clickEventFunction}
+        sx={{
+          m: 2,
+          py: 2,
+          color: textColor,
+          borderColor: textColor,
+          backgroundColor: "rgba(0, 0, 0, 0.05)",
+          ":hover": {
+            borderColor: textColor,
+            color: textColor,
+            backgroundColor: "rgba(0, 0, 0, 0.1)",
+          },
+        }}
+      >
+        {children}
+      </Button>
+    );
+  };
+
+  const moreTracksButtonContent = (
+    <>
+      {showAllTracks && "View Fewer Tracks"}
+      {!showAllTracks && "View More Tracks"}
+    </>
+  );
+
   const heroContent = (
     <>
       {userData?.name && (
@@ -241,26 +270,8 @@ export default function ProfilePage() {
             Current Top Tracks
           </Typography>
           {renderItemList(topTracks)}
-          {userData.top_tracks.length > 20 && (
-            <Button
-              variant="outlined"
-              onClick={handleMoreTracks}
-              sx={{
-                m: 2,
-                color: textColor,
-                borderColor: textColor,
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-                ":hover": {
-                  borderColor: textColor,
-                  color: textColor,
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
-                },
-              }}
-            >
-              {showAllTracks && "View Fewer Tracks"}
-              {!showAllTracks && "View More Tracks"}
-            </Button>
-          )}
+          {userData.top_tracks.length > 20 &&
+            outlinedButton(handleMoreTracks, moreTracksButtonContent)}
           {renderPopularItemList(popularTracks)}
         </Container>
       )}
@@ -273,23 +284,10 @@ export default function ProfilePage() {
           >
             Settings
           </Typography>
-          <Button
-            variant="outlined"
-            sx={{
-              width: "100%",
-              py: 2,
-              color: textColor,
-              borderColor: textColor,
-              ":hover": {
-                borderColor: textColor,
-                color: textColor,
-                backgroundColor: "rgba(0, 0, 0, 0.1)",
-              },
-            }}
-            onClick={() => router.push("/api/logout")}
-          >
+          {outlinedButton(
+            () => router.push("/api/logout"),
             <Typography>Logout</Typography>
-          </Button>
+          )}
         </Container>
       )}
     </>

@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import AlbumList from "../../../components/AlbumList";
 import ListLayout from "../../../components/ListLayout";
 import PaginationButton from "../../../components/PaginationButton";
+import { useSearchParams } from "next/navigation";
 
-async function getSavedAlbum(page = 0) {
+async function getSavedAlbum(page = 1) {
   try {
     const url = `/api/getSavedAlbum${page ? `?page=${page}` : ""}`;
     const res = await fetch(url, {
@@ -20,7 +21,8 @@ async function getSavedAlbum(page = 0) {
 }
 
 export default function SavedAlbum() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const page = useSearchParams().get("page");
+  const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
   const [isNextPage, setIsNextPage] = useState(false);
   const [albums, setAlbums] = useState([]);
 

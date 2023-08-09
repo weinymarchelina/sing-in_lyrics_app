@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import TrackList from "../../../components/TrackList";
 import ListLayout from "../../../components/ListLayout";
 import PaginationButton from "../../../components/PaginationButton";
+import { useSearchParams } from "next/navigation";
 
 async function getSavedTrack(page = 1) {
   try {
@@ -20,7 +21,8 @@ async function getSavedTrack(page = 1) {
 }
 
 export default function SavedTrack() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const page = useSearchParams().get("page");
+  const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
   const [isNextPage, setIsNextPage] = useState(false);
   const [tracks, setTracks] = useState([]);
 

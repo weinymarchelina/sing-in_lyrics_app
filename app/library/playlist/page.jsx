@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import PlaylistList from "../../../components/PlaylistList";
 import ListLayout from "../../../components/ListLayout";
 import PaginationButton from "../../../components/PaginationButton";
@@ -20,13 +21,14 @@ async function getPlaylist(page = 0) {
 }
 
 export default function Playlist() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const page = useSearchParams().get("page");
+  const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
   const [isNextPage, setIsNextPage] = useState(false);
   const [playlists, setPlaylists] = useState([]);
 
   const fetchData = async () => {
     const newData = await getPlaylist(currentPage);
-    setPlaylists(newData?.playlist_list || []);
+    setPlaylists(newData?.playlist_list);
     setIsNextPage(newData?.is_next_page || false);
   };
 
