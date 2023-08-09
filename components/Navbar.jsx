@@ -34,29 +34,27 @@ const Navbar = () => {
       onChange={(event, newValue) => {
         setValue(newValue);
       }}
-      className="f-row"
       sx={{
         backgroundColor: "black",
         height: "calc(2.5rem + 5vh)",
       }}
+      className="f-row"
     >
       <Container
         sx={{
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
-
-          // maxWidth: "1200px",
         }}
       >
         <Container
-          className="f-row"
           sx={{ width: "200px", m: 0, cursor: "pointer" }}
           onClick={() => router.push("/library")}
+          className="f-row"
         >
           <img src="/base_brand.png" alt="singin_icon" />
         </Container>
-        <List className="f-row" sx={{ px: 2 }}>
+        <List sx={{ px: 2 }} className="f-row">
           <ListItem>
             <Typography variant="button">
               <Link href={"/library/playlist"}>Playlist</Link>

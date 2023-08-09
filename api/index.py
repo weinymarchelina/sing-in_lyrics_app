@@ -409,6 +409,9 @@ def get_track_lyric(track_id):
         return {
             'redirect': True
         }
+    
+    
+    track_id = track_info['id']
 
     track_album = track_info['album']
 
@@ -431,17 +434,22 @@ def get_track_lyric(track_id):
         track_artist_name_list.append(artists_item['name'])
     track_artist_phonetics_data = get_phonetics(track_artist_name_list)
     
+    # print(track_info['name'], track_info['id'])
 
     #
 
     lyric_url = f"https://spotify-lyric-api.herokuapp.com/?trackid={track_info['id']}"
+
+    # print(lyric_url)
 
     lyric_response = requests.get(lyric_url)
 
     lyric_data = {}
     is_lyric_available = True
 
-    if lyric_response.status_code == 404:
+    # print(lyric_response.json())
+
+    if lyric_response.json()['error'] == True:
         is_lyric_available = False
     else:
         lines_list = []
@@ -450,6 +458,8 @@ def get_track_lyric(track_id):
             lines_list.append(line['words'])
 
         lyric_data = get_phonetics(lines_list)
+
+    # print(is_lyric_available)
 
     #
 
@@ -501,7 +511,8 @@ def get_playlist_tracks(playlist_id):
     try:
         playlist_info = sp.playlist(playlist_id, additional_types=["track"])
         response_data = sp.playlist_tracks(playlist_id, limit=limit, offset=offset, additional_types=["track"])
-    except Exception:
+    except Exception as err:
+        print(err)
         return error_not_found
 
     playlist_tracks = response_data['items']

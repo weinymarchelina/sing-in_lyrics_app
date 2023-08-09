@@ -14,7 +14,6 @@ const MainHeroPage = ({
 }) => {
   return (
     <Container
-      className={smallScreen ? "" : "f-row"}
       sx={{
         p: 3,
         pb: 25,
@@ -22,6 +21,7 @@ const MainHeroPage = ({
         color: textColor,
         minHeight: "100vh",
       }}
+      className={smallScreen ? "" : "f-row"}
     >
       <Box sx={{ width: "100%" }} maxWidth={"lg"}>
         <Container sx={{ py: 2, px: 0 }}>

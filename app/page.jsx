@@ -64,10 +64,10 @@ function Home() {
             Elevate Your Music Experience with Lyric Books
           </Typography>
         </Container>
-        <Container className="f-row" sx={{ py: 3, maxWidth: "225px" }}>
+        <Container sx={{ py: 3, maxWidth: "225px" }} className="f-row">
           <img src="/user_music.svg" alt="signin_icon" />
         </Container>
-        <Container className="f-row" sx={{ py: 1 }} maxWidth="xs">
+        <Container sx={{ py: 1 }} maxWidth="xs" className="f-row">
           <Button
             onClick={() => router.push("/api")}
             color="secondary"

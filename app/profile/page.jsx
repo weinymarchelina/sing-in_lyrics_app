@@ -91,7 +91,7 @@ export default function ProfilePage() {
   const renderItemList = (items) => {
     return (
       <List>
-        <ListItem className="f-col" sx={{ pb: 3 }} key={items[0].id}>
+        <ListItem sx={{ pb: 3 }} key={items[0].id} className="f-col">
           <Box sx={{ py: 2 }}>
             <Image
               src={items[0].img[0].url ? items[0].img[0].url : "/backup.jpg"}
@@ -108,10 +108,10 @@ export default function ProfilePage() {
         {items.slice(1).map((item, index) => (
           <ListItem key={item.id}>
             <Card
-              className="f-space"
               sx={{
                 ...listItemStyle,
               }}
+              className="f-space"
               variant="outlined"
             >
               <Box sx={{ width: "115px" }}>

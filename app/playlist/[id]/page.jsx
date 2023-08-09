@@ -78,7 +78,15 @@ export default function PlaylistTrack() {
             All tracks
           </Typography>
 
-          <Container className="f-space" sx={{ px: 0, alignItems: "flex-end" }}>
+          <Container
+            className="f-space"
+            sx={{
+              px: 0,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+            }}
+          >
             <Typography
               variant="h5"
               component="p"
@@ -102,15 +110,17 @@ export default function PlaylistTrack() {
   );
 
   return (
-    <MainHeroPage
-      smallScreen={smallScreen}
-      bgColor={bgColor}
-      textColor={textColor}
-      heroCondition={playlist.name}
-      imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
-      imgAlt={`${playlist.name}_img`}
-      heroContent={heroContent}
-      mainContent={mainContent}
-    />
+    playlist && (
+      <MainHeroPage
+        smallScreen={smallScreen}
+        bgColor={bgColor}
+        textColor={textColor}
+        heroCondition={playlist.name}
+        imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
+        imgAlt={`${playlist.name}_img`}
+        heroContent={heroContent}
+        mainContent={mainContent}
+      />
+    )
   );
 }

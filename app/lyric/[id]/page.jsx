@@ -28,7 +28,7 @@ async function savePreference(preference) {
   try {
     await fetch(`/api/setPreference?preference=${preference}`);
   } catch (error) {
-    console.error("Error setting preference: ", error);
+    console.log("Error setting preference: ", error);
   }
 }
 
@@ -50,7 +50,7 @@ async function getAudio(textList) {
     const audioUrl = URL.createObjectURL(audioBlob);
     return audioUrl;
   } catch (error) {
-    console.error("Error getting audio: ", error);
+    console.log("Error getting audio: ", error);
   }
 }
 
@@ -126,49 +126,45 @@ export default function LyricInfo() {
     return fullLine;
   };
 
-  async function fetchLyricData() {
-    let additional = "";
+  useEffect(() => {
+    async function fetchLyricData() {
+      let additional = "";
 
-    if (status) {
-      additional = "?status=next";
-    }
+      if (status) {
+        additional = "?status=next";
+      }
 
-    try {
-      const response = await fetch(`/api/lyric/${trackId}${additional}`);
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching lyric data:", error);
-    }
-  }
+      try {
+        const url = `/api/lyric/${trackId}${additional}`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-  async function processLyricData() {
-    const data = await fetchLyricData();
-    if (data?.redirect) {
-      router.push("/lyric/current");
-    } else {
-      setMainData(data);
-      setSelectedPhonetic(data?.preference || "pinyin");
-      handlePhoneticsIndex(data?.preference);
+        if (data?.redirect) {
+          router.push("/lyric/current");
+          return;
+        }
 
-      const script = {
-        name: data?.track?.name,
-        album_name: data?.track?.album_name,
-        artists: data?.track?.artists.map((artist) => artist.name).join(", "),
-      };
+        setMainData(data);
+        setSelectedPhonetic(data?.preference || "pinyin");
+        handlePhoneticsIndex(data?.preference);
 
-      const audioUrl = await getAudio(script);
-      setAudioUrl(audioUrl);
-      setLyric(data?.lyric);
-      setBgColor(data?.bg_color);
-      setTextColor(data?.text_color);
-      setIsLyricAvailable(data?.is_lyric_available);
+        const script = {
+          name: data?.track.name,
+          album_name: data?.track.album_name,
+          artists: data?.track.artists.map((artist) => artist.name).join(", "),
+        };
+        const audioUrl = await getAudio(script);
+        setAudioUrl(audioUrl);
+        setLyric(data?.lyric);
+        setBgColor(data?.bg_color);
+        setTextColor(data?.text_color);
+        setIsLyricAvailable(data?.is_lyric_available);
 
-      setMainImageData(data?.track?.album_img);
+        setMainImageData(data?.track.album_img);
 
-      setTrackInfoPhonetics(data?.track_phonetics);
-      setArtistsPhonetics(data?.artist_phonetics);
+        setTrackInfoPhonetics(data?.track_phonetics);
+        setArtistsPhonetics(data?.artist_phonetics);
 
-      if (data?.track_phonetics) {
         const trackInfoPhoneticsList = [];
 
         for (let i = 0; i < 4; i++) {
@@ -181,9 +177,7 @@ export default function LyricInfo() {
 
           trackInfoPhoneticsList.push(phoneticVersion);
         }
-      }
 
-      if (data?.is_lyric_available) {
         const fullLyricsList = [];
 
         for (let i = 0; i < 4; i++) {
@@ -198,12 +192,12 @@ export default function LyricInfo() {
         }
 
         setJoinedLyrics(fullLyricsList);
+      } catch (error) {
+        console.error("Error fetching lyric data:", error);
       }
     }
-  }
 
-  useEffect(() => {
-    processLyricData();
+    fetchLyricData();
   }, [trackId]);
 
   const playAudio = (event) => {
@@ -351,7 +345,6 @@ export default function LyricInfo() {
     return mainData?.track?.artists?.map((artist, index) => (
       <ListItem sx={{ px: 0 }} key={artist.id}>
         <Card
-          className="f-space"
           variant="outlined"
           sx={{
             width: "100%",
@@ -359,6 +352,7 @@ export default function LyricInfo() {
             backgroundColor: "rgba(0, 0, 0, 0.15)",
             color: textColor,
           }}
+          className="f-space"
         >
           <Box sx={{ width: "115px" }}>
             <Image
@@ -386,15 +380,15 @@ export default function LyricInfo() {
   const heroContent = mainData?.track && (
     <>
       <Typography variant={smallScreen ? "h3" : "h2"} component="h1">
-        {mainData?.track?.name}
+        {mainData?.track.name}
       </Typography>
       <Typography
         sx={{ py: 2, textTransform: "uppercase" }}
         variant={smallScreen ? "h6" : "h5"}
         component="h2"
       >
-        <Link href={`/album/${mainData?.track?.album_id}`}>
-          Album : {mainData?.track?.album_name}
+        <Link href={`/album/${mainData?.track.album_id}`}>
+          Album : {mainData?.track.album_name}
         </Link>
       </Typography>
     </>
@@ -402,15 +396,15 @@ export default function LyricInfo() {
 
   const mainContent = (
     <>
-      {trackInfoPhonetics?.length > 0 && (
+      {trackInfoPhonetics.length > 0 && (
         <Accordion
-          className="f-col"
           sx={{
             px: 0,
             backgroundColor: bgColor,
             color: textColor,
             border: "none",
           }}
+          className="f-col"
         >
           <AccordionSummary className="f-space">
             <Typography
@@ -478,7 +472,7 @@ export default function LyricInfo() {
           </AccordionDetails>
         </Accordion>
       )}
-      {mainData?.track?.artists && (
+      {mainData?.track.artists && (
         <Accordion
           sx={{
             backgroundColor: bgColor,
@@ -488,10 +482,10 @@ export default function LyricInfo() {
           defaultExpanded={true}
         >
           <AccordionSummary
-            className="f-space"
             sx={{
               alignItems: "center",
             }}
+            className="f-space"
           >
             <Typography
               sx={{ textTransform: "uppercase", flex: 1 }}
@@ -518,7 +512,7 @@ export default function LyricInfo() {
           }}
           defaultExpanded={true}
         >
-          <AccordionSummary className="f-space" sx={{ width: "100%" }}>
+          <AccordionSummary sx={{ width: "100%" }} className="f-space">
             <Typography
               sx={{ textTransform: "uppercase", py: 1, flex: 1 }}
               variant="h5"
@@ -638,17 +632,15 @@ export default function LyricInfo() {
   );
 
   return (
-    mainData && (
-      <MainHeroPage
-        smallScreen={smallScreen}
-        bgColor={bgColor}
-        textColor={textColor}
-        heroCondition={mainData?.track?.name}
-        imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
-        imgAlt={`${mainData?.track?.name}_img`}
-        heroContent={heroContent}
-        mainContent={mainContent}
-      />
-    )
+    <MainHeroPage
+      smallScreen={smallScreen}
+      bgColor={bgColor}
+      textColor={textColor}
+      heroCondition={mainData?.track.name}
+      imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
+      imgAlt={`${mainData?.track.name}_img`}
+      heroContent={heroContent}
+      mainContent={mainContent}
+    />
   );
 }

@@ -24,7 +24,6 @@ const PlaylistItem = ({ playlists }) => {
           onClick={() => router.push(`/playlist/${playlist.id}`)}
         >
           <Card
-            className="f-space"
             variant="outlined"
             sx={{
               alignItems: "center",
@@ -33,6 +32,7 @@ const PlaylistItem = ({ playlists }) => {
               backgroundColor: "#181818",
               color: "#eee",
             }}
+            className="f-space"
           >
             {playlist?.img && playlist?.img[0]?.url && (
               <Box sx={{ width: "115px" }}>

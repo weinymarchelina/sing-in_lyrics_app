@@ -132,14 +132,15 @@ export default function PlayerBar() {
                       height={track.album_img[2].height}
                     />
                   </Box>
-                  <Box
-                    sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
-                    onClick={handleClickLyric}
-                  >
-                    <Typography variant="h6" component="p">
+                  <Box sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <Typography
+                      variant="h6"
+                      component="p"
+                      onClick={handleClickLyric}
+                    >
                       {track.name}
                     </Typography>
-                    <Typography>
+                    <Typography onClick={handleClickLyric}>
                       {track.artists.map((artist) => artist.name).join(", ")}
                     </Typography>
                   </Box>
@@ -148,8 +149,8 @@ export default function PlayerBar() {
 
               <AccordionDetails sx={{ p: 0 }}>
                 <Container
-                  className="f-row"
                   sx={{ gap: 2, borderTop: "1px solid #aaa" }}
+                  className="f-row"
                 >
                   <IconButton onClick={() => handleSkipTrack("previous")}>
                     <SkipPreviousIcon fontSize="large" color="secondary" />
@@ -197,9 +198,9 @@ export default function PlayerBar() {
               style={{ margin: 0 }}
             >
               <AccordionSummary
-                className="f-row"
                 sx={{ py: 0, gap: 2 }}
                 expandIcon={<ExpandMoreIcon color="secondary" />}
+                className="f-row"
               >
                 <Container
                   sx={{
@@ -238,8 +239,8 @@ export default function PlayerBar() {
                   </Box>
                 </Container>
                 <Container
-                  className="f-row"
                   sx={{ flex: 1, p: 0, gap: `${smallScreen ? 3 : 5}` }}
+                  className="f-row"
                 >
                   <IconButton sx={{ flex: 1 }} onClick={handleClickLyric}>
                     <LibraryMusicIcon color="secondary" />
@@ -278,8 +279,8 @@ export default function PlayerBar() {
                 </Container>
               </AccordionSummary>
               <AccordionDetails
-                className="f-row"
                 sx={{ gap: 2, maxHeight: "7vh" }}
+                className="f-row"
               >
                 <IconButton onClick={() => handleSkipTrack("previous")}>
                   <SkipPreviousIcon fontSize="large" color="secondary" />

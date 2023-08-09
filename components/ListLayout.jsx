@@ -13,7 +13,6 @@ const Layout = ({
 
   return (
     <Container
-      className={smallScreen ? "" : "f-row"}
       sx={{
         p: 3,
         pb: 30,
@@ -21,8 +20,9 @@ const Layout = ({
         backgroundColor: "#202020",
         color: "#eee",
       }}
+      className={smallScreen ? "" : "f-row"}
     >
-      <Box className="f-col" maxWidth={"lg"} sx={{ width: "100%" }}>
+      <Box maxWidth={"lg"} sx={{ width: "100%" }} className="f-col">
         {items?.length > 0 && (
           <>
             <Typography
@@ -32,10 +32,10 @@ const Layout = ({
             >
               {pageTitle}
             </Typography>
-            <Container className="f-col" sx={{ px: 0 }}>
+            <Container sx={{ px: 0 }} className="f-col">
               <Container
-                className="f-space"
                 sx={{ gap: 2, px: 0, alignItems: "center" }}
+                className="f-space"
               >
                 <Typography
                   variant="h6"

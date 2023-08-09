@@ -84,7 +84,6 @@ export default function AlbumTrack() {
             {albumInfo.artists.map((artist) => (
               <ListItem sx={{ px: 0 }} key={artist.id}>
                 <Card
-                  className="f-space"
                   variant="outlined"
                   sx={{
                     width: "100%",
@@ -92,6 +91,7 @@ export default function AlbumTrack() {
                     backgroundColor: "rgba(0, 0, 0, 0.15)",
                     color: textColor,
                   }}
+                  className="f-space"
                 >
                   <Box sx={{ minWidth: "100px" }}>
                     <Image
