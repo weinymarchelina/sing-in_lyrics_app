@@ -554,6 +554,7 @@ export default function LyricInfo() {
                       value="original"
                       sx={{
                         color: textColor,
+                        fontSize: "calc(0.6rem + 0.35vw)",
                       }}
                     >
                       Original
@@ -562,6 +563,7 @@ export default function LyricInfo() {
                       value="pinyin"
                       sx={{
                         color: textColor,
+                        fontSize: "calc(0.6rem + 0.35vw)",
                       }}
                     >
                       Pinyin
@@ -570,6 +572,7 @@ export default function LyricInfo() {
                       value="zhuyin"
                       sx={{
                         color: textColor,
+                        fontSize: "calc(0.6rem + 0.35vw)",
                       }}
                     >
                       Zhuyin
@@ -578,6 +581,7 @@ export default function LyricInfo() {
                       value="jyutping"
                       sx={{
                         color: textColor,
+                        fontSize: "calc(0.6rem + 0.35vw)",
                       }}
                     >
                       Jyutping
