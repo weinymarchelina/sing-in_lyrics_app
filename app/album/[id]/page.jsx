@@ -90,8 +90,10 @@ export default function AlbumTrack() {
                     maxHeight: "100px",
                     backgroundColor: "rgba(0, 0, 0, 0.15)",
                     color: textColor,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
-                  className="f-space"
                 >
                   <Box sx={{ minWidth: "100px" }}>
                     <Image

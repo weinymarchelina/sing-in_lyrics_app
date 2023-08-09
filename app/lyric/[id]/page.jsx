@@ -351,8 +351,10 @@ export default function LyricInfo() {
             maxHeight: "100px",
             backgroundColor: "rgba(0, 0, 0, 0.15)",
             color: textColor,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-          className="f-space"
         >
           <Box sx={{ width: "115px" }}>
             <Image
@@ -403,10 +405,17 @@ export default function LyricInfo() {
             backgroundColor: bgColor,
             color: textColor,
             border: "none",
+            display: "flex",
+            flexDirection: "column",
           }}
-          className="f-col"
         >
-          <AccordionSummary className="f-space">
+          <AccordionSummary
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Typography
               sx={{
                 textTransform: "uppercase",
@@ -483,9 +492,10 @@ export default function LyricInfo() {
         >
           <AccordionSummary
             sx={{
+              display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
             }}
-            className="f-space"
           >
             <Typography
               sx={{ textTransform: "uppercase", flex: 1 }}
@@ -512,7 +522,14 @@ export default function LyricInfo() {
           }}
           defaultExpanded={true}
         >
-          <AccordionSummary sx={{ width: "100%" }} className="f-space">
+          <AccordionSummary
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Typography
               sx={{ textTransform: "uppercase", py: 1, flex: 1 }}
               variant="h5"

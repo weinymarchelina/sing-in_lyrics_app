@@ -20,8 +20,10 @@ const MainHeroPage = ({
         backgroundColor: bgColor,
         color: textColor,
         minHeight: "100vh",
+        display: `${smallScreen ? "block" : "flex"}`,
+        justifyContent: "center",
+        alignItems: "center",
       }}
-      className={smallScreen ? "" : "f-row"}
     >
       <Box sx={{ width: "100%" }} maxWidth={"lg"}>
         <Container sx={{ py: 2, px: 0 }}>
@@ -33,8 +35,11 @@ const MainHeroPage = ({
               gap: 5,
               alignItems: "center",
               maxWidth: `${smallScreen ? 320 : "auto"}`,
+              display: "flex",
+              flexDirection: `${smallScreen ? "column" : "row"}`,
+              justifyContent: "center",
+              alignItems: "center",
             }}
-            className={smallScreen ? "f-col" : "f-row"}
           >
             {heroCondition && (
               <Box

@@ -39,7 +39,6 @@ const BottomNavbar = ({ trackId = "" }) => {
     <BottomNavigation
       showLabels
       value={value}
-      className="f-row"
       onChange={(event, newValue) => {
         setValue(newValue);
       }}
@@ -51,6 +50,9 @@ const BottomNavbar = ({ trackId = "" }) => {
         bottom: "0px",
         left: "0px",
         right: "0px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
       <BottomNavigationAction

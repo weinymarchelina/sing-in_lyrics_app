@@ -25,7 +25,6 @@ const LibraryCard = ({ title, icon, route }) => {
 
   return (
     <Card
-      className="f-space"
       sx={{
         p: 2,
         gap: 2,
@@ -33,6 +32,9 @@ const LibraryCard = ({ title, icon, route }) => {
         color: "#eee",
         border: "1px solid #aaa",
         cursor: "pointer",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
       }}
       elevation={2}
       variant="outlined"

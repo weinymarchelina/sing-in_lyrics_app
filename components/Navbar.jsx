@@ -37,8 +37,10 @@ const Navbar = () => {
       sx={{
         backgroundColor: "black",
         height: "calc(2.5rem + 5vh)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
-      className="f-row"
     >
       <Container
         sx={{
@@ -48,13 +50,26 @@ const Navbar = () => {
         }}
       >
         <Container
-          sx={{ width: "200px", m: 0, cursor: "pointer" }}
+          sx={{
+            width: "200px",
+            m: 0,
+            cursor: "pointer",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
           onClick={() => router.push("/library")}
-          className="f-row"
         >
           <img src="/base_brand.png" alt="singin_icon" />
         </Container>
-        <List sx={{ px: 2 }} className="f-row">
+        <List
+          sx={{
+            px: 2,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <ListItem>
             <Typography variant="button">
               <Link href={"/library/playlist"}>Playlist</Link>

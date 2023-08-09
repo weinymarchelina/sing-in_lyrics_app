@@ -91,7 +91,14 @@ export default function ProfilePage() {
   const renderItemList = (items) => {
     return (
       <List>
-        <ListItem sx={{ pb: 3 }} key={items[0].id} className="f-col">
+        <ListItem
+          sx={{
+            pb: 3,
+            display: "flex",
+            flexDirection: "column",
+          }}
+          key={items[0].id}
+        >
           <Box sx={{ py: 2 }}>
             <Image
               src={items[0].img[0].url ? items[0].img[0].url : "/backup.jpg"}
@@ -110,8 +117,10 @@ export default function ProfilePage() {
             <Card
               sx={{
                 ...listItemStyle,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
-              className="f-space"
               variant="outlined"
             >
               <Box sx={{ width: "115px" }}>
@@ -169,7 +178,6 @@ export default function ProfilePage() {
         >
           {items.map((item) => (
             <ListItem
-              className="f-col"
               key={item.id}
               sx={{
                 display: "flex",
@@ -248,7 +256,14 @@ export default function ProfilePage() {
   const mainContent = (
     <>
       {topArtists.length > 0 && (
-        <Container className="f-col" sx={{ py: 3, px: 0 }}>
+        <Container
+          sx={{
+            py: 3,
+            px: 0,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <Typography
             variant="h4"
             component="h2"
@@ -261,7 +276,14 @@ export default function ProfilePage() {
         </Container>
       )}
       {topTracks.length > 0 && (
-        <Container className="f-col" sx={{ py: 3, px: 0 }}>
+        <Container
+          sx={{
+            py: 3,
+            px: 0,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <Typography
             variant="h4"
             component="h2"
@@ -276,7 +298,14 @@ export default function ProfilePage() {
         </Container>
       )}
       {userData && (
-        <Container className="f-col" sx={{ width: "100%", py: 3 }}>
+        <Container
+          sx={{
+            width: "100%",
+            py: 3,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <Typography
             variant="h4"
             component="h2"

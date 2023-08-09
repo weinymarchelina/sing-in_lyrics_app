@@ -26,13 +26,14 @@ const PlaylistItem = ({ playlists }) => {
           <Card
             variant="outlined"
             sx={{
+              display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
               width: "100%",
               maxHeight: "100px",
               backgroundColor: "#181818",
               color: "#eee",
             }}
-            className="f-space"
           >
             {playlist?.img && playlist?.img[0]?.url && (
               <Box sx={{ width: "115px" }}>

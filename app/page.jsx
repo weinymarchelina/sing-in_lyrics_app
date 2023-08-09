@@ -52,8 +52,19 @@ function Home() {
         textAlign: "center",
       }}
     >
-      <Container maxWidth="xs" className="f-col">
-        <Container className="f-col">
+      <Container
+        maxWidth="xs"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Container
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <img src="/base_brand.png" alt="signin_icon" />
         </Container>
         <Container>
@@ -64,10 +75,26 @@ function Home() {
             Elevate Your Music Experience with Lyric Books
           </Typography>
         </Container>
-        <Container sx={{ py: 3, maxWidth: "225px" }} className="f-row">
+        <Container
+          sx={{
+            py: 3,
+            maxWidth: "225px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <img src="/user_music.svg" alt="signin_icon" />
         </Container>
-        <Container sx={{ py: 1 }} maxWidth="xs" className="f-row">
+        <Container
+          sx={{
+            py: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          maxWidth="xs"
+        >
           <Button
             onClick={() => router.push("/api")}
             color="secondary"
@@ -77,7 +104,12 @@ function Home() {
             <Typography variant="h6" component="p" sx={{ fontWeight: 600 }}>
               Login
             </Typography>
-            <Box className="f-col">
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               <Image
                 src="/icon.svg"
                 alt="spotify_icon"

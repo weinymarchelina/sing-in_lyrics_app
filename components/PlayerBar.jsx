@@ -149,8 +149,13 @@ export default function PlayerBar() {
 
               <AccordionDetails sx={{ p: 0 }}>
                 <Container
-                  sx={{ gap: 2, borderTop: "1px solid #aaa" }}
-                  className="f-row"
+                  sx={{
+                    gap: 2,
+                    borderTop: "1px solid #aaa",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
                   <IconButton onClick={() => handleSkipTrack("previous")}>
                     <SkipPreviousIcon fontSize="large" color="secondary" />
@@ -198,9 +203,14 @@ export default function PlayerBar() {
               style={{ margin: 0 }}
             >
               <AccordionSummary
-                sx={{ py: 0, gap: 2 }}
+                sx={{
+                  py: 0,
+                  gap: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
                 expandIcon={<ExpandMoreIcon color="secondary" />}
-                className="f-row"
               >
                 <Container
                   sx={{
@@ -239,8 +249,14 @@ export default function PlayerBar() {
                   </Box>
                 </Container>
                 <Container
-                  sx={{ flex: 1, p: 0, gap: `${smallScreen ? 3 : 5}` }}
-                  className="f-row"
+                  sx={{
+                    flex: 1,
+                    p: 0,
+                    gap: `${smallScreen ? 3 : 5}`,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
                   <IconButton sx={{ flex: 1 }} onClick={handleClickLyric}>
                     <LibraryMusicIcon color="secondary" />
@@ -279,8 +295,13 @@ export default function PlayerBar() {
                 </Container>
               </AccordionSummary>
               <AccordionDetails
-                sx={{ gap: 2, maxHeight: "7vh" }}
-                className="f-row"
+                sx={{
+                  gap: 2,
+                  maxHeight: "7vh",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
               >
                 <IconButton onClick={() => handleSkipTrack("previous")}>
                   <SkipPreviousIcon fontSize="large" color="secondary" />

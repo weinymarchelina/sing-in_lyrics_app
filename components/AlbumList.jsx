@@ -23,9 +23,10 @@ const AlbumList = ({ albums }) => {
           onClick={() => router.push(`/album/${album.id}`)}
         >
           <Card
-            className="f-space"
             variant="outlined"
             sx={{
+              display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
               width: "100%",
               maxHeight: "100px",

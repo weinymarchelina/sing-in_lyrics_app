@@ -19,7 +19,6 @@ export default function NotFound() {
 
   return (
     <Container
-      className="f-col"
       sx={{
         p: 3,
         backgroundColor: "#202020",
@@ -27,6 +26,7 @@ export default function NotFound() {
         minHeight: "100vh",
         textAlign: "center",
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
       }}

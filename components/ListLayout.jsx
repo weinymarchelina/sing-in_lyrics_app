@@ -19,10 +19,19 @@ const Layout = ({
         minHeight: "100vh",
         backgroundColor: "#202020",
         color: "#eee",
+        display: `${smallScreen ? "block" : "flex"}`,
+        justifyContent: "center",
+        alignItems: "center",
       }}
-      className={smallScreen ? "" : "f-row"}
     >
-      <Box maxWidth={"lg"} sx={{ width: "100%" }} className="f-col">
+      <Box
+        maxWidth={"lg"}
+        sx={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {items?.length > 0 && (
           <>
             <Typography
@@ -32,10 +41,21 @@ const Layout = ({
             >
               {pageTitle}
             </Typography>
-            <Container sx={{ px: 0 }} className="f-col">
+            <Container
+              sx={{
+                px: 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               <Container
-                sx={{ gap: 2, px: 0, alignItems: "center" }}
-                className="f-space"
+                sx={{
+                  gap: 2,
+                  px: 0,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
                 <Typography
                   variant="h6"

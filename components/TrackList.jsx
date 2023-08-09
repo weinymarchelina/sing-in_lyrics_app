@@ -23,15 +23,16 @@ const TrackList = ({ tracks, textColor = "#eee" }) => {
           onClick={() => router.push(`/lyric/${track.id}`)}
         >
           <Card
-            className="f-space"
             variant="outlined"
             sx={{
               px: 0,
-              alignItems: "center",
               width: "100%",
               maxHeight: "100px",
               backgroundColor: "rgba(0, 0, 0, 0.15)",
               color: textColor,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             {track.album_img[1].url && (

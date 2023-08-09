@@ -79,7 +79,6 @@ export default function PlaylistTrack() {
           </Typography>
 
           <Container
-            className="f-space"
             sx={{
               px: 0,
               display: "flex",
@@ -110,13 +109,13 @@ export default function PlaylistTrack() {
   );
 
   return (
-    playlist && (
+    playlist?.name && (
       <MainHeroPage
         smallScreen={smallScreen}
         bgColor={bgColor}
         textColor={textColor}
         heroCondition={playlist.name}
-        imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
+        imgUrl={mainImageData[0]?.url}
         imgAlt={`${playlist.name}_img`}
         heroContent={heroContent}
         mainContent={mainContent}
