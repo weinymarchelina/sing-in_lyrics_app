@@ -20,7 +20,7 @@ load_dotenv(find_dotenv())
 app = Flask(__name__)
 CORS(app)
 
-# app.config['SESSION_COOKIE_NAME'] = "Spotify Cookie"
+app.config['SESSION_COOKIE_NAME'] = "Spotify Cookie"
 app.secret_key = os.getenv("SECRET_KEY")
 base_url = os.getenv("BASE_URL")
 TOKEN_INFO = "token_info"

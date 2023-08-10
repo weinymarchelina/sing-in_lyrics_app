@@ -142,7 +142,7 @@ export default function AlbumTrack() {
       bgColor={bgColor}
       textColor={textColor}
       heroCondition={albumInfo.name}
-      imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
+      imgUrl={mainImageData[0]?.url}
       imgAlt={`${albumInfo.name}_img`}
       heroContent={heroContent}
       mainContent={mainContent}

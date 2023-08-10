@@ -108,6 +108,7 @@ function Home() {
               sx={{
                 display: "flex",
                 flexDirection: "column",
+                width: "35px",
               }}
             >
               <Image

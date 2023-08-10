@@ -654,7 +654,7 @@ export default function LyricInfo() {
       bgColor={bgColor}
       textColor={textColor}
       heroCondition={mainData?.track.name}
-      imgUrl={smallScreen ? mainImageData[1]?.url : mainImageData[0]?.url}
+      imgUrl={mainImageData[0]?.url}
       imgAlt={`${mainData?.track.name}_img`}
       heroContent={heroContent}
       mainContent={mainContent}
