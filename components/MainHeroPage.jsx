@@ -34,7 +34,7 @@ const MainHeroPage = ({
               px: 0,
               gap: 5,
               alignItems: "center",
-              width: `${smallScreen ? 320 : "auto"}`,
+              width: `${smallScreen ? 320 : "100%"}`,
               display: "flex",
               flexDirection: `${smallScreen ? "column" : "row"}`,
               justifyContent: "center",
@@ -45,8 +45,8 @@ const MainHeroPage = ({
               <Box
                 sx={{
                   flex: 1,
-                  width: 320,
-                  height: 320,
+                  maxWidth: 320,
+                  maxHeight: 320,
                   boxShadow: "0px 0px 1rem 1rem rgba(0,0,0,0.12)",
                 }}
               >
