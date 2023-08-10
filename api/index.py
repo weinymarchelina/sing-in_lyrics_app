@@ -3,8 +3,6 @@ import os
 import re
 import time
 import random
-import secrets
-import string
 import spotipy
 import requests
 import colorgram
@@ -22,24 +20,18 @@ load_dotenv(find_dotenv())
 app = Flask(__name__)
 CORS(app)
 
+app.config['SESSION_COOKIE_NAME'] = "Spotify Cookie"
+app.secret_key = os.getenv("SECRET_KEY")
 base_url = os.getenv("BASE_URL")
 TOKEN_INFO = "token_info"
-scope = "user-library-read user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-top-read"
 
 error_not_found = "The page you are looking for is not found."
 success_action_done = "Action done."
 
-def generate_random_secret(length=32):
-    characters = string.ascii_letters + string.digits + string.punctuation
-    secret = ''.join(secrets.choice(characters) for _ in range(length))
-    return secret
-
-# app.config['SESSION_COOKIE_NAME'] = "Spotify Cookie"
-app.secret_key = generate_random_secret()
-
 @app.route("/api")
 def login():
     auth_url = create_spotify_oauth().get_authorize_url()
+    redirect(auth_url)
     return redirect(auth_url)
 
 @app.route("/api/redirect")
@@ -121,7 +113,7 @@ def create_spotify_oauth():
         client_id=os.getenv("CLIENT_ID"),
         client_secret=os.getenv("CLIENT_SECRET"),
         redirect_uri=url_for("redirect_page", _external=True),
-        scope=scope
+        scope="user-library-read user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-top-read"
     )
 
 def refresh_access_token(refresh_token):
