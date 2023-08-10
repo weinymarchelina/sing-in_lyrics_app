@@ -28,7 +28,7 @@ export default function SavedAlbum() {
 
   const fetchData = async () => {
     const newData = await getSavedAlbum(currentPage);
-    setAlbums(newData?.album_data || []);
+    setAlbums(newData?.album_data);
     setIsNextPage(newData?.is_next_page || false);
   };
 

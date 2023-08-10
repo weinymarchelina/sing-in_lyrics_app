@@ -1,15 +1,21 @@
 "use client";
 import { useState, useEffect } from "react";
 import TrackList from "../../../components/TrackList";
-import { useParams, useSearchParams } from "next/navigation";
+import {
+  useRouter,
+  useParams,
+  useSearchParams,
+  usePathname,
+} from "next/navigation";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { Container, Card, Typography } from "@mui/material";
+import { Container, Card, IconButton, Typography } from "@mui/material";
 import MainHeroPage from "../../../components/MainHeroPage";
-import PaginationButton from "../../../components/PaginationButton";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 async function getPlaylistTrack(playlistId, page = 1) {
   try {
-    const url = `http://localhost:3000/api/playlist/${playlistId}?page=${page}`;
+    const url = `/api/playlist/${playlistId}?page=${page}`;
     const res = await fetch(url, {
       next: {
         revalidate: 5,
@@ -18,16 +24,17 @@ async function getPlaylistTrack(playlistId, page = 1) {
 
     return await res.json();
   } catch (error) {
-    console.error(error);
+    console.log(error);
   }
 }
 
 export default function PlaylistTrack() {
   const [playlist, setPlaylist] = useState({});
+  const router = useRouter();
+  const pathname = usePathname();
   const playlistId = useParams().id;
   const page = useSearchParams().get("page");
-  const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
-  const [isNextPage, setIsNextPage] = useState(false);
+  const currentPage = page ? parseInt(page) : 1;
   const [bgColor, setBgColor] = useState("#202020");
   const [textColor, setTextColor] = useState("#eee");
   const [mainImageData, setMainImageData] = useState([]);
@@ -36,7 +43,6 @@ export default function PlaylistTrack() {
   const fetchData = async () => {
     const newData = await getPlaylistTrack(playlistId, currentPage);
     setPlaylist(newData || {});
-    setIsNextPage(newData?.is_next_page);
     setMainImageData(newData?.img);
     setBgColor(newData?.bg_color);
     setTextColor(newData?.text_color);
@@ -45,6 +51,16 @@ export default function PlaylistTrack() {
   useEffect(() => {
     fetchData();
   }, [playlistId, page]);
+
+  const handleNextPage = () => {
+    const nextPage = currentPage + 1;
+    router.push(`${pathname}?page=${nextPage}`);
+  };
+
+  const handlePreviousPage = () => {
+    const prevPage = Math.max(currentPage - 1, 1);
+    router.push(`${pathname}?page=${prevPage}`);
+  };
 
   const heroContent = (
     <>
@@ -81,9 +97,9 @@ export default function PlaylistTrack() {
           <Container
             sx={{
               px: 0,
+              alignItems: "flex-end",
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "flex-end",
             }}
           >
             <Typography
@@ -95,11 +111,16 @@ export default function PlaylistTrack() {
               variant="outlined"
               sx={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
             >
-              <PaginationButton
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                isNextPage={isNextPage}
-              />
+              {page > 1 && (
+                <IconButton onClick={handlePreviousPage}>
+                  <ArrowBackIosIcon sx={{ color: textColor }} />
+                </IconButton>
+              )}
+              {playlist?.is_next_page && (
+                <IconButton onClick={handleNextPage}>
+                  <ArrowForwardIosIcon sx={{ color: textColor }} />
+                </IconButton>
+              )}
             </Card>
           </Container>
           <TrackList tracks={playlist.track_list} textColor={textColor} />
@@ -109,17 +130,15 @@ export default function PlaylistTrack() {
   );
 
   return (
-    playlist?.name && (
-      <MainHeroPage
-        smallScreen={smallScreen}
-        bgColor={bgColor}
-        textColor={textColor}
-        heroCondition={playlist.name}
-        imgUrl={mainImageData[0]?.url}
-        imgAlt={`${playlist.name}_img`}
-        heroContent={heroContent}
-        mainContent={mainContent}
-      />
-    )
+    <MainHeroPage
+      smallScreen={smallScreen}
+      bgColor={bgColor}
+      textColor={textColor}
+      heroCondition={playlist.name}
+      imgUrl={mainImageData[0]?.url}
+      imgAlt={`${playlist.name}_img`}
+      heroContent={heroContent}
+      mainContent={mainContent}
+    />
   );
 }

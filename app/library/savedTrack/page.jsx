@@ -28,7 +28,7 @@ export default function SavedTrack() {
 
   const fetchData = async () => {
     const newData = await getSavedTrack(currentPage);
-    setTracks(newData?.track_list || []);
+    setTracks(newData?.track_list);
     setIsNextPage(newData?.is_next_page || false);
   };
 

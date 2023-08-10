@@ -36,7 +36,6 @@ const LibraryCard = ({ title, icon, route }) => {
         justifyContent: "space-between",
         alignItems: "center",
       }}
-      elevation={2}
       variant="outlined"
       onClick={() => router.push(`/library/${route}`)}
     >
