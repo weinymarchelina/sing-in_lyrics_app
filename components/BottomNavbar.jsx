@@ -18,7 +18,7 @@ import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const BottomNavbar = ({ trackId = "" }) => {
+const BottomNavbar = ({}) => {
   const pathname = usePathname();
   const router = useRouter();
   const [value, setValue] = useState("/library");
@@ -66,7 +66,7 @@ const BottomNavbar = ({ trackId = "" }) => {
         label="Lyric"
         value="/lyric"
         icon={<LibraryMusicIcon />}
-        onClick={() => router.push(`/lyric/${trackId}`)}
+        onClick={() => router.push(`/lyric/current`)}
         sx={{ color: "#eee", textTransform: "uppercase", gap: 0.5 }}
       />
       <BottomNavigationAction

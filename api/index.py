@@ -516,20 +516,17 @@ def get_track_lyric(track_id):
         track_artist_name_list.append(artists_item['name'])
     track_artist_phonetics_data = get_phonetics(track_artist_name_list)
     
-    # print(track_info['name'], track_info['id'])
 
     #
 
     lyric_url = f"https://spotify-lyric-api.herokuapp.com/?trackid={updated_track_id}"
 
-    # print(lyric_url)
 
     lyric_response = requests.get(lyric_url)
 
     lyric_data = {}
     is_lyric_available = True
 
-    # print(lyric_response.json())
 
     if lyric_response.json()['error'] == True:
         is_lyric_available = False
@@ -541,7 +538,6 @@ def get_track_lyric(track_id):
 
         lyric_data = get_phonetics(lines_list)
 
-    # print(is_lyric_available)
 
     #
 
