@@ -519,7 +519,7 @@ def get_track_lyric(track_id):
 
     #
 
-    lyric_url = f"https://spotify-lyric-api.herokuapp.com/?trackid={updated_track_id}"
+    lyric_url = f"{os.getenv('SPOTIFY_LYRIC_API')}{updated_track_id}"
 
 
     lyric_response = requests.get(lyric_url)
