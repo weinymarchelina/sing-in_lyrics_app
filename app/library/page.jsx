@@ -65,6 +65,7 @@ export default function Library() {
     };
 
     if (token) {
+      console.log("token accepted");
       setCookieWithCode(data);
       router.push("/library");
     }

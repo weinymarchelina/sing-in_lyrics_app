@@ -5,6 +5,7 @@ const nextConfig = {
       "i.scdn.co",
       "mosaic.scdn.co",
       "daily-mix.scdn.co",
+      "image-cdn-ak.spotifycdn.com",
       "images-ak.spotifycdn.com",
       "wrapped-images.spotifycdn.com",
     ],
